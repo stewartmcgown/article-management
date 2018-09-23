@@ -1,32 +1,12 @@
-class AMS {
+export default class AMS {
   constructor() {
-    
+
   }
 
   verifyAPICredentials(sessionKey) {
 
   }
 
-  getSheetIdByName(sheetName) {
-      let file; //Retrieve the ID
-      const files = DriveApp.getFilesByName(sheetName);
-
-      // Check if the doc exists. If it doesn't, return nothing
-      if (files.hasNext())
-          file = files.next()
-      else
-          return ""
-
-
-      return file.getId()
-  }
-
-  /**
-   * Fetch a given sheet as an array
-   */
-  getSheetAsArray(id) {
-      return SpreadsheetApp.openById(id).getActiveSheet().getDataRange().getValues()
-  }
 
   getAllArticles() {
       // Apps script code to get stuff
@@ -43,17 +23,3 @@ class AMS {
       return articles
   }
 }
-
-// Construct a test object
-const test = {
-  "parameter": {
-      "pages": null
-  },
-  "contextPath": "",
-  "contentLength": -1,
-  "queryString": "",
-  "parameters": {},
-  "pathInfo": "articles/list"
-}
-
-doGet(test);

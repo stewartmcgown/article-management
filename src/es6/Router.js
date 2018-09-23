@@ -1,3 +1,7 @@
+var SheetUtils = require('./SheetUtils').default,
+    AMS = require('./AMS').default;
+
+
 /**
  * This class will be used to route requests to the appropriate function,
  * then allowing either a result or a promise to be returned.
@@ -5,16 +9,18 @@
  * Actions that require authorisation will be checked against
  * the main auth db.
  * 
- * @param {string[]} paths 
+ * @param {request} e
+ * @param {String} type is the request a Get or Post
+ * @param {AMS} ams
  */
-class Router {
-    constructor(paths, type, ams) {
-
+export class Router {
+    constructor(e, type, ams) {
         this.type = type;
-        this.paths = paths;
+        this.paths = e.pathInfo.split('/')
+        this.parameter = e.parameter
 
         this.ams = ams;
-
+    
         const a = {
 
             "GET" : {
@@ -59,7 +65,7 @@ class Router {
         // Time to route
         if (c == "articles") {
             if (a == "list") {
-                return getList();
+                return this.getList();
             }
         } else if (c == "article") {
             if (a == "info") {
@@ -68,7 +74,25 @@ class Router {
         }
     }
 
-    route() {
+    routePOST() {
 
+    }
+
+    route() {
+        if (!this.isAuthenticated)
+            return "Unauthorised"
+
+        switch (this.type) {
+            case "GET":
+                return this.routeGET()
+                break
+            case "POST":
+                return this.routePOST()
+                break
+        }
+    }
+
+    get isAuthenticated() {
+        let authList = SheetUtils.getSheetAsArray("")
     }
 }
