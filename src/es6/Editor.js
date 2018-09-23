@@ -1,0 +1,3 @@
+class Editor extends Person {
+    
+}

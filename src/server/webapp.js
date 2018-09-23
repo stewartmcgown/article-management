@@ -1,7 +1,4 @@
 export const doGet = () => {
-  const title = 'Google Apps Script';
-  const fileName = 'index.html';
-  return HtmlService.createHtmlOutputFromFile(fileName)
-    .setTitle(title)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
+  let router = new router(e.pathInfo.split('/'), "GET")
+  return ContentService.createTextOutput(router.route());
 };
