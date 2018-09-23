@@ -97,12 +97,7 @@ export class Router {
      * @returns an authentication object
      */
     authenticate() {
-        let authList = SheetUtils.getSheetAsArray(SheetUtils.getSheetIdByName("Editor Logins"))
-
-        for (let row of authList) {
-            
-        }
-
-        return false
+        let authList = SheetUtils.getSheetAsJSON("Editor Logins")
+        return authList
     }
 }

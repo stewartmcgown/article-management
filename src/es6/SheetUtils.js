@@ -27,29 +27,20 @@ export default class SheetUtils {
      * @returns A JSON organised array of the sheet using the headers
      */
     static getSheetAsJSON(sheetName) {
-        if (!this.specialNames.includes(sheetName))
-            return false
-        
         let id = this.getSheetIdByName(sheetName),
         data = this.getSheetAsArray(id),
         out = []
 
-        for (let i = 1, row = data[i]; i < data.length; i++) {
-            let inner = {}
+        for (let i = 1; i < data.length; i++) {
+            let inner = {}, row = data[i]
             for (let j = 0; j < row.length; j++) {
                 let header = this.camelize(data[0][j])
                 inner[header] = row[j]
             }
-            
+            out.push(inner)
         }
         
-    }
-
-    static get specialNames() {
-        return [
-            "Editor Logins",
-            "Article DB Keys"
-        ]
+        return out
     }
 
     /**
