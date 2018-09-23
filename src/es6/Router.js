@@ -1,7 +1,7 @@
-var SheetUtils = require('./SheetUtils').default,
-    AMS = require('./AMS').default;
+import Authentication from './Authentication';
+import AMS from './AMS';
 
-
+var SheetUtils = require('./SheetUtils').default
 /**
  * This class will be used to route requests to the appropriate function,
  * then allowing either a result or a promise to be returned.
@@ -17,9 +17,9 @@ export class Router {
     constructor(e, type, ams) {
         this.type = type;
         this.paths = e.pathInfo.split('/')
-        this.parameter = e.parameter
+        this.parameters = e.parameter
 
-        this.ams = ams ? ams : new AMS()
+        this.ams = new AMS()
     
         const a = {
 
@@ -31,30 +31,35 @@ export class Router {
                 "article": ["update", "delete"]
             }
 
-        }
-        
-        
+        }  
+    }
+
+    get email() {
+        return this.parameters.email
     }
 
     getPaths() {
         return paths;
     }
 
+    /**
+     * @returns the first level of the two level API
+     */
     context() {
         return paths[0];
     }
 
+    /**
+     * @returns the second level of the API
+     */
     action() {
         return paths[1];
     }
 
-    execute() {
-        if (this.type == "GET")
-            return this.routeGET()
-        else if (this.type == "POST")
-            return this.routePOST()
-    }
-
+    /**
+     * Process a GET request
+     * @returns the requested data, or Unauthorised
+     */
     routeGET() {
         const c = this.context();
         const a = this.action();
@@ -78,11 +83,16 @@ export class Router {
         }
     }
 
+    /**
+     * Process a POST request
+     * @returns the requested data, or Unauthorised
+     */
     routePOST() {
 
     }
 
     route() {
+        return this.authenticate()
         switch (this.type) {
             case "GET":
                 return this.routeGET()
@@ -94,10 +104,14 @@ export class Router {
     }
 
     /**
+     * Checks whet
      * @returns an authentication object
      */
     authenticate() {
-        let authList = SheetUtils.getSheetAsJSON("Editor Logins")
-        return authList
+        let auth = new Authentication({
+            email: this.email
+        })
+
+        return auth.authenticate("Editor Logins")
     }
 }

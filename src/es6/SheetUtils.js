@@ -24,18 +24,23 @@ export default class SheetUtils {
      * Generic function to return any Google Sheet as an array of
      * JSON objects
      * 
-     * @returns A JSON organised array of the sheet using the headers
+     * @returns {Array} A JSON organised array of the sheet using the headers
      */
     static getSheetAsJSON(sheetName) {
         let id = this.getSheetIdByName(sheetName),
         data = this.getSheetAsArray(id),
-        out = []
+        out = [],
+        delimiter = ','
 
         for (let i = 1; i < data.length; i++) {
             let inner = {}, row = data[i]
             for (let j = 0; j < row.length; j++) {
-                let header = this.camelize(data[0][j])
-                inner[header] = row[j]
+                let header = this.camelize(data[0][j]), item = row[j].toString()
+                
+                if (item.indexOf(delimiter) != -1)
+                    item = item.split(delimiter)
+                
+                inner[header] = item
             }
             out.push(inner)
         }
