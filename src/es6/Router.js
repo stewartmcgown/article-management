@@ -19,7 +19,7 @@ export class Router {
         this.paths = e.pathInfo.split('/')
         this.parameter = e.parameter
 
-        this.ams = ams;
+        this.ams = ams ? ams : new AMS()
     
         const a = {
 
@@ -62,7 +62,11 @@ export class Router {
         if (!doesPairExist(c, a, GET))
             throw "No such route exists."
         
-        // Time to route
+        if (c == "authenticate") {
+            return this.isAuthenticated()
+        }
+
+        // AUTHENTICATED TRACKS
         if (c == "articles") {
             if (a == "list") {
                 return this.getList();
@@ -79,9 +83,6 @@ export class Router {
     }
 
     route() {
-        if (!this.isAuthenticated)
-            return "Unauthorised"
-
         switch (this.type) {
             case "GET":
                 return this.routeGET()
@@ -92,7 +93,16 @@ export class Router {
         }
     }
 
-    get isAuthenticated() {
-        let authList = SheetUtils.getSheetAsArray("")
+    /**
+     * @returns an authentication object
+     */
+    authenticate() {
+        let authList = SheetUtils.getSheetAsArray(SheetUtils.getSheetIdByName("Editor Logins"))
+
+        for (let row of authList) {
+            
+        }
+
+        return false
     }
 }

@@ -1,12 +1,13 @@
+/**
+ * AMS will handle all AMS specific actions when called by the Router.
+ * 
+ * @author Stewart McGown
+ * @see https://drive.google.com/open?id=1nkLn0BRqyT5ZotY4YFy-L_2w5WFMvFJZsgGdFQlqSRU
+ */
 export default class AMS {
   constructor() {
 
   }
-
-  verifyAPICredentials(sessionKey) {
-
-  }
-
 
   getAllArticles() {
       // Apps script code to get stuff
