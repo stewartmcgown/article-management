@@ -1,7 +1,11 @@
 import Authentication from './Authentication';
 import AMS from './AMS';
 
-var SheetUtils = require('./SheetUtils').default
+const get = (p, o) =>
+    p.reduce((xs, x) =>
+        (xs && xs[x]) ? xs[x] : null, o)
+
+
 /**
  * This class will be used to route requests to the appropriate function,
  * then allowing either a result or a promise to be returned.
@@ -17,43 +21,46 @@ export class Router {
     constructor(e, type, ams) {
         this.type = type;
         this.paths = e.pathInfo.split('/')
-        this.parameters = e.parameter
+
+        this.setOptions(e)
 
         this.ams = new AMS()
-    
-        const a = {
+    }
 
-            "GET" : {
+    get allowedRoutes() {
+        return {
+            "GET": {
                 "articles": ["list"],
-                "article": ["info"]
-            }, 
-            "POST" : {
+                "article": ["info"],
+                "authentication": ["authenticate"]
+            },
+            "POST": {
                 "article": ["update", "delete"]
             }
-
-        }  
+        }
     }
 
-    get email() {
-        return this.parameters.email
-    }
+    setOptions(e) {
+        if (!e.parameter)
+            return
 
-    getPaths() {
-        return paths;
+        this.email = e.parameter.email
+        this.key = e.parameter.key
+        this.authToken = e.parameter.authToken
     }
 
     /**
      * @returns the first level of the two level API
      */
-    context() {
-        return paths[0];
+    get context() {
+        return this.paths[0];
     }
 
     /**
      * @returns the second level of the API
      */
-    action() {
-        return paths[1];
+    get action() {
+        return this.paths[1];
     }
 
     /**
@@ -61,26 +68,30 @@ export class Router {
      * @returns the requested data, or Unauthorised
      */
     routeGET() {
-        const c = this.context();
-        const a = this.action();
+        const context = this.context;
+        const action = this.action;
 
-        if (!doesPairExist(c, a, GET))
-            throw "No such route exists."
-        
-        if (c == "authenticate") {
-            return this.isAuthenticated()
+        // Check context is valid
+        let selectedContext = get([this.type, context], this.allowedRoutes)
+        if (!selectedContext)
+            throw new Error("No such context exists.")
+        else if (!(selectedContext instanceof Array))
+            throw new Error("Conext exists but has no actions")
+        else if (!selectedContext.includes(action))
+            throw new Error(`No such action exists for context ${context}`)
+
+        if (context == "authentication") {
+            return this.authenticate()
         }
 
         // AUTHENTICATED TRACKS
-        if (c == "articles") {
-            if (a == "list") {
+        if (context == "articles")
+            if (action == "list")
                 return this.getList();
-            }
-        } else if (c == "article") {
-            if (a == "info") {
-                return getInfo();
-            }
-        }
+        else if (context == "article")
+            if (action == "info")
+                return this.getInfo();
+        
     }
 
     /**
@@ -92,7 +103,6 @@ export class Router {
     }
 
     route() {
-        return this.authenticate()
         switch (this.type) {
             case "GET":
                 return this.routeGET()
@@ -109,9 +119,12 @@ export class Router {
      */
     authenticate() {
         let auth = new Authentication({
-            email: this.email
+            email: this.email,
+            key: this.key,
+            authToken: this.authToken
         })
 
-        return auth.authenticate("Editor Logins")
+        return auth.authenticate()
     }
 }
+
