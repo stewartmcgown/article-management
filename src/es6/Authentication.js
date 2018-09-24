@@ -95,8 +95,12 @@ export default class Authentication {
         return new AMSResponse("Successfully sent authentication email.")
     }
 
+    /**
+     * Remove key from database and null it
+     */
     invalidateKey() {
-        // Finish up
+        SheetUtils.removeMatchingRowsFromSheet(key)
+
         this.key = null
     }
 

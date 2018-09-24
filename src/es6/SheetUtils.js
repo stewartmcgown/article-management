@@ -93,6 +93,10 @@ export default class SheetUtils {
         return rows
     }
 
+    removeMatchingRowsFromSheet() {
+        
+    }
+
     /**
      * Turn any string to camelcase
      * @author CMS
