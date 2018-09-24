@@ -87,10 +87,10 @@ export class Router {
         // AUTHENTICATED TRACKS
         if (context == "articles")
             if (action == "list")
-                return this.getList();
+                return this.ams.getList();
         else if (context == "article")
             if (action == "info")
-                return this.getInfo();
+                return this.ams.getInfo();
         
     }
 

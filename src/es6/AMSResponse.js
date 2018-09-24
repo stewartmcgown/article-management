@@ -1,9 +1,6 @@
 export default class AMSResponse {
-
-
-    constructor(options) {
+    constructor(message) {
         this.message = message
-
         // Assign defaults
     }
 }

@@ -2,6 +2,8 @@ import ExtendableError from './ExtendableError';
 import SheetUtils from './SheetUtils';
 import EmailService from './EmailService';
 import AMSResponse from './AMSResponse';
+import KeyGen from './KeyGen';
+import AMS from './AMS';
 
 /**
  * This class will handle initial authentication requests, provide authentication keys
@@ -15,17 +17,20 @@ export default class Authentication {
      * @param {String} options.email The email to authenticate
      * @param {Integer} options.key Authentication key from an email
      * @param {String} options.authToken Exisiting authtoken from a previous run
+     * @param {Boolean} [options.keepLoggedIn=false] Should the key be issued for a longer period
      * @param {String} [options.baseAuthSheet="Editor Logins"] Name of the editor login sheet
      * @param {String} [options.keySheet="Article Management Keys Distributed"] Name of the key sheet
      */
     constructor(options) {
         // Options
         this.email = options.email
-        this.key = options.key
-        this.authToken = options.authToken
+        this.key = options.key || null
+        this.authToken = options.authToken || null
+        this.keepLoggedIn = options.keepLoggedIn || false
+
         // Databases
-        this.baseAuthSheetName = options.baseAuthSheet || "Editor Logins"
-        this.keySheetName = options.keySheet || "Article Management Keys Distributed"
+        this.baseAuthSheetName = options.baseAuthSheet || AMS.baseAuthSheet
+        this.keySheetName = options.keySheet || AMS.keySheet
 
         // States
         this.states = {
@@ -38,22 +43,36 @@ export default class Authentication {
     
     }
 
-    getUserFromSheet() {
-        let authList = SheetUtils.getSheetAsJSON(this.baseAuthSheetName),
-        user = authList.filter(o => {
-            return o.email === this.email
-          })
+    static get () { }
 
-        return user
+    /**
+     * Get a user from a Google Sheet
+     * 
+     * @returns {Object}
+     */
+    getUserFromSheet() {
+        return SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
+            key: "email",
+            value: this.email
+        })
     }
 
     createKeyForEmail() {
-        let key = Math.floor(1e5 + Math.random() * 9e5)
+        let key = KeyGen.generate()
 
         // Insert key in to database
-        
+        this.pushKeyToDatabase(key)
 
         return key
+    }
+
+    pushKeyToDatabase(key) {
+        SheetUtils.getSheetByName(this.keySheetName)
+            .appendRow(AMS.createKeySheetRow({
+                key: key,
+                email: this.email,
+                keepLoggedIn: this.keepLoggedIn
+            }))
     }
 
     /**
@@ -82,8 +101,10 @@ export default class Authentication {
      * an authToken
      */
     verifyKey() {
-        let keys = SheetUtils.getSheetAsJSON(this.keySheetName),
-        entry = keys.filter(o => {
+        let rows = SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
+            key: this.o
+        }),
+        entry = rows.filter(o => {
             return (o.key === this.key && o.email === this.email)
         })        
     }
