@@ -43,18 +43,18 @@ export default class Authentication {
     
     }
 
-    static get () { }
-
     /**
-     * Get a user from a Google Sheet
+     * Get users from a Google Sheet
      * 
-     * @returns {Object}
+     * @returns {Array<Object>}
      */
-    getUserFromSheet() {
-        return SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
-            key: "email",
-            value: this.email
+    getUsersFromSheet() {
+        let matchingUsers = SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
+            email: this.email
         })
+
+        return matchingUsers
+        
     }
 
     createKeyForEmail() {
@@ -95,25 +95,48 @@ export default class Authentication {
         return new AMSResponse("Successfully sent authentication email.")
     }
 
+    invalidateKey() {
+        // Finish up
+        this.key = null
+    }
+
     /**
      * [Verification Path]
      * Check if a given key is expired, and if not, return
      * an authToken
      */
     verifyKey() {
-        let rows = SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
-            key: this.o
-        }),
-        entry = rows.filter(o => {
-            return (o.key === this.key && o.email === this.email)
-        })        
+        let rows = SheetUtils.getMatchingRowsFromSheet(this.keySheetName, {
+            email: this.email,
+            key: this.key
+        })
+
+        if (rows.length === 0) {
+            return new NoMatchingKeyError()
+        }
+
+        let keyEntry = rows[0]
+
+        // Check date isn't older than an hour
+        if ((new Date().getTime() - new Date(keyEntry.dateTime).getTime()) > (60 * 60 * 1000)) {
+            // Date is too old
+
+            // Invalidate key
+            this.invalidateKey()
+
+            return this.authenticate()
+        } else {
+            // Date is in range
+            return this.issueAuthToken()
+        }
+
     }
 
     /**
      * Issue an authtoken for a user
      */
     issueAuthToken() {
-
+        return {token: `token`}
     }
 
     /**
@@ -126,7 +149,7 @@ export default class Authentication {
     }
 
     authenticateFromSheet() {
-        let user = this.getUserFromSheet()
+        let user = this.getUsersFromSheet()
 
         if (user.length === 0)
             return new EditorNotRegisteredError()
@@ -149,7 +172,7 @@ export default class Authentication {
         }
 
         // Check that email is registered before continuing
-        if (this.getUserFromSheet().length === 0)
+        if (this.getUsersFromSheet().length === 0)
             return new Error(EditorNotRegisteredError.name)
 
         // Set state
@@ -173,3 +196,4 @@ class EditorNotRegisteredError extends ExtendableError { }
 class EditorHasInsufficientAccessPermissions extends ExtendableError {}
 class EmailNotGivenError extends ExtendableError { }
 class EmailSendFailure extends ExtendableError {}
+class NoMatchingKeyError extends ExtendableError {}

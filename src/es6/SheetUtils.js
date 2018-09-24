@@ -66,25 +66,28 @@ export default class SheetUtils {
     * with the same value as the properties value
     * 
     * @param {String} sheetName name of the sheet to search
-    * @param {Array<Object>} properties contains key-value pairs to search for
+    * @param {Object} properties contains key-value pairs to search for
     * @param {Boolean} allowMultiple should we return multiple results
     * 
     * @returns {Array<Object>} matching row(s)
     */
     static getMatchingRowsFromSheet(sheetName, properties) {
+        if (!properties) throw new MissingArgumentError(`'property'`)
+
+
         let sheet = this.getSheetAsJSON(sheetName)
 
-        if (!properties) throw new MissingArgumentError(`'property'`)
-        if (!properties.key || !properties.value) throw new MalformedPropertyError()
-
+        // Will locate all rows that match the given properties
         let rows = sheet
-            .filter(o => { return o[properties.key] == properties.value })
+            .filter(o => {
+                return Object.keys(properties).every(key => properties[key] == o[key]) 
+            })
             
 
         if (!rows) {
-            throw new Error(`No matching row for property @ getMatchingRowFromSheet`)
+            throw new Error(`No matching row for property ${JSON.stringify(properties)} @ getMatchingRowsFromSheet (!rows)`)
         } else if (rows.length === 0) {
-            return new Error(`No matching row for property @ getMatchingRowFromSheet`)
+            return new Error(`No matching row for property ${JSON.stringify(properties)}  @ getMatchingRowsFromSheet`)
         }
 
         return rows
