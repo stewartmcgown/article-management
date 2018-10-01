@@ -4,6 +4,7 @@ import EmailService from './EmailService';
 import AMSResponse from './AMSResponse';
 import KeyGen from './KeyGen';
 import AMS from './AMS';
+import AMSCrypto from '../crypto/AMSCrypto';
 
 /**
  * This class will handle initial authentication requests, provide authentication keys
@@ -67,12 +68,18 @@ export default class Authentication {
     }
 
     pushKeyToDatabase(key) {
-        SheetUtils.getSheetByName(this.keySheetName)
-            .appendRow(AMS.createKeySheetRow({
+        SheetUtils.pushRowToSheet(
+            AMS.createKeySheetRow({
                 key: key,
                 email: this.email,
                 keepLoggedIn: this.keepLoggedIn
-            }))
+            })
+        , AMS.authTokenSheet)
+
+    }
+
+    pushAuthTokenToDatabase(token) {
+
     }
 
     /**
@@ -99,7 +106,7 @@ export default class Authentication {
      * Remove key from database and null it
      */
     invalidateKey() {
-        SheetUtils.removeMatchingRowsFromSheet(key)
+        SheetUtils.removeMatchingRowsFromSheet(this.key)
 
         this.key = null
     }
@@ -138,9 +145,15 @@ export default class Authentication {
 
     /**
      * Issue an authtoken for a user
+     * 
+     * @returns an authToken
      */
     issueAuthToken() {
-        return {token: `token`}
+        let token = AMSCrypto.generateRandomString()
+
+        this.pushAuthTokenToDatabase(token)
+
+        return {token: token}
     }
 
     /**
@@ -150,7 +163,7 @@ export default class Authentication {
      */
     verifyAuthToken() {
         
-    }
+    } 
 
     authenticateFromSheet() {
         let user = this.getUsersFromSheet()

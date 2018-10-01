@@ -19,4 +19,6 @@ const expBackoff = func => {
 
 const hasCpuTime = () => !(Date.now() - START_TIME > ONE_MINUTE * 4);
 
-export { expBackoff, hasCpuTime };
+
+
+export { expBackoff, hasCpuTime};

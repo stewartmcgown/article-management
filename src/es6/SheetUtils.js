@@ -1,6 +1,23 @@
 import ExtendableError from "./ExtendableError";
 
+
+
 export default class SheetUtils {
+    /**
+ * Find the longest array in a list
+ * @param {Array<Array>} a 
+ */
+    static maxLength(a) {
+        let max = 0
+        if (a[0] instanceof Array) {
+            for (let b of a) {
+                if (b.length > max)
+                    max = b.length
+            }
+        }
+        return max
+    }
+
     static getSheetIdByName(sheetName) {
         let file; //Retrieve the ID
         const files = DriveApp.getFilesByName(sheetName);
@@ -15,7 +32,7 @@ export default class SheetUtils {
     }
 
     /**
-     * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet}
+     * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet} a matching sheet
      */
     static getSheetByName(sheetName) {
         let sheet = this.getSheetIdByName(sheetName)
@@ -80,9 +97,9 @@ export default class SheetUtils {
         // Will locate all rows that match the given properties
         let rows = sheet
             .filter(o => {
-                return Object.keys(properties).every(key => properties[key] == o[key]) 
+                return Object.keys(properties).every(key => properties[key] == o[key])
             })
-            
+
 
         if (!rows) {
             throw new Error(`No matching row for property ${JSON.stringify(properties)} @ getMatchingRowsFromSheet (!rows)`)
@@ -93,8 +110,48 @@ export default class SheetUtils {
         return rows
     }
 
-    removeMatchingRowsFromSheet() {
-        
+    static removeMatchingRowsFromSheet() {
+
+    }
+
+    /**
+     * Push a new row to a sheet
+     * @param {Array} row
+     * @param {String} sheetName 
+     */
+    static pushRowToSheet(row, sheetName) {
+        this.getSheetByName(sheetName).appendRow(row)
+    }
+
+    /**
+     * Push an array of rows to a sheet. Using the Lock system, we can ensure
+     * that no collisions are made during data entry.
+     * 
+     * @param {Array<Array>} rows data to push
+     * @param {String} sheetName name of sheet
+     */
+    static pushRowsToSheet(rows, sheetName) {
+        /*if (!(rows instanceof Array))
+            return new Error("Rows must be an array")
+
+        let sheet = this.getSheetByName(sheetName),
+            lock = LockService.getScriptLock()
+
+        try {
+            lock.waitLock(10000); // wait 10 seconds for others' use of the code section and lock to stop and then proceed
+        } catch (e) {
+            Logger.log('Could not obtain lock after 30 seconds.');
+            return new Error("Server busy.")
+        }
+
+        sheet = sheet.getActiveSheet()
+
+        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, this.maxLength(rows))
+            .setValues(rows);
+
+        SpreadsheetApp.flush()
+
+        lock.releaseLock()*/
     }
 
     /**
@@ -110,5 +167,5 @@ export default class SheetUtils {
     }
 }
 
-class MissingArgumentError extends ExtendableError {}
-class MalformedPropertyError extends ExtendableError {}
+class MissingArgumentError extends ExtendableError { }
+class MalformedPropertyError extends ExtendableError { }

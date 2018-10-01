@@ -32,4 +32,6 @@ List of possible API paths
  - Interfaces with a Spreadsheet
  - Data comes from the [article-submissions](https://github.com/youngscientists/article-submissions) form.
 
-> Built with :heart: using [Apps Script](https://developers.google.com/apps-script/) by the [Young Scientists Journal](https://ysjournal.com).
+> Built with :heart: for the [Young Scientists Journal](https://ysjournal.com).
+
+> Platform design by [Stewart McGown](https://twistedcore.co.uk) and [Peter He]()

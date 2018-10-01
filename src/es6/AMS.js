@@ -1,5 +1,5 @@
 /**
- * AMS will handle all AMS specific actions when called by the Router.
+ * Handles all AMS specific actions when called by the Router.
  * 
  * @author Stewart McGown
  * @see https://drive.google.com/open?id=1nkLn0BRqyT5ZotY4YFy-L_2w5WFMvFJZsgGdFQlqSRU
@@ -9,8 +9,25 @@ export default class AMS {
 
   }
 
+  /**
+   * Use these static members to get the name the sheet you need
+   */
   static get baseAuthSheet() { return "Editor Logins" }
   static get keySheet() { return "Article Management 2 Keys Distributed" }
+  static get authTokenSheet() { return "Article Management 2 Authentication Internals" }
+
+  static get allowedRoutes() {
+    return {
+      "GET": {
+        "articles": ["list"],
+        "article": ["info"],
+        "authentication": ["authenticate"]
+      },
+      "POST": {
+        "article": ["update", "delete"]
+      }
+    }
+  }
 
   /**
    * Creates an array for appending to a key sheet. Usually called
@@ -39,17 +56,17 @@ export default class AMS {
   }
 
   getAllArticles() {
-      // Apps script code to get stuff
-      const data = this.getSheetAsArray(this.getDatabaseId());
-      
-      const articles = [];
+    // Apps script code to get stuff
+    const data = this.getSheetAsArray(this.getDatabaseId());
 
-      for (let i = 1; i < data.length; i++) {
-          const article = new Article();
-          article.fromRow(data[i])
-          articles.push(article)
-      }
+    const articles = [];
 
-      return articles
+    for (let i = 1; i < data.length; i++) {
+      const article = new Article();
+      article.fromRow(data[i])
+      articles.push(article)
+    }
+
+    return articles
   }
 }

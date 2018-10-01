@@ -1,10 +1,20 @@
 import Authentication from './Authentication';
 import AMS from './AMS';
 
+/**
+ * Safely access nested object properties
+ * 
+ * @param {Array<Object>} p path to desired object
+ * @param {Object} o context object in which to search 
+ * 
+ * @returns the desired object or null if no such object is found.
+ * 
+ * @author A. Sharif
+ * @see https://medium.com/javascript-inside/safely-accessing-deeply-nested-values-in-javascript-99bf72a0855a
+ */
 const get = (p, o) =>
     p.reduce((xs, x) =>
         (xs && xs[x]) ? xs[x] : null, o)
-
 
 /**
  * This class will be used to route requests to the appropriate function,
@@ -15,31 +25,31 @@ const get = (p, o) =>
  * 
  * @param {request} e
  * @param {String} type is the request a Get or Post
- * @param {AMS} ams
  */
 export class Router {
-    constructor(e, type, ams) {
+    constructor(e, type) {
         this.type = type;
-        this.paths = e.pathInfo.split('/')
 
         this.setOptions(e)
 
+        // Instantiate the interface
         this.ams = new AMS()
     }
 
     get allowedRoutes() {
-        return {
-            "GET": {
-                "articles": ["list"],
-                "article": ["info"],
-                "authentication": ["authenticate"]
-            },
-            "POST": {
-                "article": ["update", "delete"]
-            }
-        }
+        return AMS.allowedRoutes
     }
 
+    /**
+     * Applies the parameter options to the router.
+     * 
+     * @param {Object} e the request
+     * @param {Object} e.parameter request parameters
+     * @param {String} e.parameter.email a supplied email
+     * @param {String} e.parameter.authToken a supplied authToken
+     * @param {String} e.parameter.path alternative to supplying an actual path to the API.
+     *                                  if there is no real path specified this will be used 
+     */
     setOptions(e) {
         if (!e.parameter)
             return
@@ -47,6 +57,15 @@ export class Router {
         this.email = e.parameter.email
         this.key = e.parameter.key
         this.authToken = e.parameter.authToken
+
+        let pathInfo = get(['pathInfo'], e)
+        if (pathInfo)
+            this.paths = pathInfo.split('/')
+        else if (e.parameter.path) {
+            this.paths = e.parameter.path.split('/')
+        } else {
+            return new Error('No path supplied @ setOptions')
+        }
     }
 
     /**
@@ -103,6 +122,9 @@ export class Router {
     }
 
     route() {
+        if (!this.paths)
+            return {}
+
         switch (this.type) {
             case "GET":
                 return this.routeGET()
