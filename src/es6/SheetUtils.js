@@ -89,7 +89,6 @@ export default class SheetUtils {
     static getMatchingRowsFromSheet(sheetName, properties) {
         if (!properties) throw new MissingArgumentError(`'property'`)
 
-
         let sheet = this.getSheetAsJSON(sheetName)
 
         // Will locate all rows that match the given properties
@@ -108,7 +107,7 @@ export default class SheetUtils {
         return rows
     }
 
-    static removeMatchingRowsFromSheet() {
+    static removeMatchingRowsFromSheet(sheetName, properties) {
 
     }
 

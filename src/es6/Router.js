@@ -1,20 +1,7 @@
 import Authentication from './Authentication';
 import AMS from './AMS';
-
-/**
- * Safely access nested object properties
- * 
- * @param {Array.<Object>} p path to desired object
- * @param {Object} o context object in which to search 
- * 
- * @returns the desired object or null if no such object is found.
- * 
- * @author A. Sharif
- * @see https://medium.com/javascript-inside/safely-accessing-deeply-nested-values-in-javascript-99bf72a0855a
- */
-const get = (p, o) =>
-    p.reduce((xs, x) =>
-        (xs && xs[x]) ? xs[x] : null, o)
+import Utils from './Utils';
+import SheetUtils from './SheetUtils';
 
 /**
  * This class will be used to route requests to the appropriate function,
@@ -79,7 +66,7 @@ export class Router {
         this.key = e.parameter.key
         this.authToken = e.parameter.authToken
 
-        let pathInfo = get(['pathInfo'], e)
+        let pathInfo = Utils.get(['pathInfo'], e)
         if (pathInfo)
             this.paths = pathInfo.split('/')
         else if (e.parameter.path) {
@@ -113,7 +100,7 @@ export class Router {
         const type = this.type
 
         // Check context is valid
-        let selectedContext = get([type, context], this.allowedRoutes)
+        let selectedContext = Utils.get([type, context], this.allowedRoutes)
         if (!selectedContext)
             throw new Error("No such context exists.")
         else if (!(selectedContext instanceof Object))
@@ -123,6 +110,8 @@ export class Router {
 
         if (context == "authentication") {
             return this.authenticate()
+        } else if (this.authenticate() !== true) {
+            return "unauth"
         }
 
         // AUTHENTICATED TRACKS
