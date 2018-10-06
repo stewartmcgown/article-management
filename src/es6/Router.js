@@ -4,7 +4,7 @@ import AMS from './AMS';
 /**
  * Safely access nested object properties
  * 
- * @param {Array<Object>} p path to desired object
+ * @param {Array.<Object>} p path to desired object
  * @param {Object} o context object in which to search 
  * 
  * @returns the desired object or null if no such object is found.
@@ -37,8 +37,29 @@ export class Router {
     }
 
     get allowedRoutes() {
-        return AMS.allowedRoutes
-    }
+        return {
+          "GET": {
+            "articles": {
+              "list" : AMS.getAllArticles()
+            },
+            "article": ["info"],
+            "authentication": {
+                "authenticate" : this.authenticate()
+            }
+          },
+          "POST": {
+            "article": {
+                "create": AMS.createArticle(), 
+                "update": AMS.updateArticle(), 
+                "delete": AMS.deleteArticle()
+            },
+            "editor": {
+                "create": AMS.createEditor(), 
+                "update": AMS.updateEditor()
+            }
+          }
+        }
+      }
 
     /**
      * Applies the parameter options to the router.
@@ -82,57 +103,30 @@ export class Router {
         return this.paths[1];
     }
 
-    /**
-     * Process a GET request
-     * @returns the requested data, or Unauthorised
-     */
-    routeGET() {
-        const context = this.context;
-        const action = this.action;
+
+    route() {
+        if (!this.paths)
+            return {}
+
+        const context = this.context
+        const action = this.action
+        const type = this.type
 
         // Check context is valid
-        let selectedContext = get([this.type, context], this.allowedRoutes)
+        let selectedContext = get([type, context], this.allowedRoutes)
         if (!selectedContext)
             throw new Error("No such context exists.")
-        else if (!(selectedContext instanceof Array))
+        else if (!(selectedContext instanceof Object))
             throw new Error("Conext exists but has no actions")
-        else if (!selectedContext.includes(action))
-            throw new Error(`No such action exists for context ${context}`)
+        else if (!selectedContext[action])
+            throw new Error(`No such action ${action} exists for context ${context}`)
 
         if (context == "authentication") {
             return this.authenticate()
         }
 
         // AUTHENTICATED TRACKS
-        if (context == "articles")
-            if (action == "list")
-                return this.ams.getList();
-        else if (context == "article")
-            if (action == "info")
-                return this.ams.getInfo();
-        
-    }
-
-    /**
-     * Process a POST request
-     * @returns the requested data, or Unauthorised
-     */
-    routePOST() {
-
-    }
-
-    route() {
-        if (!this.paths)
-            return {}
-
-        switch (this.type) {
-            case "GET":
-                return this.routeGET()
-                break
-            case "POST":
-                return this.routePOST()
-                break
-        }
+        return this.allowedRoutes[type][context][action]
     }
 
     /**

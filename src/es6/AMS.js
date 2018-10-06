@@ -1,3 +1,5 @@
+import SheetUtils from "./SheetUtils";
+
 /**
  * Handles all AMS specific actions when called by the Router.
  * 
@@ -15,19 +17,10 @@ export default class AMS {
   static get baseAuthSheet() { return "Editor Logins" }
   static get keySheet() { return "Article Management 2 Keys Distributed" }
   static get authTokenSheet() { return "Article Management 2 Authentication Internals" }
+  static get articleDatabase() { return "Article Database" }
 
-  static get allowedRoutes() {
-    return {
-      "GET": {
-        "articles": ["list"],
-        "article": ["info"],
-        "authentication": ["authenticate"]
-      },
-      "POST": {
-        "article": ["update", "delete"]
-      }
-    }
-  }
+  
+  
 
   /**
    * Creates an array for appending to a key sheet. Usually called
@@ -55,18 +48,29 @@ export default class AMS {
     ]
   }
 
-  getAllArticles() {
+  /**
+   * @return {Array.<Object>} all articles in JSON format
+   */
+  static getAllArticles() {
     // Apps script code to get stuff
-    const data = this.getSheetAsArray(this.getDatabaseId());
+    return SheetUtils.getSheetAsJSON(this.articleDatabase)
+  }
 
-    const articles = [];
+  /**
+   * @param {String} id 
+   * @return {Array} rows matching the ID
+   */
+  static getInfo(id) {
+    return SheetUtils.getMatchingRowsFromSheet(id)
+  }
 
-    for (let i = 1; i < data.length; i++) {
-      const article = new Article();
-      article.fromRow(data[i])
-      articles.push(article)
-    }
+  /**
+   * Search all parts of the API for a given query.
+   * @param {String} query 
+   */
+  static doSearch(query) {
+    let collected = []
 
-    return articles
+    
   }
 }

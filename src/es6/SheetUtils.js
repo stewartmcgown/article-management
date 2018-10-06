@@ -1,7 +1,5 @@
 import ExtendableError from "./ExtendableError";
 
-
-
 export default class SheetUtils {
     /**
  * Find the longest array in a list
