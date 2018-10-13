@@ -10,7 +10,8 @@ import Utils from './Utils';
 export const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
     JUNIOR: 1,
-    SENIOR: 2
+    SENIOR: 2,
+    ADMIN: 3
 })
 
 /**
