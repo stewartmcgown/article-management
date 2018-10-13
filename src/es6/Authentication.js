@@ -7,6 +7,12 @@ import AMS from './AMS';
 import AMSCrypto from '../crypto/AMSCrypto';
 import Utils from './Utils';
 
+export const AuthenticationLevels = Object.freeze({
+    UNAUTHORISED: 0,
+    JUNIOR: 1,
+    SENIOR: 2
+})
+
 /**
  * This class will handle initial authentication requests, provide authentication keys
  */
@@ -60,8 +66,16 @@ export default class Authentication {
 
     }
 
+    /**
+     * @return {Key}
+     */
     createKeyForEmail() {
-        let key = KeyGen.generate()
+        let keyNumber = KeyGen.generate()
+
+        let key = {
+            key: keyNumber,
+            level: this.level
+        }
 
         // Insert key in to database
         this.pushKeyToDatabase(key)
@@ -69,27 +83,43 @@ export default class Authentication {
         return key
     }
 
+    /**
+     * 
+     * @param {Key} key key object
+     * @param {Number} key.key key number
+     * @param {AuthenticationLevels} key.level
+     */
     pushKeyToDatabase(key) {
         SheetUtils.pushRowToSheet(
             this.createKeySheetRow({
-                key: key,
+                key: key.key,
                 email: this.email,
+                level: key.level,
                 keepLoggedIn: this.keepLoggedIn
             }), this.keySheetName)
 
     }
 
+    /**
+     * 
+     * @param {AMS.Token} token Token object
+     * @param {String} token.token token string
+     * @param {AuthenticationLevels} token.level level of authorisation
+     */
     pushAuthTokenToDatabase(token) {
         SheetUtils.pushRowToSheet(
             this.createAuthTokenSheetRow({
-                token: token,
+                token: token.token,
                 email: this.email,
+                level: token.level,
                 keepLoggedIn: this.keepLoggedIn
             }), this.authTokenSheetName)
     }
 
     /**
-     * Send an email to the user containing a log in key.
+     * Send an authentication email to the user
+     * 
+     * @return {AuthenticationResource} the current authentication state
      */
     sendAuthEmail() {
         // Check state
@@ -102,10 +132,13 @@ export default class Authentication {
         EmailService.send({
             to: this.email,
             type: 'key',
-            payload: key
+            payload: key.key
         })
 
-        return new AMSResponse("Successfully sent authentication email.")
+        return new AuthenticationResource({
+            message: "Successfully sent authentication email.",
+            email: this.email
+        })
     }
 
     /**
@@ -128,12 +161,14 @@ export default class Authentication {
             key: this.key
         })
 
-        if (rows.length === 0) {
-            return new NoMatchingKeyError()
+        if (rows.length === 0 || !rows[0]) {
+            return new AuthenticationResource({
+                message: "No matching key found."
+            })
         }
 
         let keyEntry = rows[0]
-
+        
         // Check date isn't older than an hour
         if ((new Date().getTime() - new Date(keyEntry.dateTime).getTime()) > (60 * 60 * 1000)) {
             // Date is too old
@@ -150,12 +185,26 @@ export default class Authentication {
     }
 
     /**
+     * 
+     * @param {String} level 
+     */
+    setLevel(level) {
+        level = level.toUpperCase()
+        if (AuthenticationLevels[level]) {
+            this.level = AuthenticationLevels[level]
+        } else {
+            this.level = AuthenticationLevels.UNAUTHORISED
+        }
+    }
+
+    /**
      * Creates an array for appending to a key sheet. Usually called
      * by Authentication classes
      * 
      * @param {Object} data to create row from
      * @param {String} data.key the generated key
      * @param {String} data.email the email tied to the key
+     * @param {AuthenticationLevels} [data.level] the level of auth
      * @param {Boolean} [data.keepLoggedIn=false] should the token last for longer than usual
      * 
      * @returns {Array} key sheet row 
@@ -166,11 +215,13 @@ export default class Authentication {
         if (!data.email) throw new Error(`Missing Email @ ${this.createKeySheetRow.name}`)
 
         data.keepLoggedIn = data.keepLoggedIn || false
+        data.level = data.level || AuthenticationLevels.UNAUTHORISED
 
         return [
             new Date(),
             data.email,
             data.key,
+            data.level,
             data.keepLoggedIn
         ]
     }
@@ -178,14 +229,21 @@ export default class Authentication {
     /**
      * Issue an authtoken for a user
      * 
-     * @returns an authToken
+     * @returns an authentication resource
      */
     issueAuthToken() {
-        let token = AMSCrypto.generateRandomString()
+        let tokenString = AMSCrypto.generateRandomString(40)
 
-        this.pushAuthTokenToDatabase(token)
+        this.pushAuthTokenToDatabase({
+            token: tokenString,
+            level: this.level
+        })
 
-        return { origin: this.issueAuthToken.name, token: token }
+        return new AuthenticationResource({
+            message: "Issued authtoken for user",
+            authToken: tokenString,
+            authenticationLevel: this.level
+        })
     }
 
     /**
@@ -199,7 +257,9 @@ export default class Authentication {
         })
 
         if (rows.length === 0 || !Utils.get(['0', 'dateTime'], rows)) {
-            return new NoMatchingKeyError()
+            return new AuthenticationResource({
+                message: "Unauthenticated",
+            })
         }
 
         let authTokenEntry = rows[0]
@@ -209,10 +269,14 @@ export default class Authentication {
             // Date is too old, so Invalidate key
             this.invalidateAuthToken()
 
-            return this.authenticate()
+            return "Expired Authtoken"
         } else {
             // Date is in range
-            return true
+            return new AuthenticationResource({
+                message: "Successfully authenticated",
+                authenticationLevel: authTokenEntry.level,
+                email: authTokenEntry.email
+            })
         }
     }
 
@@ -232,19 +296,13 @@ export default class Authentication {
             new Date(),
             data.email,
             data.token,
+            data.level,
             data.keepLoggedIn
         ]
     }
 
-    authenticateFromSheet() {
-        let user = this.getUsersFromSheet()
+    getUserPermissions() {
 
-        if (user.length === 0)
-            return new EditorNotRegisteredError()
-        else {
-            this.user = user[0]
-            return this.sendAuthEmail()
-        }
     }
 
     /**
@@ -260,8 +318,15 @@ export default class Authentication {
         }
 
         // Check that email is registered before continuing
-        if (this.getUsersFromSheet().length === 0)
-            return new Error(EditorNotRegisteredError.name)
+        if (!this.authToken) {
+            let matchingUsers = this.getUsersFromSheet()
+            if (matchingUsers.length === 0) {
+                throw new EditorNotRegisteredError()
+            } else {
+                this.user = matchingUsers[0]
+                this.setLevel(this.user.level)
+            }
+        }
 
         // Set state
         this.states.emailIsAllowed = true
@@ -278,6 +343,26 @@ export default class Authentication {
         }
     }
 
+}
+
+export class AuthenticationResource {
+    /**
+     * Constructs an authentication resource
+     * 
+     * @param {Object} data 
+     * @param {String} data.message
+     * @param {Integer} [data.authenticationLevel=AuthenticationLevels.UNAUTHORISED]
+     * @param {String} data.email
+     */
+    constructor(data) {
+        this.message = data.message || null
+        this.authenticationLevel = data.authenticationLevel || AuthenticationLevels.UNAUTHORISED
+        this.email = data.email || null
+
+        this.key = data.key || null
+        this.authToken = data.authToken || null
+
+    }
 }
 
 

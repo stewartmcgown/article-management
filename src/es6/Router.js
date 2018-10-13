@@ -1,4 +1,4 @@
-import Authentication from './Authentication';
+import Authentication, { AuthenticationLevels, AuthenticationResource } from './Authentication';
 import AMS from './AMS';
 import Utils from './Utils';
 import SheetUtils from './SheetUtils';
@@ -23,6 +23,12 @@ export class Router {
         this.ams = new AMS()
     }
 
+    /**
+     * Find the routes that can be taken by the application.
+     * 
+     * Each route has a level attached to it, indicating the minimum authorisation
+     * required to get access.
+     */
     get allowedRoutes() {
         return {
           "GET": {
@@ -72,7 +78,7 @@ export class Router {
         else if (e.parameter.path) {
             this.paths = e.parameter.path.split('/')
         } else {
-            return new Error('No path supplied @ setOptions')
+            throw new Error('No path supplied @ setOptions')
         }
     }
 
@@ -110,8 +116,16 @@ export class Router {
 
         if (context == "authentication") {
             return this.authenticate()
-        } else if (this.authenticate() !== true) {
-            return "unauth"
+        }
+
+        let auth = this.authenticate()
+        
+        // Check if user is authenticated
+        if (auth.authenticationLevel == AuthenticationLevels.UNAUTHORISED || !auth.authenticationLevel) {
+            return new AuthenticationResource({
+                message: "Unauthorised",
+                authenticationLevel: AuthenticationLevels.UNAUTHORISED
+            })
         }
 
         // AUTHENTICATED TRACKS
@@ -119,17 +133,17 @@ export class Router {
     }
 
     /**
-     * Checks whet
+     * Checks whether a user is authenticated
      * @returns an authentication object
      */
     authenticate() {
-        let auth = new Authentication({
+        this.auth = new Authentication({
             email: this.email,
             key: this.key,
             authToken: this.authToken
         })
 
-        return auth.authenticate()
+        return this.auth.authenticate()
     }
 }
 
