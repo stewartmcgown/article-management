@@ -39,7 +39,7 @@ export default class SheetUtils {
     static getSheetByName(sheetName) {
         let sheet = this.getSheetIdByName(sheetName)
         if (!sheet)
-            return new Error(`No Sheet '${sheetName}' found @ ${this.getSheetByName.name}`)
+            throw new Error(`No Sheet '${sheetName}' found @ SheetUtils.getSheetByName`)
 
         return SpreadsheetApp.openById(sheet)
     }
@@ -116,6 +116,18 @@ export default class SheetUtils {
     }
 
     /**
+     * 
+     * 
+     * @param {Object} identifiers identifying properties of the row
+     * @param {Array} row overwriting data
+     * @param {String} sheetName sheet to look in
+     */
+    static updateMatchingRow(identifiers, row, sheetName) {
+        let sheet = this.getSheetByName(sheetName)
+        
+    }
+
+    /**
      * Push a new row to a sheet
      * @param {Array} row
      * @param {String} sheetName 
@@ -132,7 +144,7 @@ export default class SheetUtils {
      * @param {String} sheetName name of sheet
      */
     static pushRowsToSheet(rows, sheetName) {
-        /*if (!(rows instanceof Array))
+        if (!(rows instanceof Array))
             return new Error("Rows must be an array")
 
         let sheet = this.getSheetByName(sheetName),
@@ -152,7 +164,7 @@ export default class SheetUtils {
 
         SpreadsheetApp.flush()
 
-        lock.releaseLock()*/
+        lock.releaseLock()
     }
 
     /**

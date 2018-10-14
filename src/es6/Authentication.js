@@ -1,7 +1,6 @@
 import ExtendableError from './ExtendableError';
 import SheetUtils from './SheetUtils';
 import EmailService from './EmailService';
-import KeyGen from './KeyGen';
 import AMS from './AMS';
 import AMSCrypto from '../crypto/AMSCrypto';
 import Utils from './Utils';
@@ -70,7 +69,7 @@ export default class Authentication {
      * @return {Key}
      */
     createKeyForEmail() {
-        let keyNumber = KeyGen.generate()
+        let keyNumber = AMSCrypto.generateKey(6)
 
         let key = {
             key: keyNumber,
