@@ -1,7 +1,6 @@
 import ExtendableError from './ExtendableError';
 import SheetUtils from './SheetUtils';
 import EmailService from './EmailService';
-import AMSResponse from './AMSResponse';
 import KeyGen from './KeyGen';
 import AMS from './AMS';
 import AMSCrypto from '../crypto/AMSCrypto';
@@ -259,7 +258,7 @@ export default class Authentication {
 
         if (rows.length === 0 || !Utils.get(['0', 'dateTime'], rows)) {
             return new AuthenticationResource({
-                message: "Unauthenticated",
+                message: "Authtoken not present.",
             })
         }
 
@@ -270,7 +269,9 @@ export default class Authentication {
             // Date is too old, so Invalidate key
             this.invalidateAuthToken()
 
-            return "Expired Authtoken"
+            return new AuthenticationResource({
+                message: "Authtoken has expired",
+            })
         } else {
             // Date is in range
             return new AuthenticationResource({

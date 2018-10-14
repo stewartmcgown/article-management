@@ -2,9 +2,9 @@ import ExtendableError from "./ExtendableError";
 
 export default class SheetUtils {
     /**
- * Find the longest array in a list
- * @param {Array<Array>} a 
- */
+     * Find the longest array in a list
+     * @param {Array<Array>} a 
+     */
     static maxLength(a) {
         let max = 0
         if (a[0] instanceof Array) {
@@ -16,6 +16,10 @@ export default class SheetUtils {
         return max
     }
 
+    /**
+     * Get a sheet's ID based on its name
+     * @param {String} sheetName 
+     */
     static getSheetIdByName(sheetName) {
         let file; //Retrieve the ID
         const files = DriveApp.getFilesByName(sheetName);
@@ -157,6 +161,8 @@ export default class SheetUtils {
      * @see https://stackoverflow.com/a/2970667
      */
     static camelize(str) {
+        if (str == "ID")
+            return str
         return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
             if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
             return index == 0 ? match.toLowerCase() : match.toUpperCase();

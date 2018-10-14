@@ -19,7 +19,11 @@ export default class AMS {
   static get authTokenSheet() { return "Article Management 2 Authentication Internals" }
   static get articleDatabase() { return "Article Database" }
 
-  static createArticle() {
+  /**
+   * 
+   * @param {Article} article 
+   */
+  static createArticle(article) {
 
   }
 
