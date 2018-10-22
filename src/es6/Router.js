@@ -1,5 +1,10 @@
-import Authentication, { AuthenticationLevels, AuthenticationResource } from './Authentication';
-import AMS from './AMS';
+import Authentication, {
+    AuthenticationLevels,
+    AuthenticationResource
+} from './Authentication';
+import AMS, {
+    Response
+} from './AMS';
 import Utils from './Utils';
 import SheetUtils from './SheetUtils';
 
@@ -19,6 +24,9 @@ export class Router {
 
         this.setOptions(e)
 
+        if (this.type == "POST")
+            this.setPostData(e)
+
         // Instantiate the interface
         this.ams = new AMS()
     }
@@ -31,28 +39,42 @@ export class Router {
      */
     get allowedRoutes() {
         return {
-          "GET": {
-            "articles": {
-              "list" : AMS.getAllArticles()
+            "GET": {
+                "articles": {
+                    "list": AMS.getAllArticles
+                },
+                "article": ["info"],
+                "authentication": {
+                    "authenticate": this.authenticate
+                }
             },
-            "article": ["info"],
-            "authentication": {
-                "authenticate" : this.authenticate()
+            "POST": {
+                "article": {
+                    "create": AMS.createArticle,
+                    "update": AMS.updateArticle,
+                    "delete": AMS.deleteArticle
+                },
+                "editor": {
+                    "create": AMS.createEditor,
+                    "update": AMS.updateEditor
+                }
             }
-          },
-          "POST": {
-            "article": {
-                "create": AMS.createArticle(), 
-                "update": AMS.updateArticle(), 
-                "delete": AMS.deleteArticle()
-            },
-            "editor": {
-                "create": AMS.createEditor(), 
-                "update": AMS.updateEditor()
-            }
-          }
         }
-      }
+    }
+
+    /**
+     * Applies the POST request data to the router
+     * 
+     * @param {Object} e
+     * @param {String} e.postData 
+     */
+    setPostData(e) {
+        if (!e.postData)
+            return
+        
+        this.post.type = e.postData.type
+        this.post.contents = e.postData.contents
+    }
 
     /**
      * Applies the parameter options to the router.
@@ -62,7 +84,7 @@ export class Router {
      * @param {String} e.parameter.email a supplied email
      * @param {String} e.parameter.authToken a supplied authToken
      * @param {String} e.parameter.path alternative to supplying an actual path to the API.
-     *                                  if there is no real path specified this will be used 
+     *                                  if there is no real path specified this will be used
      */
     setOptions(e) {
         if (!e.parameter)
@@ -80,6 +102,12 @@ export class Router {
         } else {
             throw new Error('No path supplied @ setOptions')
         }
+
+        this.args = Object.assign({}, e.parameter, {
+            email: undefined,
+            key: undefined,
+            authToken: undefined
+        });
     }
 
     /**
@@ -119,7 +147,7 @@ export class Router {
         }
 
         let auth = this.authenticate()
-        
+
         // Check if user is authenticated
         if (auth.authenticationLevel == AuthenticationLevels.UNAUTHORISED || !auth.authenticationLevel) {
             return new AuthenticationResource({
@@ -129,7 +157,15 @@ export class Router {
         }
 
         // AUTHENTICATED TRACKS
-        return this.allowedRoutes[type][context][action]
+        let track = Utils.get([type, context, action], this.allowedRoutes)
+        if (track !== null) {
+            return track(this.args)
+        } else {
+            return new Response({
+                message: "Unable to locate an appropriate track."
+            })
+        }
+
     }
 
     /**
@@ -146,4 +182,3 @@ export class Router {
         return this.auth.authenticate()
     }
 }
-

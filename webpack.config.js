@@ -15,7 +15,7 @@ const getFileName = () => {
 module.exports = {
   mode,
   context: __dirname,
-  entry: './src/index.js',
+  entry: ['./src/index.js'],
   output: {
     filename: getFileName(),
     path: path.resolve(__dirname, destination),
@@ -49,7 +49,10 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader'
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
         }
       }
     ]

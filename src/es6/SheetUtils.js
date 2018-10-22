@@ -1,4 +1,6 @@
 import ExtendableError from "./ExtendableError";
+require("jspolyfill-array.prototype.findIndex")
+
 
 export default class SheetUtils {
     /**
@@ -37,6 +39,8 @@ export default class SheetUtils {
      * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet} a matching sheet
      */
     static getSheetByName(sheetName) {
+        if (!sheetName) throw new Error("Missing argument @ getSheetByName")
+
         let sheet = this.getSheetIdByName(sheetName)
         if (!sheet)
             throw new Error(`No Sheet '${sheetName}' found @ SheetUtils.getSheetByName`)
@@ -46,23 +50,26 @@ export default class SheetUtils {
 
     /**
      * Fetch a given sheet as an array
-     * @returns {Array}
+     * @returns {SpreadsheetApp.Spreadsheet}
      */
-    static getSheetAsArray(id) {
-        return SpreadsheetApp.openById(id).getActiveSheet().getDataRange().getValues()
+    static getSheetAsArray(sheetName) {
+        if (!sheetName) throw new Error("Missing argument @ getSheetAsArray")
+        let sheet = this.getSheetByName(sheetName)
+        return sheet.getActiveSheet().getDataRange().getValues()
     }
 
     /**
      * Generic function to return any Google Sheet as an array of
      * JSON objects
      * 
-     * @returns {Array} A JSON organised array of the sheet using the headers
+     * @returns {Array.<Object>} A JSON organised array of the sheet using the headers
      */
     static getSheetAsJSON(sheetName) {
-        let id = this.getSheetIdByName(sheetName),
-            data = this.getSheetAsArray(id),
-            out = [],
-            delimiter = ','
+        if (!sheetName) throw new Error("Missing argument @ getSheetAsJSON")
+
+        let data = this.getSheetAsArray(sheetName)
+        let out = []
+        let delimiter = ','
 
         for (let i = 1; i < data.length; i++) {
             let inner = {}, row = data[i]
@@ -91,7 +98,7 @@ export default class SheetUtils {
     * @returns {Array<Object>} matching row(s)
     */
     static getMatchingRowsFromSheet(sheetName, properties) {
-        if (!properties) throw new MissingArgumentError(`'property'`)
+        if (!properties || !sheetName) throw new Error("Missing arguments @ getMatchingRowsFromSheet")
 
         let sheet = this.getSheetAsJSON(sheetName)
 
@@ -100,7 +107,6 @@ export default class SheetUtils {
             .filter(o => {
                 return Object.keys(properties).every(key => properties[key] == o[key])
             })
-
 
         if (!rows) {
             throw new Error(`No matching row for property ${JSON.stringify(properties)} @ getMatchingRowsFromSheet (!rows)`)
@@ -123,8 +129,48 @@ export default class SheetUtils {
      * @param {String} sheetName sheet to look in
      */
     static updateMatchingRow(identifiers, row, sheetName) {
+        if (!identifiers || !row || !sheetName) throw new Error("Missing arguments @ SheetUtils.updateMatchingRow")
+
         let sheet = this.getSheetByName(sheetName)
-        
+
+        let rowNumber = this.getMatchingRowRange(identifiers, sheetName, 2)
+
+        let rangeRow = [row]
+
+        sheet.getActiveSheet().getRange(rowNumber, 1, 1, sheet.getLastColumn()).setValues(rangeRow)
+    }
+
+    /**
+     * Finds the matching row number of the given sheet.
+     * 
+     * @param {Object} identifiers 
+     * @param {String} sheetName 
+     * @param {Number} offset
+     * 
+     * @throws {Error} Missing parameter error
+     */
+    static getMatchingRowRange(identifiers, sheetName, offset = 0) {
+        if (!identifiers || !sheetName) throw new Error("Missing parameters @ getMatchingRowRange")
+
+        /** @type {Array.<Object>} */
+        let data = this.getSheetAsJSON(sheetName)
+
+        // Should be replaced with a recursive algorithm
+        let number = data.findIndex((o) => Object.keys(identifiers).every(key => {
+            if (Object.keys(identifiers[key]).length != 0) {
+                return Object.keys(identifiers[key]).every(subkey => {
+                    return identifiers[key][subkey] == o[key][subkey]
+                })
+            }
+
+            return identifiers[key] == o[key]
+        }))
+
+        if (offset) {
+            number += offset
+        }
+
+        return number
     }
 
     /**

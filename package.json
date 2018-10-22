@@ -55,6 +55,7 @@
     "eslint-plugin-prettier": "^2.6.2",
     "gas-lib": "^2.0.2",
     "gas-webpack-plugin": "^0.3.0",
+    "jspolyfill-array.prototype.findIndex": "^0.1.0",
     "mersenne-twister": "^1.1.0",
     "polyfill-crypto.getrandomvalues": "^1.0.0",
     "prettier": "^1.14.2",

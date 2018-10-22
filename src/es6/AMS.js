@@ -5,6 +5,7 @@ import { assignExisting } from "./Utils";
 
 
 
+
 /**
  * Handles all AMS specific actions when called by the Router.
  * 
@@ -22,7 +23,7 @@ export default class AMS {
   static get baseAuthSheet() { return "Editor Logins" }
   static get keySheet() { return "Article Management 2 Keys Distributed" }
   static get authTokenSheet() { return "Article Management 2 Authentication Internals" }
-  static get articleDatabase() { return "Article Database" }
+  static get articleDatabase() { return "Article Database (Testing)" }
 
   /**
    * Completely handles the creation of a single article.
@@ -52,10 +53,11 @@ export default class AMS {
   static updateArticle(partial, properties) {
     if (!partial || !properties) throw new Error('Missing arguments @ updateArticle')
 
-    let article = SheetUtils.getMatchingRowsFromSheet(this.articleDatabase,
-      partial)
+    let article = SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, partial)
 
-    if (!article[0])
+    article = article[0]
+
+    if (!article)
       return new Response({
         message: "Article not found",
         id: partial.id
@@ -63,7 +65,13 @@ export default class AMS {
 
     assignExisting(article, properties)
 
-    SheetUtils.updateMatchingRow(partial.id, article.toRow(), this.articleDatabase)
+    let rowData = new Article(article).toRow()
+
+    SheetUtils.updateMatchingRow(partial, rowData, AMS.articleDatabase)
+
+    return new Response({
+      message: `Successfully updated ${article.title}`
+    })
   }
 
 
@@ -96,7 +104,7 @@ export default class AMS {
    * @return {Array.<Article>} all articles in JSON format
    */
   static getAllArticles() {
-    return SheetUtils.getSheetAsJSON(this.articleDatabase)
+    return SheetUtils.getSheetAsJSON(AMS.articleDatabase)
       .map((a) => new Article(a))
   }
 
@@ -119,7 +127,15 @@ export default class AMS {
   }
 }
 
-class Response {
+/**
+ *
+ */
+export class Response {
+  /**
+   * 
+   * @param {Object} data 
+   * @param {String} message
+   */
   constructor(data) {
     this.message = data.message
   }
