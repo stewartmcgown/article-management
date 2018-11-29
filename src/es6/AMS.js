@@ -1,11 +1,7 @@
 import SheetUtils from "./SheetUtils";
 import Article from "./Article";
 import Editor from "./people/Editor";
-import { assignExisting } from "./Utils";
 import EmailService from "./EmailService";
-
-
-
 
 /**
  * Handles all AMS specific actions when called by the Router.
@@ -53,38 +49,32 @@ export default class AMS {
    * @param {Object} properties prop
    */
   static updateArticle(data) {
-    if (!data.identifiers || !data.properties) throw new Error('Missing arguments @ updateArticle')
-
-    let identifiers = data.identifiers, properties = data.properties
-
-    let article = SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, identifiers)[0]
+    if (!data.id || !data.properties) throw new Error('Missing arguments @ updateArticle')
+    let id = data.id, properties = data.properties
+    let article = AMSSheetUtilsWrapper.getArticleById(id)
 
     if (!article)
       return new Response({
         message: "Article not found",
-        id: identifiers
+        id
       })
 
-    assignExisting(article, properties)
+    article.assignProperties(properties)
 
-    let rowData = []
-    Object.keys(article).forEach(k => rowData.push(article[k]))
-
-    SheetUtils.updateMatchingRow(identifiers, rowData, AMS.articleDatabase)
-
-    let updatedArticle = new Article(article)
+    let rowData = article.toRow()
+    AMSSheetUtilsWrapper.updateArticleById(id, rowData)
     
     // Update the author
     EmailService.send({
-      to: [updatedArticle.author.email],
+      to: [article.author.email],
       type: "update",
-
     })
 
     // notify the editor
 
     return new Response({
-      message: `Successfully updated ${article.articleTitle}`
+      reason: "Successful Update",
+      message: article
     })
   }
 
@@ -149,6 +139,15 @@ class AMSSheetUtilsWrapper {
     else return null
   }
 
+  /**
+   * 
+   * @param {String} id 
+   * @param {Array} rowData 
+   */
+  static updateArticleById(id, rowData) {
+    SheetUtils.updateMatchingRow({ID: id}, rowData, AMS.articleDatabase)
+  }
+
 }
 
 /**
@@ -158,9 +157,11 @@ export class Response {
   /**
    * 
    * @param {Object} data 
-   * @param {String} message
+   * @param {Object} data.message
+   * @param {String} data.reason
    */
   constructor(data) {
     this.message = data.message
+    this.reason = data.reason
   }
 }

@@ -34,7 +34,7 @@ export const assignExisting = (target, source) => {
 export const parseDateString = (dateString) => {
     let d = dateString.split('-')
     if (d.length != 3)
-        return "Invalid date"
+        return dateString
     else
         return new Date(d[2], d[1], d[0])
 }

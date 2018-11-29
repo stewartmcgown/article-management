@@ -9,6 +9,16 @@ import Utils from './Utils';
 import SheetUtils from './SheetUtils';
 
 /**
+ * A route points a path to a function and a minimum auth level
+ */
+class Route {
+    constructor(f, auth) {
+        this.f = !(f instanceof Function) || f
+        this.auth = auth
+    }
+}
+
+/**
  * This class will be used to route requests to the appropriate function,
  * then allowing either a result or a promise to be returned.
  * 

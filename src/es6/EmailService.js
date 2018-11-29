@@ -18,12 +18,7 @@ export default class EmailService {
         subject = options.key ? `Authentication Key: ${options.key}` : "Article Management System"
         htmlBody = options.body || (options.key ? this.templateKey(options.key) : "")
 
-        MailApp.sendEmail({
-            to: to,
-            name: name,
-            subject: subject,
-            htmlBody: htmlBody
-        })
+        MailApp.sendEmail(to, subject, htmlBody, { name })
     }
     
 }

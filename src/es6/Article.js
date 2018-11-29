@@ -1,8 +1,44 @@
 import Author from "./people/Author";
 import Editor from "./people/Editor";
-import { parseDateString } from "./Utils";
+import {
+    parseDateString,
+    assignExisting
+} from "./Utils";
 
-export const Statuses = Object.freeze({
+
+const Enums = Object.freeze({
+    status: ["In Review",
+        "Failed Data Check",
+        "Passed Data Check",
+        "Technical Review",
+        "Revisions Requested",
+        "Ready to Publish",
+        "Published"
+    ],
+    type: [
+        "Review Article",
+        "Blog",
+        "Original Research",
+        "Magazine Article",
+    ],
+    subject: [
+        "Biology",
+        "Chemistry",
+        "Computer Science",
+        "Engineering",
+        "Environmental & Earth Science",
+        "Materials Science",
+        "Mathematics",
+        "Medicine",
+        "Physics",
+        "Policy & Ethics"
+    ]
+})
+
+/**
+ * Before assigning a property, validate it against these criteria
+ */
+const Preprocessing = Object.freeze({
 
 })
 
@@ -34,21 +70,27 @@ export default class Article {
      * @param {String} row.copyright
      */
     constructor(row) {
-        this.date = row.date ? parseDateString(row.date) : null
+        this.date = row.date || null
         this.title = row.articleTitle || null
         this.subject = row.articleSubject || null
-        this.type = row.aritcleType || null
+        this.type = row.articleType || null
         this.status = row.status || null
-        this.id = row.ID || null
         this.deadline = row.deadline ? new Date(row.deadline) : null
         this.notes = row.additionalNotes || null
         this.folderId = row.folderID || null
         this.markingGrid = row.markingGrid || null
         this.copyright = row.copyright || null
 
+        // Assign immutable properties
+        Object.defineProperty(this, "id", {
+            configurable: false,
+            value: row.ID,
+            writable: false
+        });
+
         this.setLink()
         this.setAuthor(row.email, row.authorName, row.authorSchool)
-        this.setEditor(row.editorEmail, row.email)
+        this.setEditor(row.editor, row.editorEmail)
     }
 
     /**
@@ -62,7 +104,7 @@ export default class Article {
             this.type,
             this.author.name,
             this.author.school,
-            this.email,
+            this.author.email,
             this.status,
             this.id,
             this.editor.name,
@@ -85,20 +127,31 @@ export default class Article {
      */
     setAuthor(email, name, school) {
         this.author = new Author({
-            email: email,
-            name: name,
-            school: school
+            email,
+            name,
+            school
         })
     }
 
-    setEditor(email, name) {
+    setEditor(name, email) {
         this.editor = new Editor({
-            email: email,
-            name: name
+            name,
+            email
         })
     }
 
     setLink() {
         this.link = `https://docs.google.com/document/d/${this.id}/edit`
+    }
+
+    /**
+     * Checks if all the properties have correct values and assigns them
+     * to the article
+     * @param {Object} properties 
+     */
+    assignProperties(properties) {
+        let allowed = {}
+        Object.keys(properties).filter(p => Enums[p] ? Enums[p] == properties[p] : true).forEach(p => allowed[p] = properties[p])
+        assignExisting(this, allowed)
     }
 }
