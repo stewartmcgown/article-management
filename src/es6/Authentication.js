@@ -1,9 +1,9 @@
-import ExtendableError from './ExtendableError';
-import SheetUtils from './SheetUtils';
-import EmailService from './EmailService';
+import ExtendableError from './utils/ExtendableError';
+import SheetUtils from './utils/SheetUtils';
+import EmailService from './emails/EmailService';
 import AMS from './AMS';
 import AMSCrypto from '../crypto/AMSCrypto';
-import Utils from './Utils';
+import Utils from './utils/Utils';
 
 export const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
@@ -131,7 +131,7 @@ export default class Authentication {
         EmailService.send({
             to: this.email,
             type: 'key',
-            payload: key.key
+            key: key.key
         })
 
         return new AuthenticationResource({

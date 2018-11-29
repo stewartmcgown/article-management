@@ -1,7 +1,8 @@
-import SheetUtils from "./SheetUtils";
+import SheetUtils from "./utils/SheetUtils";
 import Article from "./Article";
 import Editor from "./people/Editor";
-import EmailService from "./EmailService";
+import EmailService from "./emails/EmailService";
+import { objectToKeyValues, stemFlatten } from "./utils/Utils";
 
 /**
  * Handles all AMS specific actions when called by the Router.
@@ -59,15 +60,16 @@ export default class AMS {
         id
       })
 
-    article.assignProperties(properties)
+    let modified = objectToKeyValues(stemFlatten(article.assignProperties(properties)))
 
     let rowData = article.toRow()
     AMSSheetUtilsWrapper.updateArticleById(id, rowData)
     
     // Update the author
     EmailService.send({
-      to: [article.author.email],
+      to: article.author.email,
       type: "update",
+      data: { article, modified }
     })
 
     // notify the editor

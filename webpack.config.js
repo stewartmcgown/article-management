@@ -54,7 +54,12 @@ module.exports = {
             presets: ['@babel/preset-env']
           }
         }
-      }
+      },
+      {
+        test: /\.html$/,
+        exclude: /node_modules/,
+        use: [{loader: "babel-loader"}, {loader: "template-string-loader"}]
+    }
     ]
   },
   plugins: [

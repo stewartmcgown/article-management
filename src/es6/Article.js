@@ -3,7 +3,7 @@ import Editor from "./people/Editor";
 import {
     parseDateString,
     assignExisting
-} from "./Utils";
+} from "./utils/Utils";
 
 
 const Enums = Object.freeze({
@@ -21,6 +21,7 @@ const Enums = Object.freeze({
         "Original Research",
         "Magazine Article",
     ],
+    /** @type {Array} */
     subject: [
         "Biology",
         "Chemistry",
@@ -148,10 +149,12 @@ export default class Article {
      * Checks if all the properties have correct values and assigns them
      * to the article
      * @param {Object} properties 
+     * @return {Object} the properties that got changed
      */
     assignProperties(properties) {
         let allowed = {}
-        Object.keys(properties).filter(p => Enums[p] ? Enums[p] == properties[p] : true).forEach(p => allowed[p] = properties[p])
+        Object.keys(properties).filter(p => Enums[p] ? Enums[p].includes(properties[p]) : true).forEach(p => allowed[p] = properties[p])
         assignExisting(this, allowed)
+        return allowed
     }
 }

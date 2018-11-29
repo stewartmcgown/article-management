@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base target="_top">
+        
+        
+    </head>
+    <body>
+        <div class="container" style="width: 100%;font-family: sans-serif;">
+            <div class="header" style="background: #d13619;text-align: center;">
+                <img src="https://assets.ysjournal.com/emails/logo-transparent.png" style="margin: 0 auto;">
+            </div>
+            <p>Dear ${scope.article.author ? scope.article.author.name : "Author"},</p>
+
+            <p>An article you have submitted, <a href="${scope.article.link}" style="text-decoration: none;color: #d13619;border-bottom: 2px #d13619 solid;">${scope.article.title}</a>, 
+                has been updated. The following properties have changed:</p>
+
+                <ul>
+                    ${scope.modified.map(item => `
+                        <li><strong style="text-transform: capitalize">${item.key.replace("_", " ")}</strong> changed to <strong>${item.value}</strong>.</li>
+                      `).join('')}
+                </ul>
+
+            <p>Please check if you have recieved any comments on your article.</p>
+
+            <p>Your editor is <strong><a href="mailto:${scope.article.editor.email}">${scope.article.editor ? scope.article.editor.name : "currently unavailable"}</a></strong>.</p>
+            
+            <p><em>This is an automated email and will not be replied to.</em></p>
+        </div>
+    </body>

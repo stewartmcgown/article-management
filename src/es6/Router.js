@@ -5,8 +5,8 @@ import Authentication, {
 import AMS, {
     Response
 } from './AMS';
-import Utils from './Utils';
-import SheetUtils from './SheetUtils';
+import Utils from './utils/Utils';
+import SheetUtils from './utils/SheetUtils';
 
 /**
  * A route points a path to a function and a minimum auth level
