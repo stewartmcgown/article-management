@@ -50,7 +50,7 @@ export default class SheetUtils {
 
     /**
      * Fetch a given sheet as an array
-     * @returns {SpreadsheetApp.Spreadsheet}
+     * @returns {Array}
      */
     static getSheetAsArray(sheetName) {
         if (!sheetName) throw new Error("Missing argument @ getSheetAsArray")
@@ -72,9 +72,11 @@ export default class SheetUtils {
         let delimiter = ','
 
         for (let i = 1; i < data.length; i++) {
-            let inner = {}, row = data[i]
+            let inner = {},
+                row = data[i]
             for (let j = 0; j < row.length; j++) {
-                let header = this.camelize(data[0][j]), item = row[j].toString()
+                let header = this.camelize(data[0][j]),
+                    item = row[j].toString()
 
                 if (item.indexOf(delimiter) != -1)
                     item = item.split(delimiter)
@@ -88,15 +90,15 @@ export default class SheetUtils {
     }
 
     /**
-    * Using a property, check if a given sheet contains a matching row
-    * with the same value as the properties value
-    * 
-    * @param {String} sheetName name of the sheet to search
-    * @param {Object} properties contains key-value pairs to search for
-    * @param {Boolean} allowMultiple should we return multiple results
-    * 
-    * @returns {Array<Object>} matching row(s)
-    */
+     * Using a property, check if a given sheet contains a matching row
+     * with the same value as the properties value
+     * 
+     * @param {String} sheetName name of the sheet to search
+     * @param {Object} properties contains key-value pairs to search for
+     * @param {Boolean} allowMultiple should we return multiple results
+     * 
+     * @return {Array.<Object>} matching row(s)
+     */
     static getMatchingRowsFromSheet(sheetName, properties) {
         if (!properties || !sheetName) throw new Error("Missing arguments @ getMatchingRowsFromSheet")
 
@@ -156,15 +158,17 @@ export default class SheetUtils {
         let data = this.getSheetAsJSON(sheetName)
 
         // Should be replaced with a recursive algorithm
-        let number = data.findIndex((o) => Object.keys(identifiers).every(key => {
-            if (Object.keys(identifiers[key]).length != 0) {
-                return Object.keys(identifiers[key]).every(subkey => {
-                    return identifiers[key][subkey] == o[key][subkey]
-                })
-            }
-
-            return identifiers[key] == o[key]
-        }))
+        let number = data.findIndex((o) => {
+            return Object.keys(identifiers).every(k => {
+                if (typeof o[k] === "object") {
+                    return Object.keys(identifiers[k]).every(c => {
+                        return o[k][c] == identifiers[k][c]
+                    })
+                } else {
+                    return identifiers[k] == o[k]
+                }
+            })
+        })
 
         if (offset) {
             number += offset
@@ -228,5 +232,5 @@ export default class SheetUtils {
     }
 }
 
-class MissingArgumentError extends ExtendableError { }
-class MalformedPropertyError extends ExtendableError { }
+class MissingArgumentError extends ExtendableError {}
+class MalformedPropertyError extends ExtendableError {}

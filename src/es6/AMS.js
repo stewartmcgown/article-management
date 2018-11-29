@@ -2,6 +2,7 @@ import SheetUtils from "./SheetUtils";
 import Article from "./Article";
 import Editor from "./people/Editor";
 import { assignExisting } from "./Utils";
+import EmailService from "./EmailService";
 
 
 
@@ -46,31 +47,44 @@ export default class AMS {
   /**
    * Updates an article in the database with the given properties.
    * 
-   * @param {Object} partial a partial article
-   * @param {String} partial.id ID of article to update
+   * This is a general update, so general update email will be sent.
+   * 
+   * @param {String} ID id of article to update
    * @param {Object} properties prop
    */
-  static updateArticle(partial, properties) {
-    if (!partial || !properties) throw new Error('Missing arguments @ updateArticle')
+  static updateArticle(data) {
+    if (!data.identifiers || !data.properties) throw new Error('Missing arguments @ updateArticle')
 
-    let article = SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, partial)
+    let identifiers = data.identifiers, properties = data.properties
 
-    article = article[0]
+    let article = SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, identifiers)[0]
 
     if (!article)
       return new Response({
         message: "Article not found",
-        id: partial.id
+        id: identifiers
       })
 
     assignExisting(article, properties)
 
-    let rowData = new Article(article).toRow()
+    let rowData = []
+    Object.keys(article).forEach(k => rowData.push(article[k]))
 
-    SheetUtils.updateMatchingRow(partial, rowData, AMS.articleDatabase)
+    SheetUtils.updateMatchingRow(identifiers, rowData, AMS.articleDatabase)
+
+    let updatedArticle = new Article(article)
+    
+    // Update the author
+    EmailService.send({
+      to: [updatedArticle.author.email],
+      type: "update",
+
+    })
+
+    // notify the editor
 
     return new Response({
-      message: `Successfully updated ${article.title}`
+      message: `Successfully updated ${article.articleTitle}`
     })
   }
 
@@ -123,8 +137,18 @@ export default class AMS {
   static doSearch(query) {
     let collected = []
 
-
   }
+}
+
+class AMSSheetUtilsWrapper {
+  static getArticleById(id) {
+    const data = SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+    const rows = data.filter(r => r.ID == id)
+    if (!rows) return null
+    else if (rows[0]) return new Article(rows[0])
+    else return null
+  }
+
 }
 
 /**

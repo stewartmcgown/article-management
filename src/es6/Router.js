@@ -22,6 +22,7 @@ export class Router {
     constructor(e, type) {
         this.type = type;
 
+        this.post = {}
         this.setOptions(e)
 
         if (this.type == "POST")
@@ -41,22 +42,23 @@ export class Router {
         return {
             "GET": {
                 "articles": {
-                    "list": AMS.getAllArticles
+                    "list": { function: AMS.getAllArticles, minimumAuthorisation: AuthenticationLevels.JUNIOR }
                 },
                 "article": ["info"],
                 "authentication": {
-                    "authenticate": this.authenticate
+                    "authenticate": { function: this.authenticate, minimumAuthorisation: AuthenticationLevels.JUNIOR }
                 }
             },
             "POST": {
                 "article": {
-                    "create": AMS.createArticle,
-                    "update": AMS.updateArticle,
-                    "delete": AMS.deleteArticle
+                    "create": { function: AMS.createArticle, minimumAuthorisation: AuthenticationLevels.UNAUTHORISED },
+                    "update": { function: AMS.updateArticle, minimumAuthorisation: AuthenticationLevels.JUNIOR },
+                    "delete": { function: AMS.deleteArticle, minimumAuthorisation: AuthenticationLevels.SENIOR },
+                    "assign": { function: AMS.assignArticle, minimumAuthorisation: AuthenticationLevels.SENIOR }
                 },
                 "editor": {
-                    "create": AMS.createEditor,
-                    "update": AMS.updateEditor
+                    "create": { function: AMS.createEditor, minimumAuthorisation: AuthenticationLevels.SENIOR },
+                    "update": { function: AMS.updateEditor, minimumAuthorisation: AuthenticationLevels.SENIOR }
                 }
             }
         }
@@ -71,9 +73,11 @@ export class Router {
     setPostData(e) {
         if (!e.postData)
             return
-        
-        this.post.type = e.postData.type
-        this.post.contents = e.postData.contents
+        this.post = {
+            type: e.postData.type,
+            contents: JSON.parse(e.postData.contents)
+        }
+
     }
 
     /**
@@ -156,10 +160,17 @@ export class Router {
             })
         }
 
-        // AUTHENTICATED TRACKS
         let track = Utils.get([type, context, action], this.allowedRoutes)
+
+        // verify if track and auth level match
+
         if (track !== null) {
-            return track(this.args)
+            if (auth.authenticationLevel >= track.minimumAuthorisation)
+                return track.function(this.post.contents || this.args)
+            else
+                return new Response({
+                    message: "You are not authorised to perform that action"
+                })
         } else {
             return new Response({
                 message: "Unable to locate an appropriate track."
@@ -170,7 +181,7 @@ export class Router {
 
     /**
      * Checks whether a user is authenticated
-     * @returns an authentication object
+     * @return {AuthenticationResource} an authentication object
      */
     authenticate() {
         this.auth = new Authentication({

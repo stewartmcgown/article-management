@@ -10,14 +10,7 @@ export const doGet = (e) => {
 };
 
 export const doPost = (e) => {
-  
-
+  let router = new Router(e, "POST")
   //let router = new Router(e, "POST")
-  return ContentService.createTextOutput(
-    JSON.stringify(AMS.updateArticle({
-      ID: "17cVvcsSP48YPAr06WwRkwsnJbLnLMEZjhCCFTXx27Ic"
-    }, {
-      editor: "IT WORKS"
-    }))
-  )
+  return ContentService.createTextOutput(JSON.stringify(router.route()))
 }

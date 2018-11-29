@@ -1,7 +1,7 @@
 export default class EmailService {
     /**
      * @param {Object} options
-     * @param {String} options.to
+     * @param {String[]} options.to
      * @param {String} [options.type="generic"]
      * @param {Integer} [options.key]
      * @param {String} [options.name="Submissions - Young Scientists Journal"]
@@ -25,13 +25,5 @@ export default class EmailService {
             htmlBody: htmlBody
         })
     }
-
-    static templateKey(key) {
-        return  `<!doctype html><html><body>
-                    <p><strong>Your authentication key is: ${key}</strong>
-
-                    <p>If you didn't request this key, don't worry, as no one can gain access to your account
-                    without it.
-                </body></html>`
-    }
+    
 }
