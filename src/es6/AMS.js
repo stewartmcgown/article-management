@@ -2,7 +2,8 @@ import SheetUtils from "./utils/SheetUtils";
 import Article from "./Article";
 import Editor from "./people/Editor";
 import EmailService from "./emails/EmailService";
-import { objectToKeyValues, stemFlatten } from "./utils/Utils";
+import Response from './responses/Response'
+import { objectToKeyValues, stemFlatten } from "./utils/Utils"
 
 /**
  * Handles all AMS specific actions when called by the Router.
@@ -76,7 +77,8 @@ export default class AMS {
 
     return new Response({
       reason: "Successful Update",
-      message: article
+      message: article,
+
     })
   }
 
@@ -150,20 +152,4 @@ class AMSSheetUtilsWrapper {
     SheetUtils.updateMatchingRow({ID: id}, rowData, AMS.articleDatabase)
   }
 
-}
-
-/**
- *
- */
-export class Response {
-  /**
-   * 
-   * @param {Object} data 
-   * @param {Object} data.message
-   * @param {String} data.reason
-   */
-  constructor(data) {
-    this.message = data.message
-    this.reason = data.reason
-  }
 }

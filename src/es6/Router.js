@@ -2,11 +2,9 @@ import Authentication, {
     AuthenticationLevels,
     AuthenticationResource
 } from './Authentication';
-import AMS, {
-    Response
-} from './AMS';
+import AMS from './AMS';
 import Utils from './utils/Utils';
-import SheetUtils from './utils/SheetUtils';
+import Response from './responses/Response'
 
 /**
  * A route points a path to a function and a minimum auth level
