@@ -1,4 +1,4 @@
-export default class Templates {
+module.exports =  class Templates {
     static templateKey(key) {
         return  `<!doctype html><html><body>
                     <p><strong>Your authentication key is: ${key}</strong>

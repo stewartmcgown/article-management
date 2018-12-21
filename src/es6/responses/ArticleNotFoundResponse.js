@@ -1,4 +1,4 @@
-export class ArticleNotFoundResponse {
+class ArticleNotFoundResponse {
     constructor(id) {
         super()
     }

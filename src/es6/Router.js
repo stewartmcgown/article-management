@@ -1,10 +1,11 @@
-import Authentication, {
-    AuthenticationLevels,
-    AuthenticationResource
-} from './Authentication';
-import AMS from './AMS';
-import Utils from './utils/Utils';
-import Response from './responses/Response'
+const AMS = require('./AMS');
+const {
+    Utils
+} = require('./utils/Utils');
+const Response = require('./responses/Response')
+const ErrorResponse = require('./responses/ErrorResponse')
+const { Authentication, AuthenticationResource, AuthenticationLevels } = require("./Authentication.js")
+const url = require("url")
 
 /**
  * A route points a path to a function and a minimum auth level
@@ -16,25 +17,31 @@ class Route {
     }
 }
 
-/**
- * This class will be used to route requests to the appropriate function,
- * then allowing either a result or a promise to be returned.
- * 
- * Actions that require authorisation will be checked against
- * the main auth db.
- * 
- * @param {request} e
- * @param {String} type is the request a Get or Post
- */
-export class Router {
-    constructor(e, type) {
+
+module.exports = class Router {
+    /**
+     * This class will be used to route requests to the appropriate function,
+     * then allowing either a result or a promise to be returned.
+     * 
+     * Actions that require authorisation will be checked against
+     * the main auth db.
+     * 
+     * @param {Object} request
+     * @param {String} request.path
+     * @param {String} request.method
+     * @param {Object} request.params
+     * @param {Object} request.body
+     * @param {String} type is the request a Get or Post
+     */
+    constructor(request, type) {
         this.type = type;
+        this.request = request
 
         this.post = {}
-        this.setOptions(e)
+        this.setOptions(request)
 
         if (this.type == "POST")
-            this.setPostData(e)
+            this.setPostData(request)
 
         // Instantiate the interface
         this.ams = new AMS()
@@ -50,23 +57,47 @@ export class Router {
         return {
             "GET": {
                 "articles": {
-                    "list": { function: AMS.getAllArticles, minimumAuthorisation: AuthenticationLevels.JUNIOR }
+                    "list": {
+                        function: AMS.getAllArticles,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    }
                 },
                 "article": ["info"],
                 "authentication": {
-                    "authenticate": { function: this.authenticate, minimumAuthorisation: AuthenticationLevels.JUNIOR }
+                    "authenticate": {
+                        function: this.authenticate,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    }
                 }
             },
             "POST": {
                 "article": {
-                    "create": { function: AMS.createArticle, minimumAuthorisation: AuthenticationLevels.UNAUTHORISED },
-                    "update": { function: AMS.updateArticle, minimumAuthorisation: AuthenticationLevels.JUNIOR },
-                    "delete": { function: AMS.deleteArticle, minimumAuthorisation: AuthenticationLevels.SENIOR },
-                    "assign": { function: AMS.assignArticle, minimumAuthorisation: AuthenticationLevels.SENIOR }
+                    "create": {
+                        function: AMS.createArticle,
+                        minimumAuthorisation: AuthenticationLevels.UNAUTHORISED
+                    },
+                    "update": {
+                        function: AMS.updateArticle,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    },
+                    "delete": {
+                        function: AMS.deleteArticle,
+                        minimumAuthorisation: AuthenticationLevels.SENIOR
+                    },
+                    "assign": {
+                        function: AMS.assignArticle,
+                        minimumAuthorisation: AuthenticationLevels.SENIOR
+                    }
                 },
                 "editor": {
-                    "create": { function: AMS.createEditor, minimumAuthorisation: AuthenticationLevels.SENIOR },
-                    "update": { function: AMS.updateEditor, minimumAuthorisation: AuthenticationLevels.SENIOR }
+                    "create": {
+                        function: AMS.createEditor,
+                        minimumAuthorisation: AuthenticationLevels.SENIOR
+                    },
+                    "update": {
+                        function: AMS.updateEditor,
+                        minimumAuthorisation: AuthenticationLevels.SENIOR
+                    }
                 }
             }
         }
@@ -99,23 +130,20 @@ export class Router {
      *                                  if there is no real path specified this will be used
      */
     setOptions(e) {
-        if (!e.parameter)
+        if (!e.params)
             return
 
-        this.email = e.parameter.email
-        this.key = e.parameter.key
-        this.authToken = e.parameter.authToken
+        this.email = e.params.email
+        this.key = e.params.key
+        this.authToken = e.params.authToken
 
-        let pathInfo = Utils.get(['pathInfo'], e)
-        if (pathInfo)
-            this.paths = pathInfo.split('/')
-        else if (e.parameter.path) {
-            this.paths = e.parameter.path.split('/')
-        } else {
+        if (e.path)
+            this.path = e.path.split("/").slice(1)
+        else {
             throw new Error('No path supplied @ setOptions')
         }
 
-        this.args = Object.assign({}, e.parameter, {
+        this.args = Object.assign({}, e.params, {
             email: undefined,
             key: undefined,
             authToken: undefined
@@ -126,20 +154,22 @@ export class Router {
      * @returns the first level of the two level API
      */
     get context() {
-        return this.paths[0];
+        return this.path[0];
     }
 
     /**
      * @returns the second level of the API
      */
     get action() {
-        return this.paths[1];
+        return this.path[1];
     }
 
 
     route() {
-        if (!this.paths)
-            return {}
+        if (!this.path)
+            return new Response({
+                message: "AMS API v2"
+            })
 
         const context = this.context
         const action = this.action
@@ -148,11 +178,11 @@ export class Router {
         // Check context is valid
         let selectedContext = Utils.get([type, context], this.allowedRoutes)
         if (!selectedContext)
-            throw new Error("No such context exists.")
+            return new ErrorResponse("No such context exists.")
         else if (!(selectedContext instanceof Object))
-            throw new Error("Conext exists but has no actions")
+            return new ErrorResponse("Context exists but has no actions")
         else if (!selectedContext[action])
-            throw new Error(`No such action ${action} exists for context ${context}`)
+            return new ErrorResponse(`No such action ${action} exists for context ${context}`)
 
         if (context == "authentication") {
             return this.authenticate()

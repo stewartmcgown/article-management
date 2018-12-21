@@ -1,9 +1,9 @@
-import SheetUtils from "./utils/SheetUtils";
-import Article from "./Article";
-import Editor from "./people/Editor";
-import EmailService from "./emails/EmailService";
-import Response from './responses/Response'
-import { objectToKeyValues, stemFlatten } from "./utils/Utils"
+const SheetUtils = require("./utils/SheetUtils");
+const Article = require("./Article");
+const Editor = require("./people/Editor");
+const EmailService = require("./emails/EmailService");
+const Response = require('./responses/Response')
+const { objectToKeyValues, stemFlatten } = require("./utils/Utils")
 
 /**
  * Handles all AMS specific actions when called by the Router.
@@ -11,18 +11,21 @@ import { objectToKeyValues, stemFlatten } from "./utils/Utils"
  * @author Stewart McGown
  * @see https://drive.google.com/open?id=1nkLn0BRqyT5ZotY4YFy-L_2w5WFMvFJZsgGdFQlqSRU
  */
-export default class AMS {
-  constructor() {
 
+class AMS {
+  constructor() {
+    SheetUtils.sheet = AMS.rootAppID
   }
+
+  static get rootAppID() { return "17yVLJ8L836_vKIEnkxIBN1DIxnX6PgvvfinLTFZyPAI"}
 
   /**
    * Use these static members to get the name the sheet you need
    */
-  static get baseAuthSheet() { return "Editor Logins" }
-  static get keySheet() { return "Article Management 2 Keys Distributed" }
-  static get authTokenSheet() { return "Article Management 2 Authentication Internals" }
-  static get articleDatabase() { return "Article Database (Testing)" }
+  static get baseAuthSheet() { return "Logins" }
+  static get keySheet() { return "Keys" }
+  static get authTokenSheet() { return "AuthTokens" }
+  static get articleDatabase() { return "Database" }
 
   /**
    * Completely handles the creation of a single article.
@@ -112,7 +115,7 @@ export default class AMS {
    * @return {Array.<Article>} all articles in JSON format
    */
   static getAllArticles() {
-    return SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+    return SheetUtils.getSheetAsJSON(this.ids.database)
       .map((a) => new Article(a))
   }
 
@@ -136,7 +139,7 @@ export default class AMS {
 
 class AMSSheetUtilsWrapper {
   static getArticleById(id) {
-    const data = SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+    const data = SheetUtils.getSheetAsJSON(AMS.ids.database)
     const rows = data.filter(r => r.ID == id)
     if (!rows) return null
     else if (rows[0]) return new Article(rows[0])
@@ -153,3 +156,6 @@ class AMSSheetUtilsWrapper {
   }
 
 }
+
+
+module.exports = AMS

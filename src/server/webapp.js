@@ -1,16 +1,38 @@
-import { Router } from '../es6/Router.js';
-import AMS from '../es6/AMS.js';
+const Router = require('../es6/Router.js');
+const express = require("express")
+const url = require("url")
+const app = express()
+const port = 8000
 
-export const doGet = (e) => {
-  let router = new Router(e, "GET")
+app.use(express.json())
+
+app.all("*", (request, response) => {
+  const parts = url.parse(request.url, true)
+  const router = new Router({
+    path: parts.pathname,
+    method: request.method,
+    params: parts.query,
+    body: request.body
+  }, request.method)
+  
+  response.setHeader("Content-Type", "application/json")
+  response.send(JSON.stringify(router.route()))
+})
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+const doGet = (e) => {
+  const out = JSON.stringify(router.route(), (key, value) => {
+    if (value !== null) return value // Filters null values
+  })
   return ContentService.createTextOutput(
-    JSON.stringify(router.route(), (key, value) => {
-      if (value !== null) return value // Filters null values
-    }));
+    e.params.callback + "(" + out + ")", ContentService.MimeType.JAVASCRIPT);
 };
 
-export const doPost = (e) => {
+ const doPost = (e) => {
   let router = new Router(e, "POST")
   //let router = new Router(e, "POST")
-  return ContentService.createTextOutput(JSON.stringify(router.route()))
+  const out = JSON.stringify(router.route())
+  return ContentService.createTextOutput(e.params.callback + "(" + out + ")"
+    , ContentService.MimeType.JAVASCRIPT)
 }

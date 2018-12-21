@@ -1,4 +1,4 @@
-export default class Editor {
+module.exports =  class Editor {
     /**
      * Constructs an editor object
      * 

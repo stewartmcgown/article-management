@@ -1,4 +1,4 @@
-export default class Utils {
+class Utils {
     /**
      * Safely access nested object properties
      * 
@@ -21,7 +21,7 @@ export default class Utils {
  * @param {Object} target object to update
  * @param {Object} source source of properties
  */
-export const assignExisting = (target, source) => {
+const assignExisting = (target, source) => {
     Object.keys(source).filter(key => key in target)
         .forEach(key => {
             target[key] instanceof Object ?
@@ -34,7 +34,7 @@ export const assignExisting = (target, source) => {
  * 
  * @param {String} dateString 
  */
-export const parseDateString = (dateString) => {
+const parseDateString = (dateString) => {
     let d = dateString.split('-')
     if (d.length != 3)
         return dateString
@@ -60,7 +60,7 @@ export const parseDateString = (dateString) => {
  * @param {Object} o 
  * @return {Array.<Object>}
  */
-export const objectToKeyValues = (o, h) => Object.keys(o).map(k => {
+const objectToKeyValues = (o, h) => Object.keys(o).map(k => {
     return {
         key: k,
         value: o[k]
@@ -73,7 +73,7 @@ export const objectToKeyValues = (o, h) => Object.keys(o).map(k => {
  * @param {Object} o 
  * @param {String} [stem]
  */
-export const stemFlatten = (o, stem) => {
+const stemFlatten = (o, stem) => {
     let out = {}
     Object.keys(o).forEach(k => {
         if (o[k] instanceof Object) {
@@ -83,4 +83,12 @@ export const stemFlatten = (o, stem) => {
         }
     })
     return out
+}
+
+module.exports = {
+    Utils,
+    assignExisting,
+    stemFlatten,
+    objectToKeyValues,
+    parseDateString
 }

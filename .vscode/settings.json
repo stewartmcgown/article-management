@@ -6,5 +6,6 @@
   "files.autoSave": "onFocusChange",
   "eslint.validate": [
     "javascript"
-  ]
+  ],
+  "eslint.enable": false
 }

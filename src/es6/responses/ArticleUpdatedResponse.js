@@ -1,6 +1,6 @@
-import Response from './responses/Response'
+const Response = require('./responses/Response')
 
-export class ArticleUpdatedResponse extends Response {
+class ArticleUpdatedResponse extends Response {
     constructor(article, modified) {
         super()
     }

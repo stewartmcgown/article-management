@@ -1,7 +1,7 @@
 /**
  *  
  */
-export default class Response {
+module.exports =  class Response {
     /**
      * 
      * @param {Object} data 

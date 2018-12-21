@@ -1,4 +1,4 @@
-export default class AMSCrypto {
+module.exports =  class AMSCrypto {
 
     /**
      * Generates a random secure string to use as an auth token

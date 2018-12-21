@@ -1,9 +1,9 @@
-import Author from "./people/Author";
-import Editor from "./people/Editor";
-import {
+const Author = require("./people/Author");
+const Editor = require("./people/Editor");
+const {
     parseDateString,
     assignExisting
-} from "./utils/Utils";
+} = require("./utils/Utils");
 
 
 const Enums = Object.freeze({
@@ -43,10 +43,10 @@ const Preprocessing = Object.freeze({
 
 })
 
-export default class Article {
+module.exports =  class Article {
     /**
-     * Constructs an article from a given sheet row. The sheet row
-     * is a JSON object from passed by the SheetUtils class.
+     * Constructs an article = require(a given sheet row. The sheet row
+     * is a JSON object = require(passed by the SheetUtils class.
      * 
      * The resulting structure should look like the described
      * structure in {@link https://docs.google.com/document/d/1nkLn0BRqyT5ZotY4YFy-L_2w5WFMvFJZsgGdFQlqSRU/edit#heading=h.m03wrfbkeob7}

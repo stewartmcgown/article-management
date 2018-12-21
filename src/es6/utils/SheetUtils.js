@@ -1,8 +1,12 @@
-import ExtendableError from "./ExtendableError";
-require("jspolyfill-array.prototype.findIndex")
+const ExtendableError = require("./ExtendableError");
+const GoogleWrapper = require("./GoogleWrapper")
 
+module.exports = class SheetUtils {
 
-export default class SheetUtils {
+    static set sheet(id) {
+        this.sheetID = id
+    }
+
     /**
      * Find the longest array in a list
      * @param {Array<Array>} a 
@@ -39,7 +43,7 @@ export default class SheetUtils {
      * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet} a matching sheet
      */
     static getSheetByName(sheetName) {
-        if (!sheetName) throw new Error("Missing argument @ getSheetByName")
+        if (!sheetName) throw new TypeError("Missing argument @ getSheetByName")
 
         let sheet = this.getSheetIdByName(sheetName)
         if (!sheet)
@@ -50,12 +54,12 @@ export default class SheetUtils {
 
     /**
      * Fetch a given sheet as an array
+     * @param {String} sheetName
      * @returns {Array}
      */
     static getSheetAsArray(sheetName) {
-        if (!sheetName) throw new Error("Missing argument @ getSheetAsArray")
-        let sheet = this.getSheetByName(sheetName)
-        return sheet.getActiveSheet().getDataRange().getValues()
+        if (!sheetName) throw new TypeError("Missing argument @ getSheetAsArray")
+        return new GoogleWrapper().getSheetValues(this.sheetID, sheetName)
     }
 
     /**

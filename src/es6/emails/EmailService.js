@@ -1,11 +1,11 @@
-import updateTemplate from '../../html/emails/update.html'
-import Templates from './templates';
+const updateTemplate = ""
+const Templates = require('./templates');
 
 const templates = Object.freeze({
     update: updateTemplate
 })
 
-export default class EmailService {
+module.exports =  class EmailService {
     /**
      * @param {Object} options
      * @param {String} options.to

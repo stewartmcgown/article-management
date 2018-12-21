@@ -1,11 +1,11 @@
-import ExtendableError from './utils/ExtendableError';
-import SheetUtils from './utils/SheetUtils';
-import EmailService from './emails/EmailService';
-import AMS from './AMS';
-import AMSCrypto from '../crypto/AMSCrypto';
-import Utils from './utils/Utils';
+const ExtendableError = require('./utils/ExtendableError');
+const SheetUtils = require('./utils/SheetUtils');
+const EmailService = require('./emails/EmailService');
+const AMS = require('./AMS');
+const AMSCrypto = require('../crypto/AMSCrypto')
+const Utils = require('./utils/Utils');
 
-export const AuthenticationLevels = Object.freeze({
+const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
     JUNIOR: 1,
     SENIOR: 2,
@@ -15,15 +15,15 @@ export const AuthenticationLevels = Object.freeze({
 /**
  * This class will handle initial authentication requests, provide authentication keys
  */
-export default class Authentication {
+class Authentication {
 
     /**
      * Build the Authentication object
      * 
      * @param {Object} options
      * @param {String} options.email The email to authenticate
-     * @param {Integer} options.key Authentication key from an email
-     * @param {String} options.authToken Exisiting authtoken from a previous run
+     * @param {Integer} options.key Authentication key = require(an email
+     * @param {String} options.authToken Exisiting authtoken = require(a previous run
      * @param {Boolean} [options.keepLoggedIn=false] Should the key be issued for a longer period
      * @param {String} [options.baseAuthSheet="Editor Logins"] Name of the editor login sheet
      * @param {String} [options.keySheet="Article Management Keys Distributed"] Name of the key sheet
@@ -52,7 +52,7 @@ export default class Authentication {
     }
 
     /**
-     * Get users from a Google Sheet
+     * Get users = require(a Google Sheet
      * 
      * @returns {Array<Object>}
      */
@@ -141,7 +141,7 @@ export default class Authentication {
     }
 
     /**
-     * Remove key from database and null it
+     * Remove key = require(database and null it
      */
     invalidateKey() {
         SheetUtils.removeMatchingRowsFromSheet(this.key)
@@ -346,7 +346,7 @@ export default class Authentication {
 
 }
 
-export class AuthenticationResource {
+class AuthenticationResource {
     /**
      * Constructs an authentication resource
      * 
@@ -366,6 +366,11 @@ export class AuthenticationResource {
     }
 }
 
+module.exports = {
+    Authentication,
+    AuthenticationLevels,
+    AuthenticationResource
+}
 
 class EditorNotRegisteredError extends ExtendableError { }
 class EditorHasInsufficientAccessPermissions extends ExtendableError { }
