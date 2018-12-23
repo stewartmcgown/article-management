@@ -1,3 +1,5 @@
+const TokenGenerator = require("uuid-token-generator")
+
 module.exports =  class AMSCrypto {
 
     /**
@@ -6,20 +8,10 @@ module.exports =  class AMSCrypto {
      * @returns secure string
      */
     static generateRandomString(length) {
-        let validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-
-        let array = new Array(length)
-
-        while (length) {
-            length--
-            array[length] = Math.floor(Math.random() * 256)
-        }
-
-        array = array.map(x => validChars.charCodeAt(x % validChars.length));
-        return String.fromCharCode(...array)
+        return new TokenGenerator(512).generate()
     }
 
     static generateKey() {
-        return Math.floor(1e5 + Math.random() * 9e5)
+        return new TokenGenerator(128, "0123456789").generate().substr(0, 6)
     }
 }

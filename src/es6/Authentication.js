@@ -3,7 +3,9 @@ const SheetUtils = require('./utils/SheetUtils');
 const EmailService = require('./emails/EmailService');
 const AMS = require('./AMS');
 const AMSCrypto = require('../crypto/AMSCrypto')
-const Utils = require('./utils/Utils');
+const {
+    get
+} = require('./utils/Utils');
 
 const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
@@ -11,6 +13,18 @@ const AuthenticationLevels = Object.freeze({
     SENIOR: 2,
     ADMIN: 3
 })
+
+const StaleTimes = Object.freeze({
+    KEY: 60,
+    AUTHTOKEN: 60
+})
+
+class Key {
+    constructor(key, level) {
+        this.key = key
+        this.level = level
+    }
+}
 
 /**
  * This class will handle initial authentication requests, provide authentication keys
@@ -52,12 +66,12 @@ class Authentication {
     }
 
     /**
-     * Get users = require(a Google Sheet
+     * Get users 
      * 
      * @returns {Array<Object>}
      */
-    getUsersFromSheet() {
-        let matchingUsers = SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
+    async getUsersFromSheet() {
+        let matchingUsers = await SheetUtils.getMatchingRowsFromSheet(this.baseAuthSheetName, {
             email: this.email
         })
 
@@ -71,10 +85,7 @@ class Authentication {
     createKeyForEmail() {
         let keyNumber = AMSCrypto.generateKey(6)
 
-        let key = {
-            key: keyNumber,
-            level: this.level
-        }
+        let key = new Key(keyNumber, this.level)
 
         // Insert key in to database
         this.pushKeyToDatabase(key)
@@ -88,7 +99,7 @@ class Authentication {
      * @param {Number} key.key key number
      * @param {AuthenticationLevels} key.level
      */
-    pushKeyToDatabase(key) {
+    async pushKeyToDatabase(key) {
         SheetUtils.pushRowToSheet(
             this.createKeySheetRow({
                 key: key.key,
@@ -105,14 +116,14 @@ class Authentication {
      * @param {String} token.token token string
      * @param {AuthenticationLevels} token.level level of authorisation
      */
-    pushAuthTokenToDatabase(token) {
+    async pushAuthTokenToDatabase(token) {
         SheetUtils.pushRowToSheet(
             this.createAuthTokenSheetRow({
                 token: token.token,
                 email: this.email,
                 level: token.level,
                 keepLoggedIn: this.keepLoggedIn
-            }), this.authTokenSheetName)
+            }), AMS.authTokenSheet)
     }
 
     /**
@@ -120,7 +131,7 @@ class Authentication {
      * 
      * @return {AuthenticationResource} the current authentication state
      */
-    sendAuthEmail() {
+    async sendAuthEmail() {
         // Check state
         if (!this.states.emailIsAllowed)
             return new EmailSendFailure()
@@ -143,7 +154,7 @@ class Authentication {
     /**
      * Remove key = require(database and null it
      */
-    invalidateKey() {
+    async invalidateKey() {
         SheetUtils.removeMatchingRowsFromSheet(this.key)
 
         this.key = null
@@ -154,8 +165,8 @@ class Authentication {
      * Check if a given key is expired, and if not, return
      * an authToken
      */
-    verifyKey() {
-        let rows = SheetUtils.getMatchingRowsFromSheet(this.keySheetName, {
+    async verifyKey() {
+        let rows = await SheetUtils.getMatchingRowsFromSheet(AMS.keySheet, {
             email: this.email,
             key: this.key
         })
@@ -167,9 +178,9 @@ class Authentication {
         }
 
         let keyEntry = rows[0]
-        
+
         // Check date isn't older than an hour
-        if ((new Date().getTime() - new Date(keyEntry.dateTime).getTime()) > (60 * 60 * 1000)) {
+        if (Authentication.isAuthTokenStale(keyEntry.dateTime)) {
             // Date is too old
 
             // Invalidate key
@@ -187,7 +198,7 @@ class Authentication {
      * 
      * @param {String} level 
      */
-    setLevel(level) {
+    async setLevel(level) {
         level = level.toUpperCase()
         if (AuthenticationLevels[level]) {
             this.level = AuthenticationLevels[level]
@@ -230,7 +241,7 @@ class Authentication {
      * 
      * @returns an authentication resource
      */
-    issueAuthToken() {
+    async issueAuthToken() {
         let tokenString = AMSCrypto.generateRandomString(40)
 
         this.pushAuthTokenToDatabase({
@@ -250,21 +261,21 @@ class Authentication {
      * Check if an exchanged authtoken is still valid.
      * If not, issue a new one.
      */
-    verifyAuthToken() {
-        let rows = SheetUtils.getMatchingRowsFromSheet(this.authTokenSheetName, {
+    async verifyAuthToken() {
+        let rows = await SheetUtils.getMatchingRowsFromSheet(AMS.authTokenSheet, {
             token: this.authToken
         })
 
-        if (rows.length === 0 || !Utils.get(['0', 'dateTime'], rows)) {
+        if (rows.length === 0 || !get(['0', 'dateTime'], rows)) {
             return new AuthenticationResource({
-                message: "Authtoken not present.",
+                message: "Authtoken not found",
             })
         }
 
         let authTokenEntry = rows[0]
 
         // Check date isn't older than an hour
-        if ((new Date().getTime() - new Date(authTokenEntry.dateTime).getTime()) > (60 * 60 * 1000)) {
+        if (Authentication.isAuthTokenStale(authTokenEntry.dateTime)) {
             // Date is too old, so Invalidate key
             this.invalidateAuthToken()
 
@@ -281,15 +292,15 @@ class Authentication {
         }
     }
 
-    invalidateAuthToken() {
+    async invalidateAuthToken() {
         SheetUtils.removeMatchingRowsFromSheet(this.authToken)
 
         this.authToken = null
     }
 
-    
+
     createAuthTokenSheetRow(data) {
-        if (!data.token || !data.email) throw new Error(`Missing data @ ${this.createAuthTokenSheetRow.name}`) 
+        if (!data.token || !data.email) throw new Error(`Missing data @ ${this.createAuthTokenSheetRow.name}`)
 
         data.keepLoggedIn = data.keepLoggedIn || false
 
@@ -302,7 +313,7 @@ class Authentication {
         ]
     }
 
-    getUserPermissions() {
+    async getUserPermissions() {
 
     }
 
@@ -312,7 +323,7 @@ class Authentication {
      * 
      * @returns 
      */
-    authenticate() {
+    async authenticate() {
         // Check if required elements are present
         if (!this.email && !this.authToken) {
             return new EmailNotGivenError()
@@ -320,9 +331,13 @@ class Authentication {
 
         // Check that email is registered before continuing
         if (!this.authToken) {
-            let matchingUsers = this.getUsersFromSheet()
-            if (matchingUsers.length === 0) {
-                throw new EditorNotRegisteredError()
+            let matchingUsers = await this.getUsersFromSheet()
+            console.log(matchingUsers)
+            if (!matchingUsers.length) {
+                return new AuthenticationResource({
+                    message: "Editor not registered",
+                    email: this.email
+                })
             } else {
                 this.user = matchingUsers[0]
                 this.setLevel(this.user.level)
@@ -334,14 +349,33 @@ class Authentication {
 
         // If yes, check for auth token
         if (this.authToken) {
-            return this.verifyAuthToken()
+            return await this.verifyAuthToken()
         } else if (this.key) {
             // If we have been given a key to work with, we should 
-            return this.verifyKey()
+            return await this.verifyKey()
         } else {
             // If we have neither of these, send an authentication email
-            return this.sendAuthEmail()
+            return await this.sendAuthEmail()
         }
+    }
+
+    /**
+     * Remove stale keys
+     */
+    static async cleanUp() {
+
+    }
+
+    /**
+     * 
+     * @param {String} dateTime
+     */
+    static isKeyStale(dateTime) {
+        return (new Date().getTime() - new Date(dateTime).getTime()) > (StaleTimes.KEY * 60 * 1000)
+    }
+
+    static isAuthTokenStale(dateTime) {
+        return (new Date().getTime() - new Date(dateTime).getTime()) > (StaleTimes.AUTHTOKEN * 60 * 1000)
     }
 
 }
@@ -372,8 +406,8 @@ module.exports = {
     AuthenticationResource
 }
 
-class EditorNotRegisteredError extends ExtendableError { }
-class EditorHasInsufficientAccessPermissions extends ExtendableError { }
-class EmailNotGivenError extends ExtendableError { }
-class EmailSendFailure extends ExtendableError { }
-class NoMatchingKeyError extends ExtendableError { }
+class EditorNotRegisteredError extends ExtendableError {}
+class EditorHasInsufficientAccessPermissions extends ExtendableError {}
+class EmailNotGivenError extends ExtendableError {}
+class EmailSendFailure extends ExtendableError {}
+class NoMatchingKeyError extends ExtendableError {}

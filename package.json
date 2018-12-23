@@ -14,7 +14,7 @@
     "build": "webpack -p",
     "upload": "clasp push",
     "deploy": "npm run build && npm run upload",
-    "dev": "node src/server/webapp.js"
+    "dev": "nodemon src/server/webapp.js"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,9 @@
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
     "babel-polyfill": "^6.26.0",
-    "html-loader": "^0.5.5"
+    "html-loader": "^0.5.5",
+    "npm": "^6.5.0",
+    "uuid-token-generator": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
@@ -44,6 +46,8 @@
     "babel-loader": "^8.0.4",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-array-includes": "^2.0.3",
+    "base64url": "^3.0.1",
+    "chalk": "^2.4.1",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.6.0",
     "crypto-js": "^3.1.9-1",

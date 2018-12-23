@@ -24,7 +24,9 @@ function getAuthUrl() {
     var oauth2Client = getOAuthClient();
     // generate a url that asks permissions for Google+ and Google Calendar scopes
     var scopes = [
-        'https://www.googleapis.com/auth/drive'
+        'https://www.googleapis.com/auth/drive',
+        "https://mail.google.com/",
+        "https://www.googleapis.com/auth/spreadsheets"
     ];
 
     var url = oauth2Client.generateAuthUrl({
@@ -42,7 +44,7 @@ app.use("/oauthCallback", function (req, res) {
     var session = req.session;
     var code = req.query.code;
     oauth2Client.getToken(code, function (err, tokens) {
-        console.log("tokens : ", tokens);
+        console.log("tokens : ", JSON.stringify(tokens));
         // Now tokens contains an access_token and an optional refresh_token. Save them.
         if (!err) {
             oauth2Client.setCredentials(tokens);

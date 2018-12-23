@@ -1,38 +1,41 @@
 const Router = require('../es6/Router.js');
 const express = require("express")
 const url = require("url")
-const app = express()
-const port = 8000
+const {
+  removeEmpty
+} = require("../es6/utils/Utils")
+const {
+  schedule
+} = require("./Scheduler")
+const AMS = require("../es6/AMS")
 
-app.use(express.json())
+{
+  const app = express()
+  const port = 8000
 
-app.all("*", (request, response) => {
-  const parts = url.parse(request.url, true)
-  const router = new Router({
-    path: parts.pathname,
-    method: request.method,
-    params: parts.query,
-    body: request.body
-  }, request.method)
-  
-  response.setHeader("Content-Type", "application/json")
-  response.send(JSON.stringify(router.route()))
-})
+  app.use(express.json())
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+  app.all("*", async (request, response) => {
+    const parts = url.parse(request.url, true)
+    const router = new Router({
+      path: parts.pathname,
+      method: request.method,
+      params: parts.query,
+      body: request.body
+    }, request.method)
 
-const doGet = (e) => {
-  const out = JSON.stringify(router.route(), (key, value) => {
-    if (value !== null) return value // Filters null values
+    response.setHeader("Content-Type", "application/json")
+    //router.route().then(data => response.send(JSON.stringify(data)))
+    router.route().then(data => {
+      response.send(JSON.stringify(data))
+    })
+    //response.send(JSON.stringify(await router.route()))
   })
-  return ContentService.createTextOutput(
-    e.params.callback + "(" + out + ")", ContentService.MimeType.JAVASCRIPT);
-};
 
- const doPost = (e) => {
-  let router = new Router(e, "POST")
-  //let router = new Router(e, "POST")
-  const out = JSON.stringify(router.route())
-  return ContentService.createTextOutput(e.params.callback + "(" + out + ")"
-    , ContentService.MimeType.JAVASCRIPT)
+  app.listen(port, () => console.log(`AMS v2 running on ${port}`))
+
+  /**
+   * Register tasks
+   */
+  schedule(() => AMS.doScheduledTasks(), 1500)
 }

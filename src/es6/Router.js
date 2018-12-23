@@ -1,6 +1,6 @@
 const AMS = require('./AMS');
 const {
-    Utils
+    get
 } = require('./utils/Utils');
 const Response = require('./responses/Response')
 const ErrorResponse = require('./responses/ErrorResponse')
@@ -36,12 +36,7 @@ module.exports = class Router {
     constructor(request, type) {
         this.type = type;
         this.request = request
-
-        this.post = {}
         this.setOptions(request)
-
-        if (this.type == "POST")
-            this.setPostData(request)
 
         // Instantiate the interface
         this.ams = new AMS()
@@ -165,7 +160,7 @@ module.exports = class Router {
     }
 
 
-    route() {
+    async route() {
         if (!this.path)
             return new Response({
                 message: "AMS API v2"
@@ -176,7 +171,7 @@ module.exports = class Router {
         const type = this.type
 
         // Check context is valid
-        let selectedContext = Utils.get([type, context], this.allowedRoutes)
+        let selectedContext = get([type, context], this.allowedRoutes)
         if (!selectedContext)
             return new ErrorResponse("No such context exists.")
         else if (!(selectedContext instanceof Object))
@@ -188,23 +183,20 @@ module.exports = class Router {
             return this.authenticate()
         }
 
-        let auth = this.authenticate()
+        let auth = await this.authenticate()
 
         // Check if user is authenticated
         if (auth.authenticationLevel == AuthenticationLevels.UNAUTHORISED || !auth.authenticationLevel) {
-            return new AuthenticationResource({
-                message: "Unauthorised",
-                authenticationLevel: AuthenticationLevels.UNAUTHORISED
-            })
+            return auth
         }
 
-        let track = Utils.get([type, context, action], this.allowedRoutes)
+        let track = get([type, context, action], this.allowedRoutes)
 
         // verify if track and auth level match
 
         if (track !== null) {
             if (auth.authenticationLevel >= track.minimumAuthorisation)
-                return track.function(this.post.contents || this.args)
+                return track.function(this.request.body || this.args)
             else
                 return new Response({
                     message: "You are not authorised to perform that action"

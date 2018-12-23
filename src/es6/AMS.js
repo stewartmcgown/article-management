@@ -20,7 +20,7 @@ class AMS {
   static get rootAppID() { return "17yVLJ8L836_vKIEnkxIBN1DIxnX6PgvvfinLTFZyPAI"}
 
   /**
-   * Use these static members to get the name the sheet you need
+   * Use these static async members to get the name the sheet you need
    */
   static get baseAuthSheet() { return "Logins" }
   static get keySheet() { return "Keys" }
@@ -41,7 +41,7 @@ class AMS {
    * 
    * @param {Article} article 
    */
-  static createArticle(article) {
+  static async createArticle(article) {
 
   }
 
@@ -53,10 +53,10 @@ class AMS {
    * @param {String} ID id of article to update
    * @param {Object} properties prop
    */
-  static updateArticle(data) {
-    if (!data.id || !data.properties) throw new Error('Missing arguments @ updateArticle')
+  static async updateArticle(data) {
+    if (!data.id || !data.properties) throw new TypeError('Missing arguments @ updateArticle')
     let id = data.id, properties = data.properties
-    let article = AMSSheetUtilsWrapper.getArticleById(id)
+    let article = await AMSSheetUtilsWrapper.getArticleById(id)
 
     if (!article)
       return new Response({
@@ -90,7 +90,7 @@ class AMS {
    * 
    * @param {Article} article 
    */
-  static deleteArticle(article) {
+  static async deleteArticle(article) {
 
   }
 
@@ -98,7 +98,7 @@ class AMS {
    * 
    * @param {Editor} editor 
    */
-  static createEditor(editor) {
+  static async createEditor(editor) {
 
   }
 
@@ -107,23 +107,24 @@ class AMS {
    * @param {Editor} editor 
    * @param {Object} properties 
    */
-  static updateEditor(editor, properties) {
+  static async updateEditor(editor, properties) {
 
   }
 
   /**
    * @return {Array.<Article>} all articles in JSON format
    */
-  static getAllArticles() {
-    return SheetUtils.getSheetAsJSON(this.ids.database)
-      .map((a) => new Article(a))
+  static async getAllArticles() {
+    const data = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+    
+    return data.map((a) => new Article(a))
   }
 
   /**
    * @param {String} id 
    * @return {Array} rows matching the ID
    */
-  static getInfo(id) {
+  static async getInfo(id) {
     return SheetUtils.getMatchingRowsFromSheet(id)
   }
 
@@ -131,16 +132,25 @@ class AMS {
    * Search all parts of the API for a given query.
    * @param {String} query 
    */
-  static doSearch(query) {
+  static async doSearch(query) {
     let collected = []
 
+  }
+
+  /**
+   * Do all the tasks that are to be executed at a regular interval
+   */
+  static async doScheduledTasks() {
+    /**
+     * Clean up old keys
+     */
   }
 }
 
 class AMSSheetUtilsWrapper {
-  static getArticleById(id) {
-    const data = SheetUtils.getSheetAsJSON(AMS.ids.database)
-    const rows = data.filter(r => r.ID == id)
+  static async getArticleById(id) {
+    const data = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+    const rows = data.filter(r => r.id == id)
     if (!rows) return null
     else if (rows[0]) return new Article(rows[0])
     else return null
@@ -151,11 +161,10 @@ class AMSSheetUtilsWrapper {
    * @param {String} id 
    * @param {Array} rowData 
    */
-  static updateArticleById(id, rowData) {
-    SheetUtils.updateMatchingRow({ID: id}, rowData, AMS.articleDatabase)
+  static async updateArticleById(id, rowData) {
+    SheetUtils.updateMatchingRow(id, rowData, AMS.articleDatabase)
   }
 
 }
-
 
 module.exports = AMS

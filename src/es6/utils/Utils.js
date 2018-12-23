@@ -1,20 +1,19 @@
-class Utils {
-    /**
-     * Safely access nested object properties
-     * 
-     * @param {Array.<Object>} p path to desired object
-     * @param {Object} o context object in which to search 
-     * 
-     * @returns the desired object or null if no such object is found.
-     * 
-     * @author A. Sharif
-     * @see https://medium.com/javascript-inside/safely-accessing-deeply-nested-values-in-javascript-99bf72a0855a
-     */
-    static get(p, o) {
-        return p.reduce((xs, x) =>
-            (xs && xs[x]) ? xs[x] : null, o)
-    }
-}
+/**
+ * Safely access nested object properties
+ * 
+ * @param {Array.<Object>} p path to desired object
+ * @param {Object} o context object in which to search 
+ * 
+ * @returns the desired object or null if no such object is found.
+ * 
+ * @author A. Sharif
+ * @see https://medium.com/javascript-inside/safely-accessing-deeply-nested-values-in-javascript-99bf72a0855a
+ */
+const get = (p, o) =>
+    p.reduce((xs, x) =>
+        (xs && xs[x]) ? xs[x] : null, o)
+
+
 
 /**
  * 
@@ -85,10 +84,41 @@ const stemFlatten = (o, stem) => {
     return out
 }
 
+/**
+ * Clean up an object by removing null and undefined values
+ * @param {Object} obj 
+ */
+const removeEmpty = (obj) => {
+    const o = JSON.parse(JSON.stringify(obj)); // Clone source oect.
+
+    Object.keys(o).forEach(key => {
+        if (o[key] && typeof o[key] === 'object')
+            o[key] = removeEmpty(o[key]); // Recurse.
+        else if (o[key] === undefined || o[key] === null)
+            delete o[key]; // Delete undefined and null.
+        else
+            o[key] = o[key]; // Copy value.
+    });
+
+    return o; // Return new object.
+};
+
+const columnToLetter = column =>  {
+    var temp, letter = '';
+    while (column > 0) {
+        temp = (column - 1) % 26;
+        letter = String.fromCharCode(temp + 65) + letter;
+        column = (column - temp - 1) / 26;
+    }
+    return letter;
+}
+
 module.exports = {
-    Utils,
+    get,
     assignExisting,
     stemFlatten,
     objectToKeyValues,
-    parseDateString
+    parseDateString,
+    removeEmpty,
+    columnToLetter
 }

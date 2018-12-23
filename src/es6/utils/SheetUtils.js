@@ -23,43 +23,14 @@ module.exports = class SheetUtils {
     }
 
     /**
-     * Get a sheet's ID based on its name
-     * @param {String} sheetName 
-     */
-    static getSheetIdByName(sheetName) {
-        let file; //Retrieve the ID
-        const files = DriveApp.getFilesByName(sheetName);
-
-        // Check if the doc exists. If it doesn't, return nothing
-        if (files.hasNext())
-            file = files.next()
-        else
-            return ""
-
-        return file.getId()
-    }
-
-    /**
-     * @returns {GoogleAppsScript.Spreadsheet.Spreadsheet} a matching sheet
-     */
-    static getSheetByName(sheetName) {
-        if (!sheetName) throw new TypeError("Missing argument @ getSheetByName")
-
-        let sheet = this.getSheetIdByName(sheetName)
-        if (!sheet)
-            throw new Error(`No Sheet '${sheetName}' found @ SheetUtils.getSheetByName`)
-
-        return SpreadsheetApp.openById(sheet)
-    }
-
-    /**
      * Fetch a given sheet as an array
      * @param {String} sheetName
      * @returns {Array}
      */
-    static getSheetAsArray(sheetName) {
+    static async getSheetAsArray(sheetName) {
         if (!sheetName) throw new TypeError("Missing argument @ getSheetAsArray")
-        return new GoogleWrapper().getSheetValues(this.sheetID, sheetName)
+        const values = await GoogleWrapper.getSheetValues(this.sheetID, sheetName)
+        return values
     }
 
     /**
@@ -68,12 +39,13 @@ module.exports = class SheetUtils {
      * 
      * @returns {Array.<Object>} A JSON organised array of the sheet using the headers
      */
-    static getSheetAsJSON(sheetName) {
-        if (!sheetName) throw new Error("Missing argument @ getSheetAsJSON")
+    static async getSheetAsJSON(sheetName) {
+        if (!sheetName) throw new TypeError("Missing argument @ getSheetAsJSON")
 
-        let data = this.getSheetAsArray(sheetName)
-        let out = []
-        let delimiter = ','
+        const data = await this.getSheetAsArray(sheetName)
+        if (!data) throw new TypeError("Data can not be null")
+
+        let out = [], delimiter = ','
 
         for (let i = 1; i < data.length; i++) {
             let inner = {},
@@ -103,10 +75,10 @@ module.exports = class SheetUtils {
      * 
      * @return {Array.<Object>} matching row(s)
      */
-    static getMatchingRowsFromSheet(sheetName, properties) {
+    static async getMatchingRowsFromSheet(sheetName, properties) {
         if (!properties || !sheetName) throw new Error("Missing arguments @ getMatchingRowsFromSheet")
 
-        let sheet = this.getSheetAsJSON(sheetName)
+        let sheet = await this.getSheetAsJSON(sheetName)
 
         // Will locate all rows that match the given properties
         let rows = sheet
@@ -123,27 +95,27 @@ module.exports = class SheetUtils {
         return rows
     }
 
-    static removeMatchingRowsFromSheet(sheetName, properties) {
+    static async removeMatchingRowsFromSheet(sheetName, properties) {
 
     }
 
     /**
+     * Find a row that matches a list of identifiers. If it matches,
+     * update it with the new row.
      * 
-     * 
-     * @param {Object} identifiers identifying properties of the row
+     * @param {String} id id of the row
      * @param {Array} row overwriting data
      * @param {String} sheetName sheet to look in
      */
-    static updateMatchingRow(identifiers, row, sheetName) {
-        if (!identifiers || !row || !sheetName) throw new Error("Missing arguments @ SheetUtils.updateMatchingRow")
-
-        let sheet = this.getSheetByName(sheetName)
-
-        let rowNumber = this.getMatchingRowRange(identifiers, sheetName, 2)
-
-        let rangeRow = [row]
-
-        sheet.getActiveSheet().getRange(rowNumber, 1, 1, sheet.getLastColumn()).setValues(rangeRow)
+    static async updateMatchingRow(id, row, sheetName) {
+        if (!id || !row || !sheetName) throw new Error("Missing arguments @ SheetUtils.updateMatchingRow")
+        //sheet.getActiveSheet().getRange(rowNumber, 1, 1, sheet.getLastColumn()).setValues(rangeRow)
+        GoogleWrapper.updateRow({
+            id: this.sheetID,
+            uniqueValue: id,
+            sheetName,
+            row
+        })
     }
 
     /**
@@ -155,11 +127,11 @@ module.exports = class SheetUtils {
      * 
      * @throws {Error} Missing parameter error
      */
-    static getMatchingRowRange(identifiers, sheetName, offset = 0) {
+    static async getMatchingRowRange(identifiers, sheetName, offset = 0) {
         if (!identifiers || !sheetName) throw new Error("Missing parameters @ getMatchingRowRange")
 
         /** @type {Array.<Object>} */
-        let data = this.getSheetAsJSON(sheetName)
+        let data = await this.getSheetAsJSON(sheetName)
 
         // Should be replaced with a recursive algorithm
         let number = data.findIndex((o) => {
@@ -186,8 +158,13 @@ module.exports = class SheetUtils {
      * @param {Array} row
      * @param {String} sheetName 
      */
-    static pushRowToSheet(row, sheetName) {
-        this.getSheetByName(sheetName).appendRow(row)
+    static async pushRowToSheet(row, sheetName) {
+        if (!(row instanceof Array)) throw new TypeError("Row must be an array")
+        return GoogleWrapper.appendRow({
+            id: this.sheetID,
+            sheetName,
+            row
+        })
     }
 
     /**
@@ -197,7 +174,7 @@ module.exports = class SheetUtils {
      * @param {Array<Array>} rows data to push
      * @param {String} sheetName name of sheet
      */
-    static pushRowsToSheet(rows, sheetName) {
+    static async pushRowsToSheet(rows, sheetName) {
         if (!(rows instanceof Array))
             return new Error("Rows must be an array")
 
@@ -228,7 +205,7 @@ module.exports = class SheetUtils {
      */
     static camelize(str) {
         if (str == "ID")
-            return str
+            return str.toLowerCase()
         return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
             if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
             return index == 0 ? match.toLowerCase() : match.toUpperCase();

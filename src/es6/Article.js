@@ -45,8 +45,8 @@ const Preprocessing = Object.freeze({
 
 module.exports =  class Article {
     /**
-     * Constructs an article = require(a given sheet row. The sheet row
-     * is a JSON object = require(passed by the SheetUtils class.
+     * Constructs an article from a given sheet row. The sheet row
+     * is a JSON object passed by the SheetUtils class.
      * 
      * The resulting structure should look like the described
      * structure in {@link https://docs.google.com/document/d/1nkLn0BRqyT5ZotY4YFy-L_2w5WFMvFJZsgGdFQlqSRU/edit#heading=h.m03wrfbkeob7}
@@ -84,8 +84,9 @@ module.exports =  class Article {
 
         // Assign immutable properties
         Object.defineProperty(this, "id", {
-            configurable: false,
-            value: row.ID,
+            configurable: true,
+            value: row.id,
+            enumerable: true,
             writable: false
         });
 
