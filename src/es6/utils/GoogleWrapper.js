@@ -27,6 +27,10 @@ class GoogleWrapper {
         })
     }
 
+    static generateNotation(sheetName, rowNumber, noColumns = 99) {
+        return `${sheetName}!A${rowNumber}:${columnToLetter(noColumns)}${rowNumber}`
+    }
+
     static getSheetValues(id, sheetName) {
         this.authorise()
         let start = new Date()
@@ -75,6 +79,26 @@ class GoogleWrapper {
         })
     }
 
+    static getSheetGID({
+        id,
+        sheetName
+    }) {
+        this.authorise()
+        return new Promise((resolve, reject) => {
+            sheets.spreadsheets.get({
+                    auth: oauth,
+                    spreadsheetId: id,
+                }).catch(e => console.log(e))
+                .then(response => {
+                    const sheets = get(["data", "sheets"], response)
+                    if (!sheets) reject()
+
+                    const correctSheet = sheets.find(s => s.properties.title === sheetName)
+                    resolve(get(["properties","sheetId"],correctSheet))
+                })
+        })
+    }
+
     static findRowByUniqueValue({
         id,
         sheetName,
@@ -91,7 +115,7 @@ class GoogleWrapper {
                     range: "_FUNCTIONS!A1",
                     values: [
                         [
-                            `=MATCH("${uniqueValue}", ${sheetName}!I:I, 0)`
+                            `=MATCH("${uniqueValue}", ${sheetName}!A)`
                         ]
                     ]
                 }
@@ -99,6 +123,47 @@ class GoogleWrapper {
                 const values = get(["data", "updatedData", "values"], response)
                 if (values) resolve(values[0][0])
                 else reject("Not found")
+            })
+        })
+    }
+
+    static removeRow({
+        id,
+        sheetName,
+        uniqueValue
+    }) {
+        this.authorise()
+        return new Promise((resolve, reject) => {
+            this.getSheetGID({
+                id,
+                sheetName
+            }).then(gid => {
+                console.log(gid)
+                this.findRowByUniqueValue({
+                        id,
+                        sheetName,
+                        uniqueValue
+                    }).catch(e => console.log(e))
+                    .then(rowNumber => {
+                        //const range = this.generateNotation(sheetName, rowNumber)
+                        console.log(rowNumber + " " + gid)
+                        sheets.spreadsheets.batchUpdate({
+                            auth: oauth,
+                            spreadsheetId: id,
+                            resource: {
+                                requests: [{
+                                    "deleteDimension": {
+                                        "range": {
+                                            "sheetId": gid,
+                                            "dimension": "ROWS",
+                                            "startIndex": rowNumber - 2,
+                                            "endIndex": rowNumber - 1
+                                        }
+                                    }
+                                }]
+                            }
+                        })
+                    })
             })
         })
     }
@@ -117,30 +182,30 @@ class GoogleWrapper {
         this.authorise()
         return new Promise((resolve, reject) => {
             this.findRowByUniqueValue({
-                id,
-                sheetName,
-                uniqueValue
-            }).catch(e => "Failed")
-            .then(rowNumber => {
-                const range = `${sheetName}!A${rowNumber}:${columnToLetter(row.length)}${rowNumber}`
-                sheets.spreadsheets.values.update({
-                    auth: oauth,
-                    spreadsheetId: id,
-                    range,
-                    valueInputOption: "USER_ENTERED",
-                    includeValuesInResponse: true,
-                    resource: {
+                    id,
+                    sheetName,
+                    uniqueValue
+                }).catch(e => "Failed")
+                .then(rowNumber => {
+                    const range = this.generateNotation(sheetName, rowNumber, row.length)
+                    sheets.spreadsheets.values.update({
+                        auth: oauth,
+                        spreadsheetId: id,
                         range,
-                        values: [
-                            row
-                        ]
-                    }
-                }).then((response) => {
-                    const values = get(["data", "updatedData", "values"], response)
-                    if (values) resolve(values[0][0])
-                    else reject("Not found")
+                        valueInputOption: "USER_ENTERED",
+                        includeValuesInResponse: true,
+                        resource: {
+                            range,
+                            values: [
+                                row
+                            ]
+                        }
+                    }).then((response) => {
+                        const values = get(["data", "updatedData", "values"], response)
+                        if (values) resolve(values[0][0])
+                        else reject("Not found")
+                    })
                 })
-            })
         })
     }
 

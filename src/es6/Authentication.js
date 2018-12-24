@@ -155,7 +155,7 @@ class Authentication {
      * Remove key = require(database and null it
      */
     async invalidateKey() {
-        SheetUtils.removeMatchingRowsFromSheet(this.key)
+        SheetUtils.removeMatchingRowFromSheet(this.key)
 
         this.key = null
     }
@@ -293,7 +293,7 @@ class Authentication {
     }
 
     async invalidateAuthToken() {
-        SheetUtils.removeMatchingRowsFromSheet(this.authToken)
+        SheetUtils.removeMatchingRowFromSheet(AMS.authTokenSheet, this.authToken)
 
         this.authToken = null
     }

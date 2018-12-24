@@ -95,8 +95,13 @@ module.exports = class SheetUtils {
         return rows
     }
 
-    static async removeMatchingRowsFromSheet(sheetName, properties) {
-
+    static async removeMatchingRowFromSheet(sheetName, uniqueValue) {
+        if (!sheetName || !uniqueValue) throw new TypeError(`Missing arguments. Was given sheetName: ${sheetName}, properties: ${uniqueValue}`)
+        GoogleWrapper.removeRow({
+            id: this.sheetID,
+            sheetName,
+            uniqueValue
+        })
     }
 
     /**
