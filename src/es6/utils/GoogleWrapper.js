@@ -94,7 +94,7 @@ class GoogleWrapper {
                     if (!sheets) reject()
 
                     const correctSheet = sheets.find(s => s.properties.title === sheetName)
-                    resolve(get(["properties","sheetId"],correctSheet))
+                    resolve(get(["properties", "sheetId"], correctSheet))
                 })
         })
     }
@@ -102,7 +102,8 @@ class GoogleWrapper {
     static findRowByUniqueValue({
         id,
         sheetName,
-        uniqueValue
+        uniqueValue,
+        columnNumber
     }) {
         return new Promise((resolve, reject) => {
             sheets.spreadsheets.values.update({
@@ -115,13 +116,13 @@ class GoogleWrapper {
                     range: "_FUNCTIONS!A1",
                     values: [
                         [
-                            `=MATCH("${uniqueValue}", ${sheetName}!A)`
+                            `=MATCH("${uniqueValue}", ${sheetName}!A:A)`
                         ]
                     ]
                 }
             }).then((response) => {
                 const values = get(["data", "updatedData", "values"], response)
-                if (values) resolve(values[0][0])
+                if (values[0][0] != "#N/A") resolve(values[0][0])
                 else reject("Not found")
             })
         })
@@ -130,7 +131,7 @@ class GoogleWrapper {
     static removeRow({
         id,
         sheetName,
-        uniqueValue
+        rowNumber
     }) {
         this.authorise()
         return new Promise((resolve, reject) => {
@@ -139,31 +140,25 @@ class GoogleWrapper {
                 sheetName
             }).then(gid => {
                 console.log(gid)
-                this.findRowByUniqueValue({
-                        id,
-                        sheetName,
-                        uniqueValue
-                    }).catch(e => console.log(e))
-                    .then(rowNumber => {
-                        //const range = this.generateNotation(sheetName, rowNumber)
-                        console.log(rowNumber + " " + gid)
-                        sheets.spreadsheets.batchUpdate({
-                            auth: oauth,
-                            spreadsheetId: id,
-                            resource: {
-                                requests: [{
-                                    "deleteDimension": {
-                                        "range": {
-                                            "sheetId": gid,
-                                            "dimension": "ROWS",
-                                            "startIndex": rowNumber - 2,
-                                            "endIndex": rowNumber - 1
-                                        }
-                                    }
-                                }]
+                if (rowNumber === undefined) reject("Not found")
+                //const range = this.generateNotation(sheetName, rowNumber)
+                console.log(rowNumber + " " + gid)
+                sheets.spreadsheets.batchUpdate({
+                    auth: oauth,
+                    spreadsheetId: id,
+                    resource: {
+                        requests: [{
+                            "deleteDimension": {
+                                "range": {
+                                    "sheetId": gid,
+                                    "dimension": "ROWS",
+                                    "startIndex": rowNumber,
+                                    "endIndex": rowNumber + 1
+                                }
                             }
-                        })
-                    })
+                        }]
+                    }
+                })
             })
         })
     }

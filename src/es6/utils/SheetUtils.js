@@ -45,7 +45,8 @@ module.exports = class SheetUtils {
         const data = await this.getSheetAsArray(sheetName)
         if (!data) throw new TypeError("Data can not be null")
 
-        let out = [], delimiter = ','
+        let out = [],
+            delimiter = ','
 
         for (let i = 1; i < data.length; i++) {
             let inner = {},
@@ -95,12 +96,15 @@ module.exports = class SheetUtils {
         return rows
     }
 
-    static async removeMatchingRowFromSheet(sheetName, uniqueValue) {
+    static async removeMatchingRowFromSheet(sheetName, uniqueValue, propertyName) {
         if (!sheetName || !uniqueValue) throw new TypeError(`Missing arguments. Was given sheetName: ${sheetName}, properties: ${uniqueValue}`)
+        const data = await this.getSheetAsJSON(sheetName)
+        let rowNumber = data.findIndex(r => r[propertyName] == uniqueValue) + 1
+        if (rowNumber === 0) return
         GoogleWrapper.removeRow({
             id: this.sheetID,
             sheetName,
-            uniqueValue
+            rowNumber
         })
     }
 
