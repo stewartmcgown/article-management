@@ -293,7 +293,9 @@ class Authentication {
     }
 
     async invalidateAuthToken() {
-        SheetUtils.removeMatchingRowFromSheet(AMS.authTokenSheet, this.authToken, "token")
+        SheetUtils.removeMatchingRowFromSheet(AMS.authTokenSheet, {
+            token: this.authToken
+        })
 
         this.authToken = null
     }

@@ -3,6 +3,7 @@ const Article = require("./Article");
 const Editor = require("./people/Editor");
 const EmailService = require("./emails/EmailService");
 const Response = require('./responses/Response')
+const ErrorResponse = require("./responses/ErrorResponse")
 const { objectToKeyValues, stemFlatten } = require("./utils/Utils")
 
 /**
@@ -50,11 +51,11 @@ class AMS {
    * 
    * This is a general update, so general update email will be sent.
    * 
-   * @param {String} ID id of article to update
-   * @param {Object} properties prop
+   * @param {Object} data
+   * @param {Number} level
    */
-  static async updateArticle(data) {
-    if (!data.id || !data.properties) throw new TypeError('Missing arguments @ updateArticle')
+  static async updateArticle(data, level) {
+    if (!data.id || !data.properties) return new ErrorResponse("Missing Request Body")
     let id = data.id, properties = data.properties
     let article = await AMSSheetUtilsWrapper.getArticleById(id)
 
@@ -87,11 +88,18 @@ class AMS {
 
 
   /**
+   * Delete an article.
    * 
-   * @param {Article} article 
+   * @param {Article} article Article to delete. May be partial.
    */
   static async deleteArticle(article) {
+    if (!article) throw new TypeError("Article cannot be undefined")
+    await SheetUtils.removeMatchingRowFromSheet(AMS.articleDatabase, {id: article.id})
 
+    return new Response({
+      reason: "Successful Deletion",
+      message: { id: article.id }
+    })
   }
 
   /**

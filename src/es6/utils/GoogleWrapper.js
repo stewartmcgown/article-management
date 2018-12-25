@@ -43,7 +43,7 @@ class GoogleWrapper {
                 if (err) {
                     console.log('The API returned an error: ' + err);
                 } else {
-                    console.log(`Fetched ${response.data.values.length} items in ${new Date().getTime() - start.getTime()}ms`)
+                    console.log(`[${sheetName}] Fetched ${response.data.values.length} items in ${new Date().getTime() - start.getTime()}ms`)
                     resolve(response.data.values)
                 }
             });
@@ -157,7 +157,7 @@ class GoogleWrapper {
                                 }
                             }
                         }]
-                    }
+                    } 
                 })
             })
         })

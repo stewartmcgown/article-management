@@ -1,5 +1,6 @@
 const ExtendableError = require("./ExtendableError");
 const GoogleWrapper = require("./GoogleWrapper")
+const { partialMatch } = require("./Utils")
 
 module.exports = class SheetUtils {
 
@@ -82,10 +83,7 @@ module.exports = class SheetUtils {
         let sheet = await this.getSheetAsJSON(sheetName)
 
         // Will locate all rows that match the given properties
-        let rows = sheet
-            .filter(o => {
-                return Object.keys(properties).every(key => properties[key] == o[key])
-            })
+        let rows = sheet.filter(r => partialMatch(r, properties))
 
         if (!rows) {
             throw new Error(`No matching row for property ${JSON.stringify(properties)} @ getMatchingRowsFromSheet (!rows)`)
@@ -96,10 +94,10 @@ module.exports = class SheetUtils {
         return rows
     }
 
-    static async removeMatchingRowFromSheet(sheetName, uniqueValue, propertyName) {
-        if (!sheetName || !uniqueValue) throw new TypeError(`Missing arguments. Was given sheetName: ${sheetName}, properties: ${uniqueValue}`)
+    static async removeMatchingRowFromSheet(sheetName, properties) {
+        if (!sheetName || !properties) throw new TypeError(`Missing arguments. Was given sheetName: ${sheetName}, properties: ${uniqueValue}`)
         const data = await this.getSheetAsJSON(sheetName)
-        let rowNumber = data.findIndex(r => r[propertyName] == uniqueValue) + 1
+        let rowNumber = data.findIndex(r => partialMatch(r, properties)) + 1
         if (rowNumber === 0) return
         GoogleWrapper.removeRow({
             id: this.sheetID,

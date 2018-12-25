@@ -27,7 +27,7 @@ const AMS = require("../es6/AMS")
     response.setHeader("Content-Type", "application/json")
     //router.route().then(data => response.send(JSON.stringify(data)))
     router.route().then(data => {
-      response.send(JSON.stringify(data))
+      response.send(JSON.stringify(removeEmpty(data)))
     })
     //response.send(JSON.stringify(await router.route()))
   })

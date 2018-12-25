@@ -103,7 +103,7 @@ const removeEmpty = (obj) => {
     return o; // Return new object.
 };
 
-const columnToLetter = column =>  {
+const columnToLetter = column => {
     var temp, letter = '';
     while (column > 0) {
         temp = (column - 1) % 26;
@@ -113,6 +113,13 @@ const columnToLetter = column =>  {
     return letter;
 }
 
+/**
+ * Are all the values on p present on o
+ * @param {Object} o object to search
+ * @param {Object} p object of search values
+ */
+const partialMatch = (o, p) => Object.keys(p).every(k => p[k] instanceof Object ? partialMatch(o[k], p[k]) : p[k] === o[k])
+
 module.exports = {
     get,
     assignExisting,
@@ -120,5 +127,6 @@ module.exports = {
     objectToKeyValues,
     parseDateString,
     removeEmpty,
-    columnToLetter
+    columnToLetter,
+    partialMatch
 }

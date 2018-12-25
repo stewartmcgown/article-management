@@ -43,7 +43,7 @@ const Preprocessing = Object.freeze({
 
 })
 
-module.exports =  class Article {
+module.exports = class Article {
     /**
      * Constructs an article from a given sheet row. The sheet row
      * is a JSON object passed by the SheetUtils class.
@@ -76,19 +76,28 @@ module.exports =  class Article {
         this.subject = row.articleSubject || null
         this.type = row.articleType || null
         this.status = row.status || null
+        this.id = row.id || null
         this.deadline = row.deadline ? new Date(row.deadline) : null
         this.notes = row.additionalNotes || null
         this.folderId = row.folderID || null
         this.markingGrid = row.markingGrid || null
         this.copyright = row.copyright || null
 
-        // Assign immutable properties
-        Object.defineProperty(this, "id", {
-            configurable: true,
-            value: row.id,
-            enumerable: true,
-            writable: false
-        });
+        // Redefine immutable properties
+        Object.defineProperties(this, {
+            id: {
+                configurable: true,
+                value: this.id,
+                enumerable: true,
+                writable: false
+            },
+            date: {
+                configurable: true,
+                value: this.date,
+                enumerable: true,
+                writable: false
+            }
+        })
 
         this.setLink()
         this.setAuthor(row.email, row.authorName, row.authorSchool)
