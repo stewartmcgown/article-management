@@ -1,3 +1,5 @@
+const { assignExisting } = require("../utils/Utils")
+
 const Positions = Object.freeze({
     Editor: "Editor"
 })
@@ -8,7 +10,12 @@ const Levels = Object.freeze({
     Admin: "Admin"
 })
 
-module.exports =  class Editor {
+const Enums = Object.freeze({
+    level: Levels,
+    poisition: Positions
+})
+
+module.exports = class Editor {
     /**
      * Constructs an editor object
      * 
@@ -45,5 +52,17 @@ module.exports =  class Editor {
             this.currentlyEditing,
             this.printSubjects()
         ]
+    }
+
+    /**
+     * Checks if all the properties have correct values and assigns them
+     * to the article
+     * @param {Object} properties 
+     * @return {Object} the properties that got changed
+     */
+    assignProperties(properties) {
+        let allowed = properties
+        assignExisting(this, allowed)
+        return allowed
     }
 }

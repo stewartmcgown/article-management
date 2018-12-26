@@ -98,7 +98,7 @@ const removeEmpty = (obj) => {
     }
 
     Object.keys(o).forEach(key => {
-        if (o[key] && typeof o[key] === 'object')
+        if (o[key] && typeof o[key] === "object")
             o[key] = removeEmpty(o[key]); // Recurse.
         else if (o[key] === undefined || o[key] === null)
             delete o[key]; // Delete undefined and null.

@@ -1,6 +1,8 @@
 const ExtendableError = require("./ExtendableError");
 const GoogleWrapper = require("./GoogleWrapper")
-const { partialMatch } = require("./Utils")
+const {
+    partialMatch
+} = require("./Utils")
 
 module.exports = class SheetUtils {
 
@@ -84,11 +86,10 @@ module.exports = class SheetUtils {
 
         // Will locate all rows that match the given properties
         let rows = sheet.filter(r => partialMatch(r, properties))
-
         if (!rows) {
-            throw new Error(`No matching row for property ${JSON.stringify(properties)} @ getMatchingRowsFromSheet (!rows)`)
+            return []
         } else if (rows.length === 0) {
-            return new Error(`No matching row for property ${JSON.stringify(properties)}  @ getMatchingRowsFromSheet`)
+            return []
         }
 
         return rows
@@ -110,17 +111,20 @@ module.exports = class SheetUtils {
      * Find a row that matches a list of identifiers. If it matches,
      * update it with the new row.
      * 
-     * @param {String} id id of the row
+     * @param {String} properties id of the row
      * @param {Array} row overwriting data
      * @param {String} sheetName sheet to look in
      */
-    static async updateMatchingRow(id, row, sheetName) {
-        if (!id || !row || !sheetName) throw new Error("Missing arguments @ SheetUtils.updateMatchingRow")
+    static async updateMatchingRow(properties, row, sheetName) {
+        if (!properties || !row || !sheetName) throw new Error("Missing arguments @ SheetUtils.updateMatchingRow")
+        const data = await this.getSheetAsJSON(sheetName)
+        let rowNumber = data.findIndex(r => partialMatch(r, properties)) + 2
+        if (rowNumber === 0) return
         //sheet.getActiveSheet().getRange(rowNumber, 1, 1, sheet.getLastColumn()).setValues(rangeRow)
         GoogleWrapper.updateRow({
             id: this.sheetID,
-            uniqueValue: id,
             sheetName,
+            rowNumber,
             row
         })
     }

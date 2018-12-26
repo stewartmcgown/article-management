@@ -157,7 +157,7 @@ class GoogleWrapper {
                                 }
                             }
                         }]
-                    } 
+                    }
                 })
             })
         })
@@ -171,36 +171,30 @@ class GoogleWrapper {
     static updateRow({
         id,
         sheetName,
-        uniqueValue,
-        row
+        row,
+        rowNumber
     }) {
         this.authorise()
         return new Promise((resolve, reject) => {
-            this.findRowByUniqueValue({
-                    id,
-                    sheetName,
-                    uniqueValue
-                }).catch(e => "Failed")
-                .then(rowNumber => {
-                    const range = this.generateNotation(sheetName, rowNumber, row.length)
-                    sheets.spreadsheets.values.update({
-                        auth: oauth,
-                        spreadsheetId: id,
-                        range,
-                        valueInputOption: "USER_ENTERED",
-                        includeValuesInResponse: true,
-                        resource: {
-                            range,
-                            values: [
-                                row
-                            ]
-                        }
-                    }).then((response) => {
-                        const values = get(["data", "updatedData", "values"], response)
-                        if (values) resolve(values[0][0])
-                        else reject("Not found")
-                    })
-                })
+
+            const range = this.generateNotation(sheetName, rowNumber, row.length)
+            sheets.spreadsheets.values.update({
+                auth: oauth,
+                spreadsheetId: id,
+                range,
+                valueInputOption: "USER_ENTERED",
+                includeValuesInResponse: true,
+                resource: {
+                    range,
+                    values: [
+                        row
+                    ]
+                }
+            }).then((response) => {
+                const values = get(["data", "updatedData", "values"], response)
+                if (values) resolve(values[0][0])
+                else reject("Not found")
+            })
         })
     }
 
