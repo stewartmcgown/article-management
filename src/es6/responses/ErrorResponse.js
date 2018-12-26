@@ -4,7 +4,8 @@ module.exports =  class ErrorResponse {
      * @param {String} message
      */
     constructor(error, message) {
-        this.error = error
-        this.message = message
+        this.error = {}
+        this.error.error = error
+        this.error.message = message
     }
 }

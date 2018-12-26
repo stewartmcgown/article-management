@@ -89,7 +89,13 @@ const stemFlatten = (o, stem) => {
  * @param {Object} obj 
  */
 const removeEmpty = (obj) => {
-    const o = JSON.parse(JSON.stringify(obj)); // Clone source oect.
+    if (!obj) return {}
+    let o;
+    try {
+        o = JSON.parse(JSON.stringify(obj)); // Clone source oect.
+    } catch (e) {
+        return {}
+    }
 
     Object.keys(o).forEach(key => {
         if (o[key] && typeof o[key] === 'object')

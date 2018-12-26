@@ -4,7 +4,7 @@ const Editor = require("./people/Editor");
 const EmailService = require("./emails/EmailService");
 const Response = require('./responses/Response')
 const ErrorResponse = require("./responses/ErrorResponse")
-const { objectToKeyValues, stemFlatten } = require("./utils/Utils")
+const { objectToKeyValues, stemFlatten, get } = require("./utils/Utils")
 
 /**
  * Handles all AMS specific actions when called by the Router.
@@ -104,10 +104,22 @@ class AMS {
 
   /**
    * 
-   * @param {Editor} editor 
+   * @param {Object} editor
    */
   static async createEditor(editor) {
+    if (!editor) throw new TypeError("Editor cannot be undefined")
+    if (!editor.email || !editor.name) return new ErrorResponse("Editors must have an email and a name", editor)
+    editor = new Editor(editor)
+    
+    const existing = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, editor)
+    if (existing.length !== 0) return new ErrorResponse("Email already in use")
 
+    await SheetUtils.pushRowToSheet(editor.toRow(), AMS.baseAuthSheet)
+
+    return new Response({
+      reason: "Succesful editor creation",
+      message: editor
+    })
   }
 
   /**
