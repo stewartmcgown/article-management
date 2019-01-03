@@ -11,7 +11,7 @@
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
-    "deploy": "node src/server/webapp.js",
+    "start": "node src/server/webapp.js",
     "dev": "nodemon src/server/webapp.js"
   },
   "repository": {
