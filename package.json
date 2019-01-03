@@ -33,7 +33,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server/webapp.js",
+    "dev": "nodemon src/server/webapp.js"
   },
   "repository": {
     "type": "git",
