@@ -20,7 +20,7 @@ class GoogleWrapper {
     static authorise() {
         oauth = new google.auth.OAuth2("173181351763-e0i3cevf5l6p0rf0phtoibtgibuc724q.apps.googleusercontent.com", "8A7Dqz1S3gcfXJhRRRJzucsF", "http://localhost:8081/oauthCallback")
         oauth.setCredentials({
-            refresh_token: process.env.refresh_token
+            refresh_token: process.env.refresh_token || require("../../../private.json").refresh_token
         })
     }
 

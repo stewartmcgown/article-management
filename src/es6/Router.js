@@ -73,7 +73,7 @@ module.exports = class Router {
                     },
                     "update": {
                         function: AMS.updateArticle,
-                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                        minimumAuthorisation: AuthenticationLevels.SENIOR
                     },
                     "delete": {
                         function: AMS.deleteArticle,
@@ -82,6 +82,10 @@ module.exports = class Router {
                     "assign": {
                         function: AMS.assignArticle,
                         minimumAuthorisation: AuthenticationLevels.SENIOR
+                    },
+                    "status": {
+                        function: AMS.changeStatusArticle,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
                 },
                 "editor": {

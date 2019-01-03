@@ -176,7 +176,7 @@ class AMS {
    * @return {Array} rows matching the ID
    */
   static async getInfo(id) {
-    return SheetUtils.getMatchingRowsFromSheet(id)
+    return await SheetUtils.getMatchingRowsFromSheet(id)
   }
 
   /**
