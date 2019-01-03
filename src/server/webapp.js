@@ -25,8 +25,8 @@ const AMS = require("../es6/AMS")
       body: request.body
     }, request.method)
 
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     response.setHeader("Content-Type", "application/json")
     //router.route().then(data => response.send(JSON.stringify(data)))
     router.route().then(data => {
