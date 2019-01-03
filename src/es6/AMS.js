@@ -6,6 +6,14 @@ const Response = require('./responses/Response')
 const ErrorResponse = require("./responses/ErrorResponse")
 const { objectToKeyValues, stemFlatten, get } = require("./utils/Utils")
 
+const Strings = {
+  FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
+  MISSING_BODY: "Request body missing.",
+  SUCCESS: "Success"
+}
+
+Object.freeze(Strings)
+
 /**
  * Handles all AMS specific actions when called by the Router.
  * 
@@ -43,7 +51,9 @@ class AMS {
    * @param {Article} article 
    */
   static async createArticle(article) {
-
+    return new ErrorResponse({
+      message: Strings.FUNCTIONALITY_NOT_IMPLEMENTED
+    })
   }
 
   /**
@@ -55,7 +65,7 @@ class AMS {
    * @param {Number} level
    */
   static async updateArticle(data, level) {
-    if (!data.id || !data.properties) return new ErrorResponse("Missing Request Body")
+    if (!data.id || !data.properties) return new ErrorResponse(Strings.MISSING_BODY)
     let id = data.id, properties = data.properties
     let article = await Articles.getArticleById(id)
 
@@ -73,7 +83,7 @@ class AMS {
     // Update the author
     EmailService.send({
       to: article.author.email,
-      type: "update",
+      type: "updateArticle",
       data: { article, modified }
     })
 
@@ -97,28 +107,36 @@ class AMS {
     await SheetUtils.removeMatchingRowFromSheet(AMS.articleDatabase, {id: article.id})
 
     return new Response({
-      reason: "Successful Deletion",
+      reason: "deleteArticle",
       message: { id: article.id }
     })
   }
 
   /**
    * 
-   * @param {Object} editor
+   * @param {Object} partialEditor
    */
-  static async createEditor(editor) {
-    if (!editor) throw new TypeError("Editor cannot be undefined")
-    if (!editor.email || !editor.name) return new ErrorResponse("Editors must have an email and a name", editor)
-    editor = new Editor(editor)
-    
+  static async createEditor(partialEditor) {
+    if (!partialEditor) throw new TypeError("Editor cannot be undefined")
+    if (!partialEditor.email || !partialEditor.name) return new ErrorResponse("Editors must have an email and a name", partialEditor)
+    const editor = new Editor(partialEditor)
+
     const existing = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, { email: editor.email })
-    console.log(existing)
     if (existing.length !== 0 || !(existing instanceof Array)) return new ErrorResponse("Email already in use")
 
     await SheetUtils.pushRowToSheet(editor.toRow(), AMS.baseAuthSheet)
 
+    // Update the author
+    EmailService.send({
+      to: editor.email,
+      type: "createEditor",
+      data: {
+        editor
+      }
+    })
+
     return new Response({
-      reason: "Succesful editor creation",
+      reason: "createEditor",
       message: editor
     })
   }
@@ -135,23 +153,11 @@ class AMS {
 
     if (!editor) return new ErrorResponse("Unable to find editor", editor)
 
-    let modified = objectToKeyValues(stemFlatten(editor.assignProperties(properties)))
-    let rowData = editor.toRow()
-    await Editors.updateEditorByEmail(editor.email, rowData)
+    editor.assignProperties(properties)
+    await Editors.updateEditorByEmail(editor.email, editor.toRow())
 
-    // Update the author
-    EmailService.send({
-      to: editor.email,
-      type: "updatedEditor",
-      data: {
-        editor,
-        modified
-      }
-    })
-
-    // notify the editor
     return new Response({
-      reason: "Successfully updated Editor",
+      reason: "updatedEditor",
       message: editor,
     })
   }

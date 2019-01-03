@@ -165,6 +165,8 @@ module.exports = class Router {
             return new Response({
                 message: "AMS API v2"
             })
+        
+        Authentication.cleanUp()
 
         const context = this.context
         const action = this.action

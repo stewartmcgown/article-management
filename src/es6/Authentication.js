@@ -1,4 +1,5 @@
 const ExtendableError = require('./utils/ExtendableError');
+const ErrorResponse = require("./responses/ErrorResponse")
 const SheetUtils = require('./utils/SheetUtils');
 const EmailService = require('./emails/EmailService');
 const AMS = require('./AMS');
@@ -155,9 +156,10 @@ class Authentication {
      * Remove key = require(database and null it
      */
     async invalidateKey() {
-        SheetUtils.removeMatchingRowFromSheet(this.key)
-
-        this.key = null
+        SheetUtils.removeMatchingRowFromSheet(AMS.keySheet, {
+            email: this.email,
+            key: this.key
+        })
     }
 
     /**
@@ -180,13 +182,15 @@ class Authentication {
         let keyEntry = rows[0]
 
         // Check date isn't older than an hour
-        if (Authentication.isAuthTokenStale(keyEntry.dateTime)) {
+        if (Authentication.isKeyStale(keyEntry.dateTime)) {
             // Date is too old
 
             // Invalidate key
             this.invalidateKey()
 
-            return this.authenticate()
+            return new AuthenticationResource({
+                message: "No matching key found"
+            })
         } else {
             // Date is in range
             return this.issueAuthToken()
@@ -365,7 +369,13 @@ class Authentication {
      * Remove stale keys
      */
     static async cleanUp() {
+        const data = await SheetUtils.getSheetAsJSON(AMS.keySheet)
 
+        data.forEach(k => {
+            if(Authentication.isKeyStale(k.dateTime)) {
+                SheetUtils.removeMatchingRowFromSheet(AMS.keySheet, k)
+            }
+        })
     }
 
     /**

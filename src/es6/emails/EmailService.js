@@ -1,12 +1,6 @@
-const updateTemplate = ""
 const Templates = require('./templates');
 const GoogleWrapper = require("../utils/GoogleWrapper")
 const base64url = require('base64url');
-
-
-const templates = Object.freeze({
-    update: updateTemplate
-})
 
 module.exports = class EmailService {
     /**
@@ -22,10 +16,10 @@ module.exports = class EmailService {
 
         to = "stewart@twistedcore.co.uk"//options.to
         from = options.name || "Submissions - Young Scientists Journal"
-        subject = options.key ? `Authentication Key: ${options.key}` : "Article Management System"
-
+        subject = options.key ? `Authentication Key: ${options.key}` : "Article Management System - Young Scientists Journal"
+        console.log(options)
         if (options.body) htmlBody = options.body
-        else if (options.type && options.data) htmlBody = templates[options.type] instanceof Function ? template[options.type](options.data) : ""
+        else if (options.type && options.data) htmlBody = Templates[options.type] instanceof Function ? Templates[options.type](options.data) : ""
         else if (options.key) htmlBody = Templates.templateKey(options.key)
 
         const message = this.encode({

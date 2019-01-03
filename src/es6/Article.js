@@ -5,6 +5,9 @@ const {
     assignExisting
 } = require("./utils/Utils");
 
+const Strings = {
+    IMMUTABLE: "_IMMUTABLE"
+}
 
 const Enums = Object.freeze({
     status: ["In Review",
@@ -33,7 +36,9 @@ const Enums = Object.freeze({
         "Medicine",
         "Physics",
         "Policy & Ethics"
-    ]
+    ],
+    id: Strings.IMMUTABLE, 
+    date: Strings.IMMUTABLE
 })
 
 /**
@@ -163,7 +168,9 @@ module.exports = class Article {
      */
     assignProperties(properties) {
         let allowed = {}
-        Object.keys(properties).filter(p => Enums[p] ? Enums[p].includes(properties[p]) : true).forEach(p => allowed[p] = properties[p])
+        Object.keys(properties)
+            .filter(p => Enums[p] ? Enums[p].includes(properties[p]) : true)
+            .forEach(p => allowed[p] = properties[p])
         assignExisting(this, allowed)
         return allowed
     }

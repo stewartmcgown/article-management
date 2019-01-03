@@ -19,9 +19,7 @@ let oauth = null
 
 class GoogleWrapper {
     static authorise() {
-        // configure a JWT auth client
         oauth = new google.auth.OAuth2("173181351763-e0i3cevf5l6p0rf0phtoibtgibuc724q.apps.googleusercontent.com", "8A7Dqz1S3gcfXJhRRRJzucsF", "http://localhost:8081/oauthCallback")
-        //authenticate request
         oauth.setCredentials({
             refresh_token: privateKey.refresh_token
         })
@@ -61,7 +59,7 @@ class GoogleWrapper {
                 auth: oauth,
                 spreadsheetId: id,
                 range: sheetName,
-                valueInputOption: 'RAW',
+                valueInputOption: 'USER_ENTERED',
                 insertDataOption: 'INSERT_ROWS',
                 resource: {
                     values: [
@@ -139,10 +137,8 @@ class GoogleWrapper {
                 id,
                 sheetName
             }).then(gid => {
-                console.log(gid)
                 if (rowNumber === undefined) reject("Not found")
                 //const range = this.generateNotation(sheetName, rowNumber)
-                console.log(rowNumber + " " + gid)
                 sheets.spreadsheets.batchUpdate({
                     auth: oauth,
                     spreadsheetId: id,

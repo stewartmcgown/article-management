@@ -1,7 +1,8 @@
 const { assignExisting } = require("../utils/Utils")
 
 const Positions = Object.freeze({
-    Editor: "Editor"
+    Editor: "Editor",
+    Production: "Production",
 })
 
 const Levels = Object.freeze({
@@ -11,8 +12,8 @@ const Levels = Object.freeze({
 })
 
 const Enums = Object.freeze({
-    level: Levels,
-    poisition: Positions
+    level: Object.values(Levels),
+    position: Object.values(Positions)
 })
 
 module.exports = class Editor {
@@ -61,7 +62,10 @@ module.exports = class Editor {
      * @return {Object} the properties that got changed
      */
     assignProperties(properties) {
-        let allowed = properties
+        let allowed = {}
+        Object.keys(properties)
+            .filter(p => Enums[p] ? Enums[p].includes(properties[p]) : true)
+            .forEach(p => allowed[p] = properties[p])
         assignExisting(this, allowed)
         return allowed
     }

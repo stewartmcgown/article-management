@@ -37,5 +37,5 @@ const AMS = require("../es6/AMS")
   /**
    * Register tasks
    */
-  schedule(() => AMS.doScheduledTasks(), 1500)
+  schedule(() => {}, 1500)
 }
