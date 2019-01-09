@@ -58,7 +58,7 @@ class GoogleWrapper {
                 auth: oauth,
                 spreadsheetId: id,
                 range: sheetName,
-                valueInputOption: 'USER_ENTERED',
+                valueInputOption: "RAW",
                 insertDataOption: 'INSERT_ROWS',
                 resource: {
                     values: [
