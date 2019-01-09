@@ -9,6 +9,7 @@ const {
 } = require('./utils/Utils');
 const Person = require("./people/Person")
 const Editor = require("./people/Editor")
+const Editors = require("./Editors")
 
 const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
@@ -194,19 +195,7 @@ class Authentication {
                 message: "No matching key found"
             })
         } else {
-            // Date is in range
-            let row = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, {
-                email: this.email
-            })
-
-            if (rows.length === 0 || !rows[0]) {
-                return new AuthenticationResource({
-                    message: "No matching key found."
-                })
-            }
-
-            const editor = new Editor(rows[0])
-            return this.issueAuthToken(editor)
+            return this.issueAuthToken(this.user)
         }
 
     }
