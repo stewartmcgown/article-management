@@ -7,6 +7,8 @@ const AMSCrypto = require('../crypto/AMSCrypto')
 const {
     get
 } = require('./utils/Utils');
+const Person = require("./people/Person")
+const Editor = require("./people/Editor")
 
 const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
@@ -193,7 +195,18 @@ class Authentication {
             })
         } else {
             // Date is in range
-            return this.issueAuthToken()
+            let row = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, {
+                email: this.email
+            })
+
+            if (rows.length === 0 || !rows[0]) {
+                return new AuthenticationResource({
+                    message: "No matching key found."
+                })
+            }
+
+            const editor = new Editor(rows[0])
+            return this.issueAuthToken(editor)
         }
 
     }
@@ -245,7 +258,7 @@ class Authentication {
      * 
      * @returns an authentication resource
      */
-    async issueAuthToken() {
+    async issueAuthToken(user) {
         let tokenString = AMSCrypto.generateRandomString(40)
 
         this.pushAuthTokenToDatabase({
@@ -256,7 +269,8 @@ class Authentication {
         return new AuthenticationResource({
             message: "Issued authtoken for user",
             authToken: tokenString,
-            authenticationLevel: this.level
+            authenticationLevel: this.level,
+            user
         })
     }
 
@@ -398,6 +412,7 @@ class AuthenticationResource {
      * 
      * @param {Object} data 
      * @param {String} data.message
+     * @param {Person} [data.editor]
      * @param {Integer} [data.authenticationLevel=AuthenticationLevels.UNAUTHORISED]
      * @param {String} data.email
      */
@@ -406,9 +421,8 @@ class AuthenticationResource {
         this.authenticationLevel = data.authenticationLevel || AuthenticationLevels.UNAUTHORISED
         this.email = data.email || null
 
-        this.key = data.key || null
         this.authToken = data.authToken || null
-
+        this.user = data.user
     }
 }
 

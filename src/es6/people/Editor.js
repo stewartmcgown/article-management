@@ -1,4 +1,5 @@
 const { assignExisting } = require("../utils/Utils")
+const Person = require("./Person")
 
 const Positions = Object.freeze({
     Editor: "Editor",
@@ -16,7 +17,7 @@ const Enums = Object.freeze({
     position: Object.values(Positions)
 })
 
-module.exports = class Editor {
+module.exports = class Editor extends Person {
     /**
      * Constructs an editor object
      * 
@@ -30,6 +31,7 @@ module.exports = class Editor {
      * @param {Array} data.subjects
      */
     constructor(data) {
+        super(data.name, data.email)
         this.name = data.name
         this.email = data.email
         this.position = data.position || Positions.Editor
