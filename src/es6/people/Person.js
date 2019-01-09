@@ -1,4 +1,4 @@
-class Person {
+module.exports = class Person {
     /**
      * Represents a person
      * 
