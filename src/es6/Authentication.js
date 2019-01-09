@@ -290,11 +290,13 @@ class Authentication {
                 message: "Authtoken has expired",
             })
         } else {
+            const user = await Editors.getEditorByEmail(authTokenEntry.email)
             // Date is in range
             return new AuthenticationResource({
                 message: "Successfully authenticated",
                 authenticationLevel: authTokenEntry.level,
-                email: authTokenEntry.email
+                email: authTokenEntry.email,
+                user
             })
         }
     }

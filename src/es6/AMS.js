@@ -36,6 +36,7 @@ class AMS {
   static get keySheet() { return "Keys" }
   static get authTokenSheet() { return "AuthTokens" }
   static get articleDatabase() { return "Database" }
+  static get logSheet() { return "Logs" }
 
   /**
    * Completely handles the creation of a single article.
