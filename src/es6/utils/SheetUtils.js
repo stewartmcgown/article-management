@@ -41,6 +41,7 @@ module.exports = class SheetUtils {
      * JSON objects
      * 
      * @returns {Array.<Object>} A JSON organised array of the sheet using the headers
+     * @throws {TypeError} if no sheet can be found.
      */
     static async getSheetAsJSON(sheetName) {
         if (!sheetName) throw new TypeError("Missing argument @ getSheetAsJSON")
@@ -48,8 +49,7 @@ module.exports = class SheetUtils {
         const data = await this.getSheetAsArray(sheetName)
         if (!data) throw new TypeError("Data can not be null")
 
-        let out = [],
-            delimiter = ','
+        let out = []
 
         for (let i = 1; i < data.length; i++) {
             let inner = {},
@@ -57,9 +57,6 @@ module.exports = class SheetUtils {
             for (let j = 0; j < row.length; j++) {
                 let header = this.camelize(data[0][j]),
                     item = row[j].toString()
-
-                if (item.indexOf(delimiter) != -1)
-                    item = item.split(delimiter)
 
                 inner[header] = item
             }
