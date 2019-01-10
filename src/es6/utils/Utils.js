@@ -119,10 +119,17 @@ const columnToLetter = column => {
  * Are all the values on p present on o
  * @param {Object} o object to search
  * @param {Object} p object of search values
+ * @param {Boolean} [c] are partial matches ok?
  */
-const partialMatch = (o, p) =>
+const partialMatch = (o, p, c) =>
 	Object.keys(p).every(k =>
-		p[k] instanceof Object ? partialMatch(o[k], p[k]) : p[k] === o[k]
+		p[k] && o[k]
+			? p[k] instanceof Object
+				? partialMatch(o[k], p[k], c)
+				: c
+				? o[k].toLowerCase().includes(p[k].toLowerCase())
+				: p[k] === o[k]
+			: false
 	)
 
 /**
@@ -132,19 +139,18 @@ const partialMatch = (o, p) =>
  * @param {Boolean} c if a partial match is enough
  */
 const partialSearch = (o, p, c) => {
-    (o instanceof Array) ? o : o = Object.values(o)
-	return o.filter(a =>
-		Object.keys(p).every(k =>
-			c
-				? a[k]
-					? a[k] instanceof Object
-						? partialSearch(a[k], p[k], c)
-						: a[k].toString().includes(p[k])
-					: false
-				: a[k] == p[k]
-		)
-	)
+	o instanceof Array ? o : (o = Object.values(o))
+	return o.filter(a => partialMatch(a, p, c))
 }
+
+const flatSearch = (o, p, c) =>
+	o.filter(x =>
+		c
+			? JSON.stringify(Object.values(x))
+					.toLowerCase()
+					.includes(p.toLowerCase())
+			: JSON.stringify(Object.values(x)) == p
+	)
 
 module.exports = {
 	get,
@@ -154,5 +160,7 @@ module.exports = {
 	parseDateString,
 	removeEmpty,
 	columnToLetter,
-	partialMatch
+	partialMatch,
+	partialSearch,
+	flatSearch
 }

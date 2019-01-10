@@ -147,6 +147,7 @@ module.exports = class Router {
             key: undefined,
             authToken: undefined
         });
+        this.params = e.params
     }
 
     /**
@@ -202,7 +203,7 @@ module.exports = class Router {
 
         if (track !== null) {
             if (auth.authenticationLevel >= track.minimumAuthorisation)
-                return track.function(this.request.body || this.args)
+                return track.function(this.request.body, this.params)
             else
                 return new Response({
                     message: "You are not authorised to perform that action"

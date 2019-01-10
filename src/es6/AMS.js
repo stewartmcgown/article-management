@@ -5,7 +5,8 @@ const Editors = require("./Editors")
 const EmailService = require("./emails/EmailService");
 const Response = require('./responses/Response')
 const ErrorResponse = require("./responses/ErrorResponse")
-const { objectToKeyValues, stemFlatten, get } = require("./utils/Utils")
+const { objectToKeyValues, stemFlatten, get, partialSearch, partialMatch, flatSearch } = require("./utils/Utils")
+const searchQueryParser = require("search-string")
 
 const Strings = {
   FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
@@ -168,15 +169,24 @@ class AMS {
    * @param {String} [query] search terms
    * @return {Array.<Article>} all articles in JSON format
    */
-  static async getAllArticles(query) {
+  static async getAllArticles(body, { q }) {
     const data = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
-
-    if (query) {
-      query = parseQuery
+    let out = []
+    if (typeof q === "string") {
+      let b = {}, parsed = AMS.parseQueryString(q)
+      if (parsed.conditionArray.length === 0) {
+        b = q
+        return flatSearch(data.map((a) => new Article(a)), b, true)
+      } else {
+        parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
+        return partialSearch(data.map((a) => new Article(a)), b, true) // TODO: allow negated search terms
+      }
       
     } else {
-      return data.map((a) => new Article(a))
+      out = data.map((a) => new Article(a))
     }
+
+    return out
     
   }
 
@@ -204,6 +214,18 @@ class AMS {
     /**
      * Clean up old keys
      */
+  }
+
+  /**
+   * Query strings should be in the form of:
+   * 
+   * property:value property2:value etc..
+   * 
+   * @param {String} query 
+   * @return {Object} a parsed query object
+   */
+  static parseQueryString(query) {
+    return searchQueryParser.parse(query)
   }
 }
 
