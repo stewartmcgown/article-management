@@ -165,12 +165,19 @@ class AMS {
   }
 
   /**
+   * @param {String} [query] search terms
    * @return {Array.<Article>} all articles in JSON format
    */
-  static async getAllArticles() {
+  static async getAllArticles(query) {
     const data = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+
+    if (query) {
+      query = parseQuery
+      
+    } else {
+      return data.map((a) => new Article(a))
+    }
     
-    return data.map((a) => new Article(a))
   }
 
   /**

@@ -49,7 +49,7 @@ module.exports = class SheetUtils {
         const data = await this.getSheetAsArray(sheetName)
         if (!data) throw new TypeError("Data can not be null")
 
-        let out = []
+        const out = []
 
         for (let i = 1; i < data.length; i++) {
             let inner = {},
