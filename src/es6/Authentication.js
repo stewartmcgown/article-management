@@ -151,7 +151,7 @@ class Authentication {
 
         return new AuthenticationResource({
             message: "Successfully sent authentication email.",
-            email: this.email
+            email: this.email,
         })
     }
 
@@ -255,11 +255,10 @@ class Authentication {
             level: this.level
         })
 
-        return new AuthenticationResource({
-            message: "Issued authtoken for user",
+        return AuthenticationResource.authTokenResponse({
             authToken: tokenString,
-            authenticationLevel: this.level,
-            user
+            user,
+            authenticationLevel: this.level
         })
     }
 
@@ -305,8 +304,6 @@ class Authentication {
         SheetUtils.removeMatchingRowFromSheet(AMS.authTokenSheet, {
             token: this.authToken
         })
-
-        this.authToken = null
     }
 
 
@@ -345,10 +342,7 @@ class Authentication {
             let matchingUsers = await this.getUsersFromSheet()
             console.log(matchingUsers)
             if (!matchingUsers.length) {
-                return new AuthenticationResource({
-                    message: "Editor not registered",
-                    email: this.email
-                })
+                return new ErrorResponse("editorNotRegistered", "User was not found.")
             } else {
                 this.user = matchingUsers[0]
                 this.setLevel(this.user.level)
@@ -394,7 +388,6 @@ class Authentication {
     static isAuthTokenStale(dateTime) {
         return (new Date().getTime() - new Date(dateTime).getTime()) > (StaleTimes.AUTHTOKEN * 60 * 1000)
     }
-
 }
 
 class AuthenticationResource {
@@ -414,6 +407,15 @@ class AuthenticationResource {
 
         this.authToken = data.authToken || null
         this.user = data.user
+    }
+
+    static authTokenResponse({ authToken, authenticationLevel, user}) {
+        return new AuthenticationResource({
+            message: "Issued authtoken for user",
+            authToken,
+            authenticationLevel,
+            user
+        })
     }
 }
 
