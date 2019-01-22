@@ -179,31 +179,16 @@ module.exports = class SheetUtils {
      * Push an array of rows to a sheet. Using the Lock system, we can ensure
      * that no collisions are made during data entry.
      * 
-     * @param {Array<Array>} rows data to push
+     * @param {Array.<Array>} rows data to push
      * @param {String} sheetName name of sheet
      */
     static async pushRowsToSheet(rows, sheetName) {
         if (!(rows instanceof Array))
             return new Error("Rows must be an array")
 
-        let sheet = this.getSheetByName(sheetName),
-            lock = LockService.getScriptLock()
-
-        try {
-            lock.waitLock(10000); // wait 10 seconds for others' use of the code section and lock to stop and then proceed
-        } catch (e) {
-            Logger.log('Could not obtain lock after 30 seconds.');
-            return new Error("Server busy.")
+        for (let row of rows) {
+            SheetUtils.pushRowToSheet(row, sheetName)
         }
-
-        sheet = sheet.getActiveSheet()
-
-        sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, this.maxLength(rows))
-            .setValues(rows);
-
-        SpreadsheetApp.flush()
-
-        lock.releaseLock()
     }
 
     /**

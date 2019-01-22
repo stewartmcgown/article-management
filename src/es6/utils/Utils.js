@@ -119,7 +119,8 @@ const columnToLetter = column => {
  * Are all the values on p present on o
  * @param {Object} o object to search
  * @param {Object} p object of search values
- * @param {Boolean} [c] are partial matches ok?
+ * @param {Boolean} [c] are loose equality matches ok?
+ * @return {Boolean} whether there are partial matches
  */
 const partialMatch = (o, p, c) =>
 	Object.keys(p).every(k =>
@@ -137,6 +138,7 @@ const partialMatch = (o, p, c) =>
  * @param {Array.<Object>} o An array of objects
  * @param {Object} p the properties to match
  * @param {Boolean} c if a partial match is enough
+ * @return {Array.<Object>} matching objects
  */
 const partialSearch = (o, p, c) => {
 	o instanceof Array ? o : (o = Object.values(o))

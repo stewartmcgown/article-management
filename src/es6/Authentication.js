@@ -10,6 +10,7 @@ const {
 const Person = require("./people/Person")
 const Editor = require("./people/Editor")
 const Editors = require("./Editors")
+const Logger = require("./Logger")
 
 const AuthenticationLevels = Object.freeze({
     UNAUTHORISED: 0,
@@ -273,6 +274,7 @@ class Authentication {
         })
 
         if (rows.length === 0 || !get(['0', 'dateTime'], rows)) {
+            Logger.unauthorised("Authentication", this.email)
             return new AuthenticationResource({
                 message: "Authtoken not found",
             })
@@ -284,13 +286,14 @@ class Authentication {
         if (Authentication.isAuthTokenStale(authTokenEntry.dateTime)) {
             // Date is too old, so Invalidate key
             this.invalidateAuthToken()
-
+            Logger.unauthorised("Authentication", this.email)
             return new AuthenticationResource({
                 message: "Authtoken has expired",
             })
         } else {
             const user = await Editors.getEditorByEmail(authTokenEntry.email)
             // Date is in range
+            Logger.log("Authentication", user.email, "Success")
             return new AuthenticationResource({
                 message: "Successfully authenticated",
                 authenticationLevel: authTokenEntry.level,

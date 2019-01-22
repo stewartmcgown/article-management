@@ -51,9 +51,9 @@ class AMS {
    * 
    * 4. Emails relating to the article are sent.
    * 
-   * @param {Article} article 
+   * @param {Object} article 
    */
-  static async createArticle(article) {
+  static async createArticle({}) {
     return new ErrorResponse({
       message: Strings.FUNCTIONALITY_NOT_IMPLEMENTED
     })
@@ -72,11 +72,13 @@ class AMS {
     let id = data.id, properties = data.properties
     let article = await Articles.getArticleById(id)
 
-    if (!article)
+    if (!article) {
       return new Response({
         message: "Article not found",
         id
       })
+    }
+      
 
     let modified = objectToKeyValues(stemFlatten(article.assignProperties(properties)))
 
@@ -97,6 +99,10 @@ class AMS {
       message: article,
 
     })
+  }
+
+  static async assignArticle(article) {
+    
   }
 
 
@@ -188,6 +194,42 @@ class AMS {
 
     return out
     
+  }
+
+  /**
+   * Find all the editors. Optionally search with a query
+   *  
+   * @param {Object} body 
+   * @param {Object} o
+   * @param {String} [o.q] query
+   * @returns {Array.<Editor>} list of editors
+   */
+  static async getAllEditors(body, { q }) {
+    const data = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet)
+    let out = []
+    if (typeof q === "string") {
+      // TODO: modularise this
+      let b = {}, parsed = AMS.parseQueryString(q)
+      if (parsed.conditionArray.length === 0) {
+        b = q
+        return flatSearch(data.map((a) => new Editor(a)), b, true)
+      } else {
+        parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
+        return partialSearch(data.map((a) => new Editor(a)), b, true) // TODO: allow negated search terms
+      }
+
+    } else {
+      out = data.map((a) => new Editor(a))
+    }
+
+    return out
+  }
+
+  static async getEditorByEmail(body, { email }) {
+    const q = `email:${email}`,
+    results = AMS.getAllEditors(null, { q })
+
+    return results[0] || new ErrorResponse("editorNotFound", `No editor found matching ${email}`)
   }
 
   /**

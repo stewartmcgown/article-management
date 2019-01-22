@@ -67,7 +67,7 @@ class GoogleWrapper {
                 }
             }, (err, response) => {
                 if (err) {
-                    console.log(err.response.data)
+                    console.log(err.response)
                 } else {
                     console.log(`Appended a row.`)
                     resolve("Successfully appended rows")

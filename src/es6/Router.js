@@ -6,6 +6,7 @@ const Response = require('./responses/Response')
 const ErrorResponse = require('./responses/ErrorResponse')
 const { Authentication, AuthenticationResource, AuthenticationLevels } = require("./Authentication.js")
 const url = require("url")
+const Logger = require("./Logger")
 
 /**
  * A route points a path to a function and a minimum auth level
@@ -17,6 +18,10 @@ class Route {
     }
 }
 
+const Errors = {
+    NO_SUCH_CONTEXT: "No such context exists",
+    CONTEXT_NO_ACTIONS: "Context exists but has no actions"
+}
 
 module.exports = class Router {
     /**
@@ -57,16 +62,21 @@ module.exports = class Router {
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
                 },
-                "article": ["info"],
                 "authentication": {
                     "authenticate": {
                         function: this.authenticate,
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
+                },
+                "editors": {
+                    "list": {
+                        function: AMS.getAllEditors,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    }
                 }
             },
             "POST": {
-                "article": {
+                "articles": {
                     "create": {
                         function: AMS.createArticle,
                         minimumAuthorisation: AuthenticationLevels.UNAUTHORISED
@@ -88,7 +98,7 @@ module.exports = class Router {
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
                 },
-                "editor": {
+                "editors": {
                     "create": {
                         function: AMS.createEditor,
                         minimumAuthorisation: AuthenticationLevels.SENIOR
@@ -179,12 +189,18 @@ module.exports = class Router {
 
         // Check context is valid
         let selectedContext = get([type, context], this.allowedRoutes)
-        if (!selectedContext)
-            return new ErrorResponse("No such context exists.")
-        else if (!(selectedContext instanceof Object))
-            return new ErrorResponse("Context exists but has no actions")
-        else if (!selectedContext[action])
+        if (!selectedContext) {
+            Logger.log(`${context}/${action}`, this.email, Errors.NO_SUCH_CONTEXT)
+            return new ErrorResponse(Errors.NO_SUCH_CONTEXT)
+        }
+        else if (!(selectedContext instanceof Object)) {
+            Logger.log(`${context}/${action}`, this.email, Errors.CONTEXT_NO_ACTIONS)
+            return new ErrorResponse(Errors.CONTEXT_NO_ACTIONS)
+
+        }
+        else if (!selectedContext[action]) {
             return new ErrorResponse(`No such action ${action} exists for context ${context}`)
+        }
 
         if (context == "authentication") {
             return this.authenticate()
