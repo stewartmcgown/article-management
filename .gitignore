@@ -2,3 +2,4 @@ node_modules/
 dist/
 private.json
 desktop.ini
+data

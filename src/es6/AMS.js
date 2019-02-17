@@ -102,7 +102,7 @@ class AMS {
   }
 
   static async assignArticle(article) {
-    
+
   }
 
 
@@ -169,6 +169,11 @@ class AMS {
       reason: "updatedEditor",
       message: editor,
     })
+  }
+
+
+  static async getAllSubjects(body, { q }) {
+    
   }
 
   /**
@@ -268,6 +273,10 @@ class AMS {
    */
   static parseQueryString(query) {
     return searchQueryParser.parse(query)
+  }
+
+  static getMatchingArray() {
+    
   }
 }
 
