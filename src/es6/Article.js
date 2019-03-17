@@ -173,7 +173,7 @@ module.exports = class Article {
     assignProperties(properties) {
         let allowed = {}
         Object.keys(properties)
-            .filter(p => Enums[p] ? Enums[p].includes(properties[p]) : true)
+            .filter(p => Enums[p] ? Enums[p].includes(properties[p]) && Enums[p] != Strings.IMMUTABLE : true)
             .forEach(p => allowed[p] = properties[p])
         assignExisting(this, allowed)
         return allowed
