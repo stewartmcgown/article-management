@@ -88,6 +88,7 @@ module.exports = class Article {
         this.folderId = row.folderID || null
         this.markingGrid = row.markingGrid || null
         this.copyright = row.copyright || null
+        this.possibleStates = Enums.status
 
         // Redefine immutable properties
         Object.defineProperties(this, {
