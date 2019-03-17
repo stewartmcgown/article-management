@@ -38,7 +38,8 @@ const Enums = Object.freeze({
         "Policy & Ethics"
     ],
     id: Strings.IMMUTABLE, 
-    date: Strings.IMMUTABLE
+    date: Strings.IMMUTABLE,
+
 })
 
 /**
@@ -113,7 +114,7 @@ module.exports = class Article {
      * Convert this object in to a DB row
      */
     toRow() {
-        return [
+        const data= [
             this.date,
             this.title,
             this.subject,
@@ -131,6 +132,8 @@ module.exports = class Article {
             this.markingGrid,
             this.copyright
         ]
+
+        return data.map(o => !o ? "" : o)
     }
 
     /**
@@ -173,5 +176,14 @@ module.exports = class Article {
             .forEach(p => allowed[p] = properties[p])
         assignExisting(this, allowed)
         return allowed
+    }
+
+    /**
+     * Is this article valid for a submission?
+     * @param {Article} article 
+     * @return {Boolean} is the article valid
+     */
+    static isValid(article) {
+        return true
     }
 }

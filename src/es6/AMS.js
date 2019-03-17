@@ -7,6 +7,7 @@ const Response = require('./responses/Response')
 const ErrorResponse = require("./responses/ErrorResponse")
 const { objectToKeyValues, stemFlatten, get, partialSearch, partialMatch, flatSearch } = require("./utils/Utils")
 const searchQueryParser = require("search-string")
+const ArticleCreator = require("./ArticleCreator")
 
 const Strings = {
   FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
@@ -51,12 +52,31 @@ class AMS {
    * 
    * 4. Emails relating to the article are sent.
    * 
-   * @param {Object} article 
+   * Submissions should be structured as follows:
+   * {
+   *  article: Article,
+   *  author: Author,
+   *  data: Binary
+   * }
+   * 
+   * @param {Object} body Request body, hopefully containing an article.
+   * @param {Article} body.article dd
    */
-  static async createArticle({}) {
-    return new ErrorResponse({
-      message: Strings.FUNCTIONALITY_NOT_IMPLEMENTED
-    })
+  static async createArticle({ article, author, data }) {
+    const ac = new ArticleCreator(article)
+    
+    const status = ac.verify()
+    if (!status) {
+      return new ErrorResponse({
+        error: "Missing properties"
+      })
+    }
+
+    ac.upload()
+    
+    console.log(article)
+    return new Response({ message: "Article successfully submitted" })
+    
   }
 
   /**

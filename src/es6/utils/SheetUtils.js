@@ -10,20 +10,6 @@ module.exports = class SheetUtils {
         this.sheetID = id
     }
 
-    /**
-     * Find the longest array in a list
-     * @param {Array<Array>} a 
-     */
-    static maxLength(a) {
-        let max = 0
-        if (a[0] instanceof Array) {
-            for (let b of a) {
-                if (b.length > max)
-                    max = b.length
-            }
-        }
-        return max
-    }
 
     /**
      * Fetch a given sheet as an array
