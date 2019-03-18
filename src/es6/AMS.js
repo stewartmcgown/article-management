@@ -12,7 +12,8 @@ const ArticleCreator = require("./ArticleCreator")
 const Strings = {
   FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
   MISSING_BODY: "Request body missing.",
-  SUCCESS: "Success"
+  SUCCESS: "Success",
+  INTERNAL_ERROR: "Internal Error"
 }
 
 Object.freeze(Strings)
@@ -39,6 +40,7 @@ class AMS {
   static get authTokenSheet() { return "AuthTokens" }
   static get articleDatabase() { return "Database" }
   static get logSheet() { return "Logs" }
+  static get statusSheet() { return "Definitions" }
 
   /**
    * Completely handles the creation of a single article.
@@ -77,6 +79,16 @@ class AMS {
     console.log(article)
     return new Response({ message: "Article successfully submitted" })
     
+  }
+
+  static async getAllStates(data, level) {
+    let states = await SheetUtils.getSheetAsJSON(AMS.statusSheet)
+
+    if (!states) {
+      return new ErrorResponse(Strings.INTERNAL_ERROR)
+    }
+
+    return states
   }
 
   /**

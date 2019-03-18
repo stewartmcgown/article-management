@@ -73,6 +73,12 @@ module.exports = class Router {
                         function: AMS.getAllEditors,
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
+                },
+                "states": {
+                    "list": {
+                        function: AMS.getAllStates,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    }
                 }
             },
             "POST": {

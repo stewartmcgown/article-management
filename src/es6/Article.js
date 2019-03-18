@@ -1,5 +1,6 @@
 const Author = require("./people/Author");
 const Editor = require("./people/Editor");
+const State = require("./State")
 const {
     parseDateString,
     assignExisting
@@ -10,13 +11,16 @@ const Strings = {
 }
 
 const Enums = Object.freeze({
-    status: ["In Review",
-        "Failed Data Check",
-        "Passed Data Check",
-        "Technical Review",
-        "Revisions Requested",
-        "Ready to Publish",
-        "Published"
+    status: [new State("In Review", ""),
+            new State("Failed Data Check", ""),
+            new State("Passed Data Check", ""),
+            new State("Technical Review", ""),
+            new State("Revisions Requested", ""),
+            new State("Ready to Publish", ""),
+            new State("Published", ""),
+            new State("Submitted", ""),
+            new State("Rejected", ""),
+            new State("Final Review", ""),
     ],
     type: [
         "Review Article",
@@ -173,7 +177,7 @@ module.exports = class Article {
     assignProperties(properties) {
         let allowed = {}
         Object.keys(properties)
-            .filter(p => Enums[p] ? Enums[p].includes(properties[p]) && Enums[p] != Strings.IMMUTABLE : true)
+            .filter(p => Enums[p] ? (p == "status" ? Enums[p].some(s => s.name == properties[p]) : Enums[p].includes(properties[p]) && Enums[p] != Strings.IMMUTABLE) : true)
             .forEach(p => allowed[p] = properties[p])
         assignExisting(this, allowed)
         return allowed
