@@ -21,6 +21,7 @@
     "googleapis": "^36.0.0",
     "html-loader": "^0.5.5",
     "jspolyfill-array.prototype.findIndex": "^0.1.0",
+    "memcache": "^0.3.0",
     "mersenne-twister": "^1.1.0",
     "nodemon": "^1.18.9",
     "npm": "^6.5.0",

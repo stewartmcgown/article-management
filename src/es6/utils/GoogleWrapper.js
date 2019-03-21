@@ -3,6 +3,7 @@ const {
 } = require('googleapis')
 const sheets = google.sheets('v4')
 const gmail = google.gmail("v1")
+const drive = google.drive("v2")
 const {
     get,
     columnToLetter
@@ -21,6 +22,26 @@ class GoogleWrapper {
         oauth = new google.auth.OAuth2("173181351763-e0i3cevf5l6p0rf0phtoibtgibuc724q.apps.googleusercontent.com", "8A7Dqz1S3gcfXJhRRRJzucsF", "http://localhost:8081/oauthCallback")
         oauth.setCredentials({
             refresh_token: process.env.refresh_token || require("../../../private.json").refresh_token
+        })
+    }
+
+    /**
+     * 
+     * @param {String} id 
+     */
+    static getLastRevision(id) {
+        this.authorise()
+        return new Promise((resolve, reject) => {
+            drive.files.get({
+                fileId: id,
+                fields: 'id, modifiedDate',
+                auth: oauth
+            }, (err, res) => {
+                if (err) return console.log('The API returned an error: ' + err);
+                const file = res.data
+                    resolve(file ? file.modifiedDate : "")
+     
+            });
         })
     }
 

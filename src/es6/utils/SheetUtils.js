@@ -10,6 +10,9 @@ module.exports = class SheetUtils {
         this.sheetID = id
     }
 
+    static async getLastRevision(id) {
+        return await GoogleWrapper.getLastRevision(id)
+    }
 
     /**
      * Fetch a given sheet as an array
@@ -71,9 +74,7 @@ module.exports = class SheetUtils {
         let rows = sheet.filter(r => partialMatch(r, properties))
         if (!rows) {
             return []
-        } else if (rows.length === 0) {
-            return []
-        }
+        } 
 
         return rows
     }

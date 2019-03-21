@@ -4,7 +4,11 @@ const {
 } = require('./utils/Utils');
 const Response = require('./responses/Response')
 const ErrorResponse = require('./responses/ErrorResponse')
-const { Authentication, AuthenticationResource, AuthenticationLevels } = require("./Authentication.js")
+const {
+    Authentication,
+    AuthenticationResource,
+    AuthenticationLevels
+} = require("./Authentication.js")
 const url = require("url")
 const Logger = require("./Logger")
 
@@ -60,6 +64,10 @@ module.exports = class Router {
                     "list": {
                         function: AMS.getAllArticles,
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    },
+                    "get": {
+                        function: AMS.getArticle,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
                 },
                 "authentication": {
@@ -71,6 +79,16 @@ module.exports = class Router {
                 "editors": {
                     "list": {
                         function: AMS.getAllEditors,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    }
+                },
+                "authors": {
+                    "list": {
+                        function: AMS.getAllAuthors,
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    },
+                    "get": {
+                        function: AMS.getEditor,
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
                     }
                 },
@@ -186,7 +204,7 @@ module.exports = class Router {
             return new Response({
                 message: "AMS API v2"
             })
-        
+
         Authentication.cleanUp()
 
         const context = this.context
@@ -198,13 +216,11 @@ module.exports = class Router {
         if (!selectedContext) {
             Logger.log(`${context}/${action}`, this.email, Errors.NO_SUCH_CONTEXT)
             return new ErrorResponse(Errors.NO_SUCH_CONTEXT)
-        }
-        else if (!(selectedContext instanceof Object)) {
+        } else if (!(selectedContext instanceof Object)) {
             Logger.log(`${context}/${action}`, this.email, Errors.CONTEXT_NO_ACTIONS)
             return new ErrorResponse(Errors.CONTEXT_NO_ACTIONS)
 
-        }
-        else if (!selectedContext[action]) {
+        } else if (!selectedContext[action]) {
             return new ErrorResponse(`No such action ${action} exists for context ${context}`)
         }
 
@@ -224,8 +240,15 @@ module.exports = class Router {
         // verify if track and auth level match
 
         if (track !== null) {
+            if (!track.function) {
+                return new ErrorResponse("Internal Error")
+            }
             if (auth.authenticationLevel >= track.minimumAuthorisation)
-                return track.function(this.request.body, this.params)
+                return track.function({
+                    data: this.request.body,
+                    params: this.params,
+                    level: auth.authenticationLevel
+                })
             else
                 return new Response({
                     message: "You are not authorised to perform that action"

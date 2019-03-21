@@ -196,6 +196,7 @@ class Authentication {
                 message: "No matching key found"
             })
         } else {
+            this.invalidateKey()
             return this.issueAuthToken(this.user)
         }
 

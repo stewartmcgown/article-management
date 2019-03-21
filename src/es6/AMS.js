@@ -2,6 +2,7 @@ const SheetUtils = require("./utils/SheetUtils");
 const Article = require("./Article");
 const Editor = require("./people/Editor");
 const Editors = require("./Editors")
+const Authors = require("./Authors")
 const EmailService = require("./emails/EmailService");
 const Response = require('./responses/Response')
 const ErrorResponse = require("./responses/ErrorResponse")
@@ -13,7 +14,8 @@ const Strings = {
   FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
   MISSING_BODY: "Request body missing.",
   SUCCESS: "Success",
-  INTERNAL_ERROR: "Internal Error"
+  INTERNAL_ERROR: "Internal Error",
+  NOT_FOUND: "Article not found"
 }
 
 Object.freeze(Strings)
@@ -40,7 +42,18 @@ class AMS {
   static get authTokenSheet() { return "AuthTokens" }
   static get articleDatabase() { return "Database" }
   static get logSheet() { return "Logs" }
-  static get statusSheet() { return "Definitions" }
+  static get statusSheet() { return "States" }
+
+  /**
+   * Process the modified attributes of an article.
+   * 
+   * This will include sending emails, tidying up database entries etc.
+   * 
+   * @param {Object} modified 
+   */
+  static processModified(modified) {
+
+  }
 
   /**
    * Completely handles the creation of a single article.
@@ -81,7 +94,7 @@ class AMS {
     
   }
 
-  static async getAllStates(data, level) {
+  static async getAllStates({data, level}) {
     let states = await SheetUtils.getSheetAsJSON(AMS.statusSheet)
 
     if (!states) {
@@ -89,6 +102,26 @@ class AMS {
     }
 
     return states
+  }
+
+  static async getArticle({data, params}) {
+    if (!params.id) return new ErrorResponse(Strings.MISSING_BODY)
+
+    let article = await SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, {
+      id: params.id
+    })
+
+    if (!article) return new ErrorResponse(Strings.NOT_FOUND)
+    else if (!article[0]) return new ErrorResponse(Strings.NOT_FOUND)
+    else article = article[0]
+
+    // Post processing
+    article.modifiedDate = await SheetUtils.getLastRevision(article.id)
+
+    return new Response({
+      message: article,
+      reason: Strings.SUCCESS
+    })
   }
 
   /**
@@ -99,20 +132,26 @@ class AMS {
    * @param {Object} data
    * @param {Number} level
    */
-  static async updateArticle(data, level) {
+  static async updateArticle({data, level}) {
     if (!data.id || !data.properties) return new ErrorResponse(Strings.MISSING_BODY)
     let id = data.id, properties = data.properties
     let article = await Articles.getArticleById(id)
 
     if (!article) {
-      return new Response({
-        message: "Article not found",
-        id
-      })
+      return new ErrrorResponse("Article not found")
     }
-      
+    
+    if (properties.editor) {
+      let editor = await Editors.getEditorByEmail(properties.editor.email)
+
+      if (!editor) {
+        return new ErrorResponse("Editor not found")
+      }
+    }
 
     let modified = objectToKeyValues(stemFlatten(article.assignProperties(properties)))
+
+    AMS.processModified(modified) // Can be async as we don't rely on return
 
     let rowData = article.toRow()
     Articles.updateArticleById(id, rowData)
@@ -143,13 +182,13 @@ class AMS {
    * 
    * @param {Article} article Article to delete. May be partial.
    */
-  static async deleteArticle(article) {
-    if (!article) throw new TypeError("Article cannot be undefined")
-    await SheetUtils.removeMatchingRowFromSheet(AMS.articleDatabase, {id: article.id})
+  static async deleteArticle({ data, params}) {
+    if (!params.id) throw new TypeError("Article cannot be undefined")
+    await SheetUtils.removeMatchingRowFromSheet(AMS.articleDatabase, {id})
 
     return new Response({
       reason: "deleteArticle",
-      message: { id: article.id }
+      message: { id: params.id }
     })
   }
 
@@ -187,7 +226,7 @@ class AMS {
    * @param {Editor} editor partial editor object
    * @param {Object} properties 
    */
-  static async updateEditor(data) {
+  static async updateEditor({data}) {
     if (!data.email || !data.properties) return new ErrorResponse("You must specify a partial Editor object and properties to update it with.")
     let email = data.email, properties = data.properties
     let editor = await Editors.getEditorByEmail(email)
@@ -212,21 +251,23 @@ class AMS {
    * @param {String} [query] search terms
    * @return {Array.<Article>} all articles in JSON format
    */
-  static async getAllArticles(body, { q }) {
-    const data = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+  static async getAllArticles({data, params}) {
+    if (!params) return new ErrorResponse()
+    const q = params.q
+    const articles = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
     let out = []
     if (typeof q === "string") {
       let b = {}, parsed = AMS.parseQueryString(q)
       if (parsed.conditionArray.length === 0) {
         b = q
-        return flatSearch(data.map((a) => new Article(a)), b, true)
+        return flatSearch(articles.map((a) => new Article(a)), b, true)
       } else {
         parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
-        return partialSearch(data.map((a) => new Article(a)), b, true) // TODO: allow negated search terms
+        return partialSearch(articles.map((a) => new Article(a)), b, true) // TODO: allow negated search terms
       }
       
     } else {
-      out = data.map((a) => new Article(a))
+      out = articles.map((a) => new Article(a))
     }
 
     return out
@@ -241,7 +282,8 @@ class AMS {
    * @param {String} [o.q] query
    * @returns {Array.<Editor>} list of editors
    */
-  static async getAllEditors(body, { q }) {
+  static async getAllEditors({data, params}) {
+    const q = params.q
     const data = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet)
     let out = []
     if (typeof q === "string") {
@@ -262,7 +304,8 @@ class AMS {
     return out
   }
 
-  static async getEditorByEmail(body, { email }) {
+  static async getEditorByEmail({data, params}) {
+    const email = params.email
     const q = `email:${email}`,
     results = AMS.getAllEditors(null, { q })
 
@@ -309,6 +352,25 @@ class AMS {
 
   static getMatchingArray() {
     
+  }
+
+  /**
+   * Get the authors profile picture
+   * 
+   * @param {String} email 
+   * @return {String} url of profile picture
+   */
+  static getAuthorProfile(email) {
+
+  }
+
+  /**
+   * Get last revision based on ID
+   * 
+   * @param {String} id 
+   */
+  static async getLastRevision(id) {
+    SheetUtils.getLastRevision(id)
   }
 }
 
