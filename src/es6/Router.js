@@ -125,7 +125,7 @@ module.exports = class Router {
                 "editors": {
                     "create": {
                         function: AMS.createEditor,
-                        minimumAuthorisation: AuthenticationLevels.SENIOR
+                        minimumAuthorisation: AuthenticationLevels.ADMIN
                     },
                     "update": {
                         function: AMS.updateEditor,
@@ -247,7 +247,8 @@ module.exports = class Router {
                 return track.function({
                     data: this.request.body,
                     params: this.params,
-                    level: auth.authenticationLevel
+                    level: auth.authenticationLevel,
+                    user: auth.user
                 })
             else
                 return new Response({

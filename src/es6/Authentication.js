@@ -342,7 +342,7 @@ class Authentication {
         }
 
         // Check that email is registered before continuing
-        if (!this.authToken) {
+        if (!this.authToken && this.email) {
             let matchingUsers = await this.getUsersFromSheet()
             console.log(matchingUsers)
             if (!matchingUsers.length) {

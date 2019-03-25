@@ -128,7 +128,7 @@ const partialMatch = (o, p, c) =>
 			? p[k] instanceof Object
 				? partialMatch(o[k], p[k], c)
 				: c
-				? o[k].toLowerCase().includes(p[k].toLowerCase())
+				? (o[k]) ? o[k].toLowerCase().includes(p[k].toLowerCase()) : ""
 				: p[k] === o[k]
 			: false
 	)

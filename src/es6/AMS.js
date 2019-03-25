@@ -147,6 +147,8 @@ class AMS {
       if (!editor) {
         return new ErrorResponse("Editor not found")
       }
+
+      Object.assign(properties.editor, editor)
     }
 
     let modified = objectToKeyValues(stemFlatten(article.assignProperties(properties)))
@@ -196,10 +198,10 @@ class AMS {
    * 
    * @param {Object} partialEditor
    */
-  static async createEditor(partialEditor) {
-    if (!partialEditor) throw new TypeError("Editor cannot be undefined")
-    if (!partialEditor.email || !partialEditor.name) return new ErrorResponse("Editors must have an email and a name", partialEditor)
-    const editor = new Editor(partialEditor)
+  static async createEditor({data, params}) {
+    if (!data) throw new TypeError("Editor cannot be undefined")
+    if (!data.email || !data.name) return new ErrorResponse("Editors must have an email and a name", data)
+    const editor = new Editor(data)
 
     const existing = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, { email: editor.email })
     if (existing.length !== 0 || !(existing instanceof Array)) return new ErrorResponse("Email already in use")
@@ -226,12 +228,15 @@ class AMS {
    * @param {Editor} editor partial editor object
    * @param {Object} properties 
    */
-  static async updateEditor({data}) {
+  static async updateEditor({data, user, level}) {
     if (!data.email || !data.properties) return new ErrorResponse("You must specify a partial Editor object and properties to update it with.")
     let email = data.email, properties = data.properties
     let editor = await Editors.getEditorByEmail(email)
 
     if (!editor) return new ErrorResponse("Unable to find editor", editor)
+
+    // If you aren't an admin, you can only edit yourself
+    if (editor.email != user.email && level < 3) return new ErrorResponse("You may only edit yourself")
 
     editor.assignProperties(properties)
     await Editors.updateEditorByEmail(editor.email, editor.toRow())
@@ -254,7 +259,10 @@ class AMS {
   static async getAllArticles({data, params}) {
     if (!params) return new ErrorResponse()
     const q = params.q
+
     const articles = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
+    
+
     let out = []
     if (typeof q === "string") {
       let b = {}, parsed = AMS.parseQueryString(q)
@@ -284,21 +292,21 @@ class AMS {
    */
   static async getAllEditors({data, params}) {
     const q = params.q
-    const data = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet)
+    const sheet = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet)
     let out = []
     if (typeof q === "string") {
       // TODO: modularise this
       let b = {}, parsed = AMS.parseQueryString(q)
       if (parsed.conditionArray.length === 0) {
         b = q
-        return flatSearch(data.map((a) => new Editor(a)), b, true)
+        return flatSearch(sheet.map((a) => new Editor(a)), b, true)
       } else {
         parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
-        return partialSearch(data.map((a) => new Editor(a)), b, true) // TODO: allow negated search terms
+        return partialSearch(sheet.map((a) => new Editor(a)), b, true) // TODO: allow negated search terms
       }
 
     } else {
-      out = data.map((a) => new Editor(a))
+      out = sheet.map((a) => new Editor(a))
     }
 
     return out
