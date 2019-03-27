@@ -49,6 +49,25 @@ class GoogleWrapper {
         return `${sheetName}!A${rowNumber}:${columnToLetter(noColumns)}${rowNumber}`
     }
 
+    static getSheetsValues(id, ...sheetnames) {
+        this.authorise()
+        let start = new Date()
+        return new Promise((resolve, reject) => {
+            sheets.spreadsheets.values.batchGet({
+                spreadsheetId: id,
+                ranges: sheetnames,
+                auth: oauth
+            }, (err, response) => {
+                if (err) {
+                    console.log('The API returned an error: ' + err);
+                } else {
+                    console.log(`[${id}] Fetched ${response.data.valueRanges.length} items in ${new Date().getTime() - start.getTime()}ms`)
+                    resolve(response.data.valueRanges)
+                }
+            })
+        })
+    }
+
     static getSheetValues(id, sheetName) {
         this.authorise()
         let start = new Date()

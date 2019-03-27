@@ -123,15 +123,16 @@ const columnToLetter = column => {
  * @return {Boolean} whether there are partial matches
  */
 const partialMatch = (o, p, c) =>
-	Object.keys(p).every(k =>
-		p[k] && o[k]
-			? p[k] instanceof Object
-				? partialMatch(o[k], p[k], c)
-				: c
-				? (o[k]) ? o[k].toLowerCase().includes(p[k].toLowerCase()) : ""
-				: p[k] === o[k]
-			: false
-	)
+		Object.keys(p).every(k =>
+			p[k] && o[k]
+				? p[k] instanceof Object
+					? partialMatch(o[k], p[k], c)
+					: c
+					? o[k].toLowerCase().includes(p[k].toLowerCase())
+					: p[k] === o[k]
+				: false
+)
+	
 
 /**
  *

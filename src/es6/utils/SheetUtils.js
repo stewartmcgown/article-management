@@ -3,8 +3,43 @@ const GoogleWrapper = require("./GoogleWrapper")
 const {
     partialMatch
 } = require("./Utils")
+const cache = require("memory-cache")
 
-module.exports = class SheetUtils {
+/**
+ * Convert a valueRange object to a JSON object organised
+ * by sheet name
+ * 
+ * @param {Array.<Object>} ranges 
+ */
+const valueRangesToJSON = (ranges) => {
+    if (!(ranges instanceof Array)) throw new TypeError()
+    const o = {}
+    ranges.forEach(x => { 
+        o[x.range.split("!")[0]] = arrayToJSON(x.values)
+    })
+    return o
+}
+
+const arrayToJSON = (data) => {
+    const out = []
+
+    for (let i = 1; i < data.length; i++) {
+        let inner = {},
+            row = data[i]
+        for (let j = 0; j < row.length; j++) {
+            let header = SheetUtils.camelize(data[0][j]),
+                item = row[j].toString()
+
+            inner[header] = item
+        }
+        out.push(inner)
+    }
+
+    return out
+}
+
+
+class SheetUtils {
 
     static set sheet(id) {
         this.sheetID = id
@@ -15,14 +50,57 @@ module.exports = class SheetUtils {
     }
 
     /**
+     * 
+     * @param {Array.<String>} sheets 
+     * @param {Boolean} enableCache 
+     */
+    static async getSheetsAsJSON(sheets, enableCache) {
+        if (!(sheets instanceof Array)) throw new TypeError("Missing argument @ getSheetAsArray")
+        const cacheKey = this.cacheKey(...sheets)
+
+        if (cache.get(cacheKey) && enableCache) {
+            console.log(`[Cache] Hit: ${cacheKey}`)
+            return cache.get(cacheKey)
+        }
+
+        let values = await GoogleWrapper.getSheetsValues(this.sheetID, ...sheets)
+        values = valueRangesToJSON(values)
+
+        // Process cache miss
+        if (enableCache) {
+            console.log(`[Cache] Miss: ${cacheKey}`);
+            cache.put(cacheKey, values, 10000)
+        }
+
+        return values
+    }
+
+    /**
      * Fetch a given sheet as an array
      * @param {String} sheetName
+     * @param {Boolean} enableCache
      * @returns {Array}
      */
-    static async getSheetAsArray(sheetName) {
+    static async getSheetAsArray(sheetName, enableCache = false) {
         if (!sheetName) throw new TypeError("Missing argument @ getSheetAsArray")
+        const cacheKey = this.cacheKey(sheetName)
+
+        if (cache.get(cacheKey) && enableCache) {
+            console.log(`[Cache] Hit: ${cacheKey}`)
+            return cache.get(cacheKey)
+        }
+
+
         const values = await GoogleWrapper.getSheetValues(this.sheetID, sheetName)
+
+        // Process cache miss
+        if (enableCache) {
+            console.log(`[Cache] Miss: ${cacheKey}`);
+            cache.put(cacheKey, values, 10000)
+        }
+
         return values
+
     }
 
     /**
@@ -32,29 +110,14 @@ module.exports = class SheetUtils {
      * @returns {Array.<Object>} A JSON organised array of the sheet using the headers
      * @throws {TypeError} if no sheet can be found.
      */
-    static async getSheetAsJSON(sheetName) {
+    static async getSheetAsJSON(sheetName, enableCache = false) {
         if (!sheetName) throw new TypeError("Missing argument @ getSheetAsJSON")
 
-        const data = await this.getSheetAsArray(sheetName)
+        const data = await this.getSheetAsArray(sheetName, enableCache)
         if (!data) throw new TypeError("Data can not be null")
 
-        const out = []
-
-        for (let i = 1; i < data.length; i++) {
-            let inner = {},
-                row = data[i]
-            for (let j = 0; j < row.length; j++) {
-                let header = this.camelize(data[0][j]),
-                    item = row[j].toString()
-
-                inner[header] = item
-            }
-            out.push(inner)
-        }
-
-        return out
+        return arrayToJSON(data)
     }
-
     /**
      * Using a property, check if a given sheet contains a matching row
      * with the same value as the properties value
@@ -72,10 +135,10 @@ module.exports = class SheetUtils {
 
         // Will locate all rows that match the given properties
         let rows = sheet.filter(r => partialMatch(r, properties))
+
         if (!rows) {
             return []
-        } 
-
+        }
         return rows
     }
 
@@ -183,7 +246,7 @@ module.exports = class SheetUtils {
      * @author CMS
      * @see https://stackoverflow.com/a/2970667
      */
-    static camelize(str) {
+    static camelize(str = "") {
         if (str == "ID")
             return str.toLowerCase()
         return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
@@ -191,7 +254,19 @@ module.exports = class SheetUtils {
             return index == 0 ? match.toLowerCase() : match.toUpperCase();
         });
     }
+
+    /**
+     * Create a memcache key
+     * 
+     * @param  {...any} str keys to add
+     */
+    static cacheKey(...str) {
+        const n = (a, b) => `${a}-${b}`
+        return str.reduce((p, c) => p ? p = n(p, c) : p = n(this.sheetID, c))
+    }
 }
 
 class MissingArgumentError extends ExtendableError {}
 class MalformedPropertyError extends ExtendableError {}
+
+module.exports = SheetUtils

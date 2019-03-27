@@ -124,12 +124,9 @@ module.exports = class Article {
             this.title,
             this.subject,
             this.type,
-            this.author.name,
-            this.author.school,
             this.author.email,
             this.status,
             this.id,
-            this.editor.name,
             this.editor.email,
             this.deadline,
             this.notes,
@@ -137,6 +134,8 @@ module.exports = class Article {
             this.markingGrid,
             this.copyright
         ]
+
+        console.log(data)
 
         return data.map(o => !o ? "" : o)
     }

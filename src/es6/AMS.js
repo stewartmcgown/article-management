@@ -43,6 +43,7 @@ class AMS {
   static get articleDatabase() { return "Database" }
   static get logSheet() { return "Logs" }
   static get statusSheet() { return "States" }
+  static get authorSheet() { return "Authors" }
 
   /**
    * Process the modified attributes of an article.
@@ -260,23 +261,38 @@ class AMS {
     if (!params) return new ErrorResponse()
     const q = params.q
 
-    const articles = await SheetUtils.getSheetAsJSON(AMS.articleDatabase)
-    
+    const sheet = await SheetUtils.getSheetsAsJSON([AMS.articleDatabase, AMS.baseAuthSheet, AMS.authorSheet], true)
+    /** @type {Array.<Article>} */
+    let articles = sheet[AMS.articleDatabase]
+    /** @type {Array.<Author>} */
+    const authors = sheet[AMS.authorSheet]
+    /** @type {Array.<Editor>} */
+    const editors = sheet[AMS.baseAuthSheet]
 
+    articles = articles.map(a => { 
+      a = new Article(a) 
+      a.editor = editors.find(j => j.email == a.editor.email) || a.editor
+      a.author = authors.find(j => j.email == a.author.email) || a.author
+      return a
+    })
+    
     let out = []
     if (typeof q === "string") {
       let b = {}, parsed = AMS.parseQueryString(q)
       if (parsed.conditionArray.length === 0) {
         b = q
-        return flatSearch(articles.map((a) => new Article(a)), b, true)
+        out = flatSearch(articles, b, true)
       } else {
         parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
-        return partialSearch(articles.map((a) => new Article(a)), b, true) // TODO: allow negated search terms
+        out = partialSearch(articles, b, true) // TODO: allow negated search terms
       }
       
     } else {
-      out = articles.map((a) => new Article(a))
+      out = articles
     }
+
+    // Insert authors
+    
 
     return out
     
@@ -292,7 +308,7 @@ class AMS {
    */
   static async getAllEditors({data, params}) {
     const q = params.q
-    const sheet = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet)
+    const sheet = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet, true)
     let out = []
     if (typeof q === "string") {
       // TODO: modularise this

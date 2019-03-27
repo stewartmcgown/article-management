@@ -17,7 +17,6 @@ module.exports = class EmailService {
         to = "stewart@twistedcore.co.uk"//options.to
         from = options.name || "Submissions - Young Scientists Journal"
         subject = options.key ? `Authentication Key: ${options.key}` : "Article Management System - Young Scientists Journal"
-        console.log(options)
         if (options.body) htmlBody = options.body
         else if (options.type && options.data) htmlBody = Templates[options.type] instanceof Function ? Templates[options.type](options.data) : ""
         else if (options.key) htmlBody = Templates.templateKey(options.key)

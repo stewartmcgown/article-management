@@ -31,9 +31,7 @@ module.exports = class Templates {
     </head>
     <body>
         <div class="container" style="width: 100%;font-family: sans-serif;">
-            <div class="header" style="background: #d13619;text-align: center;">
-                <img src="https://assets.ysjournal.com/emails/logo-transparent.png" style="margin: 0 auto;">
-            </div>
+            ${Components.header()}
             <p>Dear ${get(["author", "name"], article) ? article.author.name : "Author"},</p>
 
             <p>An article you have submitted, <a href="${article.link}" style="text-decoration: none;color: #d13619;border-bottom: 2px #d13619 solid;">${article.title}</a>, 
@@ -74,9 +72,7 @@ return `
     </head>
     <body>
         <div class="container" style="width: 100%;font-family: sans-serif;">
-            <div class="header" style="background: #d13619;text-align: center;">
-                <img src="https://assets.ysjournal.com/emails/logo-transparent.png" style="margin: 0 auto;">
-            </div>
+            ${Components.header()}
             <p>Dear ${ editor.name },</p>
 
             <p>Your <strong>${editor.level ? editor.level + " " : ""}Editor</strong> account at the Young Scientists Journal has just been created.</p>
@@ -94,6 +90,8 @@ return `
 
 const Components = {
     header() {
-        
+        return `<div class="header" style="background: #d13619;text-align: center;">
+        <img src="https://assets.ysjournal.com/emails/logo-transparent.png" style="margin: 0 auto;">
+    </div>`
     }
 }

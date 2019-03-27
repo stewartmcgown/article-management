@@ -251,13 +251,9 @@ module.exports = class Router {
                     user: auth.user
                 })
             else
-                return new Response({
-                    message: "You are not authorised to perform that action"
-                })
+                return new ErrorResponse("You are not authorised to perform that action")
         } else {
-            return new Response({
-                message: "Unable to locate an appropriate track."
-            })
+            return new ErrorResponse("Internal Error")
         }
 
     }
