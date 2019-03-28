@@ -14,5 +14,6 @@ module.exports = class Author extends Person {
 		this.biography = data.biography
 		this.country = data.country
 		this.teacher = data.teacher
+		this.profile = data.profile
 	}
 }

@@ -53,6 +53,8 @@ const Preprocessing = Object.freeze({
 
 })
 
+const parseTrashed = (t) => t === "TRUE" ? true : false
+
 module.exports = class Article {
     /**
      * Constructs an article from a given sheet row. The sheet row
@@ -80,19 +82,22 @@ module.exports = class Article {
      * @param {String} row.markingGrid
      * @param {String} row.copyright
      */
-    constructor(row) {
+    constructor(row, editors, authors) {
         this.date = row.date || null
-        this.title = row.articleTitle || null
-        this.subject = row.articleSubject || null
-        this.type = row.articleType || null
+        this.title = row.title || null
+        this.subject = row.subject || null
+        this.type = row.type || null
         this.status = row.status || null
         this.id = row.id || null
         this.deadline = row.deadline ? new Date(row.deadline) : null
-        this.notes = row.additionalNotes || null
+        this.notes = row.notes || null
         this.folderId = row.folderID || null
         this.markingGrid = row.markingGrid || null
         this.copyright = row.copyright || null
-        this.possibleStates = Enums.status
+        this.trashed = parseTrashed(row.trashed) || false
+        this.summary = row.summary || null
+        this.reason = row.reason || null
+        this.modified = row.modified || null
 
         // Redefine immutable properties
         Object.defineProperties(this, {
@@ -111,8 +116,8 @@ module.exports = class Article {
         })
 
         this.setLink()
-        this.setAuthor(row.email, row.authorName, row.authorSchool)
-        this.setEditor(row.editor, row.editorEmail)
+        this.setAuthor(row.email, authors)
+        this.setEditor(row.editorEmail, editors)
     }
 
     /**
@@ -132,7 +137,11 @@ module.exports = class Article {
             this.notes,
             this.folderId,
             this.markingGrid,
-            this.copyright
+            this.copyright,
+            this.trashed,
+            this.summary,
+            this.reason,
+            this.modified
         ]
 
         console.log(data)
@@ -148,19 +157,12 @@ module.exports = class Article {
      * @param {String} name
      * @param {String} school
      */
-    setAuthor(email, name, school) {
-        this.author = new Author({
-            email,
-            name,
-            school
-        })
+    setAuthor(email, authors = []) {
+        this.author = authors.find(j => j.email == email) || { email }
     }
 
-    setEditor(name, email) {
-        this.editor = new Editor({
-            name,
-            email
-        })
+    setEditor(email, editors = []) {
+        this.editor = editors.find(j => j.email == email) || { email }
     }
 
     setLink() {

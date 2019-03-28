@@ -15,7 +15,6 @@ module.exports = class Logger {
      * @param {String} result
      */
     static async log(action, email, result="Success") {
-        console.log(action)
         SheetUtils.pushRowToSheet([new Date(), action, email, result], LogSheet)
     }
 

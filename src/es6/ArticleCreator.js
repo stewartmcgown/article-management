@@ -1,26 +1,25 @@
 const Article = require("./Article")
 const SheetUtils = require("./utils/SheetUtils")
-const AMS = require("./AMS")
+const SheetNames = require("./Sheets")
 const GoogleWrapper = require("./utils/GoogleWrapper")
 
 /**
  * An article creator that creates articles
  */
 class ArticleCreator {
+
     /**
      * 
-     * @param {Object} body 
+     * @param {Object} creator
+     * @param {Object} creator.article
+     * @param {Object} creator.data containing binary 'data' and a 'mimeType'
+     * @param {Object} creator.author
      */
-    constructor(body) {
-        this._articleData = body
-        
-        this.article = new Article(body)
+    constructor({ article, author, data}) {
+        this.article = article
+        this.data = data
 
         this._verified = false
-    }
-
-    upload() {
-        SheetUtils.pushRowToSheet(this.article.toRow(), AMS.articleDatabase)
     }
 
     /**
@@ -36,8 +35,26 @@ class ArticleCreator {
 
     }
 
-    static upload(data) {
-        GoogleWrapper.uploadFile(data)
+
+    async upload() {
+        const metadata = {}
+
+        // Two copies
+        metadata.googleDoc = await GoogleWrapper.uploadFile({
+            ...this.data,
+            title: this.article.title
+        })
+
+        // Async call for original copy creation
+        GoogleWrapper.uploadFile({
+            ...this.data,
+            title: this.article.title,
+            convert: true
+        }).then(x => x)
+
+        // Append row
+        //console.log(Object.values(this.article))
+        SheetUtils.pushJSONToSheet(this.article, SheetNames.articleDatabase)
     }
 }
 

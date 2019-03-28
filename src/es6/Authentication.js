@@ -344,7 +344,6 @@ class Authentication {
         // Check that email is registered before continuing
         if (!this.authToken && this.email) {
             let matchingUsers = await this.getUsersFromSheet()
-            console.log(matchingUsers)
             if (!matchingUsers.length) {
                 return new ErrorResponse("editorNotRegistered", "User was not found.")
             } else {

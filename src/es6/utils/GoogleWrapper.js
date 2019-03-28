@@ -26,20 +26,28 @@ class GoogleWrapper {
         })
     }
 
-    static uploadFile(data) {
+    static uploadFile({encoded, mimeType, title, convert = false }) {
         let bufferStream = new stream.PassThrough()
-        bufferStream.end(Buffer.from(data, 'base64'));
-        drive.files.insert({
-            auth: oauth,
-            resource: {
-                name: "test.txt"
-            },
-            media: {
-                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                convert: true,
-                body: bufferStream
-            }
-        }).then(x => console.log(x))
+        bufferStream.end(Buffer.from(encoded, 'base64'));
+        return new Promise((resolve, reject) => {
+            drive.files.insert({
+                auth: oauth,
+                resource: {
+                    title,
+                },
+                convert,
+                media: {
+                    mimeType,
+                    body: bufferStream
+                }
+            }, (err, res) => {
+                if (err) console.log('The API returned an error: ' + err);
+                const file = res.data
+                resolve(file)
+    
+            })
+        })
+
     }
 
     /**

@@ -128,7 +128,7 @@ const partialMatch = (o, p, c) =>
 				? p[k] instanceof Object
 					? partialMatch(o[k], p[k], c)
 					: c
-					? o[k].toLowerCase().includes(p[k].toLowerCase())
+					? (typeof o[k] === "string" ? o[k].toLowerCase().includes(p[k].toLowerCase()) : JSON.stringify(o[k]).toLowerCase().includes(p[k].toLowerCase()))
 					: p[k] === o[k]
 				: false
 )
@@ -155,6 +155,8 @@ const flatSearch = (o, p, c) =>
 			: JSON.stringify(Object.values(x)) == p
 	)
 
+const swapObjectKeys = o => Object.keys(o).reduce((obj, key) => ({ ...obj, [o[key]]: key }), {});
+
 module.exports = {
 	get,
 	assignExisting,
@@ -165,5 +167,6 @@ module.exports = {
 	columnToLetter,
 	partialMatch,
 	partialSearch,
-	flatSearch
+	flatSearch,
+	swapObjectKeys
 }

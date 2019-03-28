@@ -1,7 +1,8 @@
 const ExtendableError = require("./ExtendableError");
 const GoogleWrapper = require("./GoogleWrapper")
 const {
-    partialMatch
+    partialMatch,
+    swapObjectKeys
 } = require("./Utils")
 const cache = require("memory-cache")
 
@@ -79,10 +80,10 @@ class SheetUtils {
      * Fetch a given sheet as an array
      * @param {String} sheetName
      * @param {Boolean} enableCache
-     * @returns {Array}
+     * @returns {Array.<Array>}
      */
     static async getSheetAsArray(sheetName, enableCache = false) {
-        if (!sheetName) throw new TypeError("Missing argument @ getSheetAsArray")
+        if (!sheetName) throw new TypeError("sheetName cannot be null")
         const cacheKey = this.cacheKey(sheetName)
 
         if (cache.get(cacheKey) && enableCache) {
@@ -239,6 +240,14 @@ class SheetUtils {
         for (let row of rows) {
             SheetUtils.pushRowToSheet(row, sheetName)
         }
+    }
+
+    static async pushJSONToSheet(row, sheetName) {
+        const sheet = await SheetUtils.getSheetAsArray(sheetName)
+
+        const inverted = swapObjectKeys(sheet[0].map(v => camelize(v)))
+
+        console.log(inverted)
     }
 
     /**
