@@ -3,6 +3,7 @@ const {
 } = require('googleapis')
 const sheets = google.sheets('v4')
 const gmail = google.gmail("v1")
+const stream = require('stream')
 const drive = google.drive("v2")
 const {
     get,
@@ -23,6 +24,22 @@ class GoogleWrapper {
         oauth.setCredentials({
             refresh_token: process.env.refresh_token || require("../../../private.json").refresh_token
         })
+    }
+
+    static uploadFile(data) {
+        let bufferStream = new stream.PassThrough()
+        bufferStream.end(Buffer.from(data, 'base64'));
+        drive.files.insert({
+            auth: oauth,
+            resource: {
+                name: "test.txt"
+            },
+            media: {
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                convert: true,
+                body: bufferStream
+            }
+        }).then(x => console.log(x))
     }
 
     /**

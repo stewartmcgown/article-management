@@ -78,19 +78,15 @@ class AMS {
    * @param {Object} body Request body, hopefully containing an article.
    * @param {Article} body.article dd
    */
-  static async createArticle({ article, author, data }) {
-    const ac = new ArticleCreator(article)
-    
-    const status = ac.verify()
-    if (!status) {
+  static async createArticle({ data, params }) {
+    if (!data || !params) {
       return new ErrorResponse({
         error: "Missing properties"
       })
     }
-
-    ac.upload()
     
-    console.log(article)
+    ArticleCreator.upload(data.data)
+
     return new Response({ message: "Article successfully submitted" })
     
   }
