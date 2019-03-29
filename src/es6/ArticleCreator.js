@@ -30,27 +30,41 @@ class ArticleCreator {
             throw new Error("No article given")
         }
 
-        this._verified = Article.isValid(this.article)
-        return this._verified
+        this.article = new Article(this.article)
 
+        return this.article.isFullSubmission()
     }
 
 
     async upload() {
+        if (!this.verify()) throw new Error("Could not verify article")
+
         const metadata = {}
 
-        // Two copies
+        // Prepare folder
+        metadata.googleDocFolder = await GoogleWrapper.createFolder({ 
+            title: this.article.title
+         })
+
+        // Original doc copy
         metadata.googleDoc = await GoogleWrapper.uploadFile({
             ...this.data,
-            title: this.article.title
+            title: this.article.title,
+            parent_id: metadata.googleDocFolder.id,
+            convert: true
         })
 
         // Async call for original copy creation
         GoogleWrapper.uploadFile({
             ...this.data,
-            title: this.article.title,
-            convert: true
+            title: this.article.title + " (Original Copy)",
+            parent_id: metadata.googleDocFolder.id,
+
         }).then(x => x)
+
+        // Postprocess the article, add date and other props
+        this.article.id = metadata.googleDoc.id
+        this.article.folderId = metadata.googleDocFolder.id
 
         // Append row
         //console.log(Object.values(this.article))

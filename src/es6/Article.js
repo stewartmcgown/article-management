@@ -49,8 +49,22 @@ const Enums = Object.freeze({
 /**
  * Before assigning a property, validate it against these criteria
  */
-const Preprocessing = Object.freeze({
-
+const Attributes = Object.freeze({
+    date: "",
+        title: "",
+        subject: "",
+        type: "",
+        status: "",
+        id: "",
+        deadline: a => a ? new Date(a) : null,
+        notes: "",
+        folderId: "",
+        markingGrid: "",
+        copyright: "",
+        trashed: t => parseTrashed(t),
+        summary: "",
+        reason: "",
+        modified: "",
 })
 
 const parseTrashed = (t) => t === "TRUE" ? true : false
@@ -83,24 +97,23 @@ module.exports = class Article {
      * @param {String} row.copyright
      */
     constructor(row, editors, authors) {
-        this.date = row.date || null
-        this.title = row.title || null
-        this.subject = row.subject || null
-        this.type = row.type || null
-        this.status = row.status || null
-        this.id = row.id || null
-        this.deadline = row.deadline ? new Date(row.deadline) : null
-        this.notes = row.notes || null
-        this.folderId = row.folderID || null
-        this.markingGrid = row.markingGrid || null
-        this.copyright = row.copyright || null
-        this.trashed = parseTrashed(row.trashed) || false
-        this.summary = row.summary || null
-        this.reason = row.reason || null
-        this.modified = row.modified || null
+        Object.keys(Attributes).forEach(a => {
+            if (row[a]) {
+                if (Attributes[a] instanceof Function) {
+                    this[a] = Attributes[a](row[a])
+                } else {
+                    this[a] = row[a]
+                }
+            } else {
+                if (Attributes[a] instanceof Function) {
+                    this[a] = Attributes[a]()
+                } else {
+                this[a] = Attributes[a]}
+            }
+        })
 
         // Redefine immutable properties
-        Object.defineProperties(this, {
+        /*Object.defineProperties(this, {
             id: {
                 configurable: true,
                 value: this.id,
@@ -113,7 +126,7 @@ module.exports = class Article {
                 enumerable: true,
                 writable: false
             }
-        })
+        })*/
 
         this.setLink()
         this.setAuthor(row.email, authors)
@@ -191,5 +204,26 @@ module.exports = class Article {
      */
     static isValid(article) {
         return true
+    }
+
+    /**
+     * Is this article ready to be uploaded?
+     * 
+     * Submitted articles must consist of these properties:
+     * 
+     * 
+     * 
+     * @return {Boolean} true if ready
+     */
+    isFullSubmission() {
+        const minimumProps = [
+            "title",
+            "subject",
+            "type",
+            "summary",
+            "reason",
+        ]
+
+        return minimumProps.every(p => !!this[p])
     }
 }

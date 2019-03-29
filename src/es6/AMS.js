@@ -17,6 +17,7 @@ const {
 const searchQueryParser = require("search-string")
 const ArticleCreator = require("./ArticleCreator")
 const SheetNames = require("./Sheets")
+const GoogleWrapper = require("./utils/GoogleWrapper")
 
 const Strings = {
   FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
@@ -38,10 +39,15 @@ Object.freeze(Strings)
 class AMS {
   constructor() {
     SheetUtils.sheet = AMS.rootAppID
+    GoogleWrapper.root = AMS.rootFolderID
   }
 
   static get rootAppID() {
     return "17yVLJ8L836_vKIEnkxIBN1DIxnX6PgvvfinLTFZyPAI"
+  }
+
+  static get rootFolderID() {
+    return "1dOuWu8QiLUH2FxgAYzICMx3k91Iw3Ouw"
   }
 
   /**
@@ -116,11 +122,15 @@ class AMS {
 
     const creator = new ArticleCreator(data)
 
-    await creator.upload()
+    try {
+      await creator.upload()
 
-    return new Response({
-      message: "Article successfully submitted"
-    })
+      return new Response({
+        message: "Article successfully submitted"
+      })
+    } catch (e) {
+      return new ErrorResponse("Could not upload article.", "It's possible the article is malformed.")
+    }
 
   }
 

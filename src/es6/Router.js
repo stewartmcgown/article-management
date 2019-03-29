@@ -243,14 +243,19 @@ module.exports = class Router {
             if (!track.function) {
                 return new ErrorResponse("Internal Error")
             }
-            if (auth.authenticationLevel >= track.minimumAuthorisation)
-                return track.function({
-                    data: this.request.body,
-                    params: this.params,
-                    level: auth.authenticationLevel,
-                    user: auth.user
-                })
-            else
+            if (auth.authenticationLevel >= track.minimumAuthorisation) {
+
+                try {
+                    return track.function({
+                        data: this.request.body,
+                        params: this.params,
+                        level: auth.authenticationLevel,
+                        user: auth.user
+                    })
+                } catch (e) {
+                    return new ErrorResponse("Internal Error")
+                }
+            } else
                 return new ErrorResponse("You are not authorised to perform that action")
         } else {
             return new ErrorResponse("Internal Error")

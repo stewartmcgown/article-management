@@ -2,7 +2,8 @@ const ExtendableError = require("./ExtendableError");
 const GoogleWrapper = require("./GoogleWrapper")
 const {
     partialMatch,
-    swapObjectKeys
+    swapObjectKeys,
+    camelize
 } = require("./Utils")
 const cache = require("memory-cache")
 
@@ -28,7 +29,7 @@ const arrayToJSON = (data) => {
         let inner = {},
             row = data[i]
         for (let j = 0; j < row.length; j++) {
-            let header = SheetUtils.camelize(data[0][j]),
+            let header = camelize(data[0][j]),
                 item = row[j].toString()
 
             inner[header] = item
@@ -82,7 +83,7 @@ class SheetUtils {
      * @param {Boolean} enableCache
      * @returns {Array.<Array>}
      */
-    static async getSheetAsArray(sheetName, enableCache = false) {
+    static async getSheetAsArray(sheetName, enableCache = false, cacheTimeout = 10000) {
         if (!sheetName) throw new TypeError("sheetName cannot be null")
         const cacheKey = this.cacheKey(sheetName)
 
@@ -97,7 +98,7 @@ class SheetUtils {
         // Process cache miss
         if (enableCache) {
             console.log(`[Cache] Miss: ${cacheKey}`);
-            cache.put(cacheKey, values, 10000)
+            cache.put(cacheKey, values, cacheTimeout)
         }
 
         return values
@@ -242,26 +243,21 @@ class SheetUtils {
         }
     }
 
-    static async pushJSONToSheet(row, sheetName) {
-        const sheet = await SheetUtils.getSheetAsArray(sheetName)
+    static async pushJSONToSheet(obj, sheetName) {
+        if (!obj) throw new TypeError("Object cannot be null")
+
+        const sheet = await SheetUtils.getSheetAsArray(sheetName, true, 86400)
 
         const inverted = swapObjectKeys(sheet[0].map(v => camelize(v)))
+        const row = new Array(inverted.length)
 
-        console.log(inverted)
-    }
+        Object.keys(obj).forEach(k => {
+            if (inverted[k]) {
+                row[inverted[k]] = obj[k]
+            }
+        })
 
-    /**
-     * Turn any string to camelcase
-     * @author CMS
-     * @see https://stackoverflow.com/a/2970667
-     */
-    static camelize(str = "") {
-        if (str == "ID")
-            return str.toLowerCase()
-        return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
-            if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
-            return index == 0 ? match.toLowerCase() : match.toUpperCase();
-        });
+        SheetUtils.pushRowToSheet(row, sheetName).then(x => x)
     }
 
     /**

@@ -157,6 +157,20 @@ const flatSearch = (o, p, c) =>
 
 const swapObjectKeys = o => Object.keys(o).reduce((obj, key) => ({ ...obj, [o[key]]: key }), {});
 
+/**
+     * Turn any string to camelcase
+     * @author CMS
+     * @see https://stackoverflow.com/a/2970667
+     */
+    const camelize = (str = "") => {
+        if (str == "ID")
+            return str.toLowerCase()
+        return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+            if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+            return index == 0 ? match.toLowerCase() : match.toUpperCase();
+        });
+    }
+
 module.exports = {
 	get,
 	assignExisting,
@@ -168,5 +182,6 @@ module.exports = {
 	partialMatch,
 	partialSearch,
 	flatSearch,
-	swapObjectKeys
+	swapObjectKeys,
+	camelize
 }

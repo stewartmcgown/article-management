@@ -19,6 +19,10 @@ const scopes = [
 let oauth = null
 
 class GoogleWrapper {
+    static set root(id) {
+        this.rootFolderID = id
+    }
+
     static authorise() {
         oauth = new google.auth.OAuth2("173181351763-e0i3cevf5l6p0rf0phtoibtgibuc724q.apps.googleusercontent.com", "8A7Dqz1S3gcfXJhRRRJzucsF", "http://localhost:8081/oauthCallback")
         oauth.setCredentials({
@@ -26,19 +30,43 @@ class GoogleWrapper {
         })
     }
 
-    static uploadFile({encoded, mimeType, title, convert = false }) {
+    static uploadFile({encoded, mimeType, title, parent_id, convert = false }) {
         let bufferStream = new stream.PassThrough()
         bufferStream.end(Buffer.from(encoded, 'base64'));
         return new Promise((resolve, reject) => {
+            const resource = {
+                title,
+            }
+
+            if (parent_id) resource.parents = [{id: parent_id}]
+
             drive.files.insert({
                 auth: oauth,
-                resource: {
-                    title,
-                },
+                resource,
                 convert,
                 media: {
                     mimeType,
                     body: bufferStream
+                }
+            }, (err, res) => {
+                if (err) return console.log('The API returned an error: ' + err);
+                const file = res.data
+                resolve(file)
+    
+            })
+        })
+
+    }
+
+    static createFolder({ title, parent}) {
+        return new Promise((resolve, reject) => {
+            drive.files.insert({
+                auth: oauth,
+                resource: {
+                    mimeType: "application/vnd.google-apps.folder",
+                    title,
+                    parents: [{id: this.rootFolderID}]
+
                 }
             }, (err, res) => {
                 if (err) console.log('The API returned an error: ' + err);
@@ -47,7 +75,6 @@ class GoogleWrapper {
     
             })
         })
-
     }
 
     /**
