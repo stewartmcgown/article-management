@@ -9,6 +9,16 @@ class Editors {
         else return null
     }
 
+    /**
+     * 
+     * @param {Array.<String>} emails 
+     */
+    static async getEditorsByEmails(emails) {
+        const data = await SheetUtils.getSheetAsJSON("Logins")
+        
+        return data.filter(j => emails.includes(j.email))
+    }
+
     static async updateEditorByEmail(email, rowData) {
         SheetUtils.updateMatchingRow({ email }, rowData, "Logins")
     }

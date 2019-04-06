@@ -32,7 +32,7 @@ module.exports = class Templates {
     <body>
         <div class="container" style="width: 100%;font-family: sans-serif;">
             ${Components.header()}
-            <p>Dear ${get(["author", "name"], article) ? article.author.name : "Author"},</p>
+            <p>Dear ${get(["author", "name"], article) ? article.authors[0].name : "Author"},</p>
 
             <p>An article you have submitted, <a href="${article.link}" style="text-decoration: none;color: #d13619;border-bottom: 2px #d13619 solid;">${article.title}</a>, 
                 has been updated. The following properties have changed:</p>
@@ -45,7 +45,9 @@ module.exports = class Templates {
 
             <p>Please check if you have recieved any comments on your article.</p>
 
-            <p>Your editor is <strong><a href="mailto:${article.editor.email}">${article.editor ? article.editor.name : "currently unavailable"}</a></strong>.</p>
+            <p> Your main editor is <strong> <a href = "mailto:${article.editors[0] ? article.editors[0].email : ""}" > ${
+                article.editors[0] ? article.editors[0].name : "currently unavailable"
+            } </a></strong> . </p>
             
             <p><em>This is an automated email and will not be replied to.</em></p>
         </div>

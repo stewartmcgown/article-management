@@ -12,6 +12,14 @@
 const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o)
 
 /**
+ * Map an array of objects to an array of a specific property
+ * 
+ * @param {Array.<Object>} ao 
+ * @param {String} p 
+ */
+const mapToSpecificProperty = (ao, p) => ao.map(a => a[p])
+
+/**
  *
  * @param {Object} target object to update
  * @param {Object} source source of properties
@@ -19,10 +27,21 @@ const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o)
 const assignExisting = (target, source) => {
 	Object.keys(source)
 		.filter(key => key in target)
+		.forEach(key => target[key] = source[key])
+}
+
+/**
+ *
+ * @param {Object} target object to update
+ * @param {Object} source source of properties
+ */
+const assignExistingRecursive = (target, source) => {
+	Object.keys(source)
+		.filter(key => key in target)
 		.forEach(key => {
-			target[key] instanceof Object
-				? assignExisting(target[key], source[key])
-				: (target[key] = source[key])
+			target[key] instanceof Object ?
+				assignExistingRecursive(target[key], source[key]) :
+				(target[key] = source[key])
 		})
 }
 
@@ -155,6 +174,12 @@ const flatSearch = (o, p, c) =>
 			: JSON.stringify(Object.values(x)) == p
 	)
 
+/**
+ * Swap the objects values with its keys
+ * 
+ * @param {Object} o 
+ * @return {Array}
+ */
 const swapObjectKeys = o => Object.keys(o).reduce((obj, key) => ({ ...obj, [o[key]]: key }), {});
 
 /**
@@ -171,6 +196,38 @@ const swapObjectKeys = o => Object.keys(o).reduce((obj, key) => ({ ...obj, [o[ke
         });
     }
 
+/**
+ * Take an object and convert it to an array that
+ * is indexed correctly by the order defined in the 
+ * header object.
+ * 
+ * EXAMPLE
+ * 
+ * > const header = { "Name", "Date", "Number of" }
+ * > const obj = { name: "Dave", numberOf: 9, date: "20-08-19" }
+ * 
+ * > const out = JSONToAlignedArray(obj, header)
+ * ["Dave", "20-08-19", 9]
+ * 
+ * @param {Object} obj obejct to convert
+ * @param {Array.<String>} header ordered header of sheet
+ */
+const JSONToAlignedArray = (obj, header) => {
+	const inverted = swapObjectKeys(header.map(v => camelize(v)))
+	const row = [...Array(inverted.length)]
+
+	Object.keys(obj).forEach(k => {
+		if (inverted[k]) {
+			if (obj[k] instanceof Array) {
+				obj[k] = obj[k].join(",")
+			}
+			row[inverted[k]] = obj[k]
+		}
+	})
+
+	return row
+}
+
 module.exports = {
 	get,
 	assignExisting,
@@ -183,5 +240,7 @@ module.exports = {
 	partialSearch,
 	flatSearch,
 	swapObjectKeys,
-	camelize
+	camelize,
+	JSONToAlignedArray,
+	mapToSpecificProperty
 }

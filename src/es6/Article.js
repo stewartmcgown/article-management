@@ -54,13 +54,13 @@ const Attributes = Object.freeze({
         title: "",
         subject: "",
         type: "",
-        status: "",
+        status: "Submitted",
         id: "",
         deadline: a => a ? new Date(a) : null,
         notes: "",
         folderId: "",
         markingGrid: "",
-        copyright: "",
+        copyright: "None",
         trashed: t => parseTrashed(t),
         summary: "",
         reason: "",
@@ -129,8 +129,8 @@ module.exports = class Article {
         })*/
 
         this.setLink()
-        this.setAuthor(row.email, authors)
-        this.setEditor(row.editorEmail, editors)
+        this.setAuthor(row.authors, authors)
+        this.setEditor(row.editors, editors)
     }
 
     /**
@@ -163,19 +163,18 @@ module.exports = class Article {
     }
 
     /**
-     * Using the authorName, authorSchool and email, 
-     * create an author object and set it.
      * 
-     * @param {String} email
-     * @param {String} name
-     * @param {String} school
+     * @param {Array.<String>} emails 
+     * @param {Array.<Author>} authors 
      */
-    setAuthor(email, authors = []) {
-        this.author = authors.find(j => j.email == email) || { email }
+    setAuthor(emails = "", authors = []) {
+        emails = emails.split(",")
+        this.authors = authors.filter(j => emails.includes(j.email)) || { email: emails[0] }
     }
 
-    setEditor(email, editors = []) {
-        this.editor = editors.find(j => j.email == email) || { email }
+    setEditor(emails = "", editors = []) {
+        emails = emails.split(",")
+        this.editors = editors.filter(j => emails.includes(j.email)) || { email: emails[0] }
     }
 
     setLink() {

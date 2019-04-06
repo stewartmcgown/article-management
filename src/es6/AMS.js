@@ -12,7 +12,9 @@ const {
   get,
   partialSearch,
   partialMatch,
-  flatSearch
+  flatSearch,
+  JSONToAlignedArray,
+  mapToSpecificProperty
 } = require("./utils/Utils")
 const searchQueryParser = require("search-string")
 const ArticleCreator = require("./ArticleCreator")
@@ -82,8 +84,22 @@ class AMS {
    * 
    * @param {Object} modified 
    */
-  static processModified(modified) {
+  static processModified(article, modified) {
+      // Handle editor/author changes
+      if (modified.editors) modified.editors = mapToSpecificProperty(modified.editors, "email")
+      if (modified.authors) modified.authors = mapToSpecificProperty(modified.authors, "email")
 
+      modified = objectToKeyValues(stemFlatten(modified))
+      
+        // Update the author
+        EmailService.send({
+          to: article.authors.map(a => a.email),
+          type: "updateArticle",
+          data: {
+            article,
+            modified
+          }
+        })
   }
 
   /**
@@ -129,7 +145,7 @@ class AMS {
         message: "Article successfully submitted"
       })
     } catch (e) {
-      return new ErrorResponse("Could not upload article.", "It's possible the article is malformed.")
+      return new ErrorResponse("malformedArticleException", "The article is malformed.")
     }
 
   }
@@ -187,38 +203,26 @@ class AMS {
       properties = data.properties
     let article = await Articles.getArticleById(id)
 
-    if (!article) {
-      return new ErrrorResponse("Article not found")
+    if (!article || article instanceof ErrorResponse) {
+      return new ErrorResponse("articleNotFound")
     }
 
-    if (properties.editor) {
-      let editor = await Editors.getEditorByEmail(properties.editor.email)
+    if (properties.editors) {
+      const emails = properties.editors.map(e => e.email)
+      let editors = await Editors.getEditorsByEmails(emails)
 
-      if (!editor) {
-        return new ErrorResponse("Editor not found")
+      if (editors.length === 0) {
+        return new ErrorResponse("editorNotFound")
       }
 
-      Object.assign(properties.editor, editor)
+      properties.editors = editors
     }
 
-    let modified = objectToKeyValues(stemFlatten(article.assignProperties(properties)))
+    let modified = article.assignProperties(properties)
 
-    AMS.processModified(modified) // Can be async as we don't rely on return
+    AMS.processModified(article, modified) // Can be async as we don't rely on return
 
-    let rowData = article.toRow()
-    Articles.updateArticleById(id, rowData)
-
-    // Update the author
-    EmailService.send({
-      to: article.author.email,
-      type: "updateArticle",
-      data: {
-        article,
-        modified
-      }
-    })
-
-    // notify the editor
+    Articles.updateArticle(article)
 
     return new Response({
       reason: "Successful Update",
@@ -339,12 +343,7 @@ class AMS {
     /** @type {Array.<Editor>} */
     const editors = sheet[AMS.baseAuthSheet]
 
-    articles = articles.map(a => {
-      a = new Article(a)
-      a.editor = editors.find(j => j.email == a.editor.email) || a.editor
-      a.author = authors.find(j => j.email == a.author.email) || a.author
-      return a
-    })
+    articles = articles.map(a => new Article(a, editors, authors))
 
     let out = []
     if (typeof q === "string") {
@@ -497,15 +496,15 @@ class Articles {
     return new Article(article, editors, authors)
   }
 
-  /**
-   * 
-   * @param {String} id 
-   * @param {Array} rowData 
-   */
-  static async updateArticleById(id, rowData) {
-    SheetUtils.updateMatchingRow({
-      id
-    }, rowData, AMS.articleDatabase)
+  static async updateArticle(article) {
+    const out = {...article}
+
+    out.authors = article.authors.map(au => au.email)
+    out.editors = article.editors.map(ed => ed.email)
+  
+    SheetUtils.updateMatchingRowWithJSON({
+      id: article.id
+    }, out, AMS.articleDatabase)
   }
 
 }

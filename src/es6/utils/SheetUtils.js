@@ -3,7 +3,8 @@ const GoogleWrapper = require("./GoogleWrapper")
 const {
     partialMatch,
     swapObjectKeys,
-    camelize
+    camelize,
+    JSONToAlignedArray
 } = require("./Utils")
 const cache = require("memory-cache")
 
@@ -39,7 +40,6 @@ const arrayToJSON = (data) => {
 
     return out
 }
-
 
 class SheetUtils {
 
@@ -170,6 +170,32 @@ class SheetUtils {
         let rowNumber = data.findIndex(r => partialMatch(r, properties)) + 2
         if (rowNumber === 0) return
         //sheet.getActiveSheet().getRange(rowNumber, 1, 1, sheet.getLastColumn()).setValues(rangeRow)
+        GoogleWrapper.updateRow({
+            id: this.sheetID,
+            sheetName,
+            rowNumber,
+            row
+        })
+    }
+
+    /**
+     * Find a row that matches a list of identifiers. If it matches,
+     * update it with the new row.
+     * 
+     * @param {String} properties id of the row
+     * @param {Object} row overwriting data
+     * @param {String} sheetName sheet to look in
+     */
+    static async updateMatchingRowWithJSON(properties, row, sheetName) {
+        if (!properties || !row || !sheetName) throw new Error("Missing arguments @ SheetUtils.updateMatchingRow")
+        
+        const data = await this.getSheetAsJSON(sheetName)
+        let rowNumber = data.findIndex(r => partialMatch(r, properties)) + 2
+        if (rowNumber === 0) return
+
+        // Convert object to aligned row
+        const data_array = await this.getSheetAsArray(sheetName)
+        row = JSONToAlignedArray(row, data_array[0])
         GoogleWrapper.updateRow({
             id: this.sheetID,
             sheetName,
