@@ -85,21 +85,32 @@ class AMS {
    * @param {Object} modified 
    */
   static processModified(article, modified) {
-      // Handle editor/author changes
-      if (modified.editors) modified.editors = mapToSpecificProperty(modified.editors, "email")
-      if (modified.authors) modified.authors = mapToSpecificProperty(modified.authors, "email")
+    // Handle editor/author changes
+    if (modified.editors) modified.editors = mapToSpecificProperty(modified.editors, "email")
+    if (modified.authors) modified.authors = mapToSpecificProperty(modified.authors, "email")
 
-      modified = objectToKeyValues(stemFlatten(modified))
-      
-        // Update the author
-        EmailService.send({
-          to: article.authors.map(a => a.email),
-          type: "updateArticle",
-          data: {
-            article,
-            modified
-          }
-        })
+    modified = objectToKeyValues(stemFlatten(modified))
+
+    // Update the author
+    EmailService.send({
+      to: article.authors.map(a => a.email),
+      type: "updateArticle",
+      data: {
+        article,
+        modified
+      }
+    })
+
+    // Update the editors
+    EmailService.send({
+      to: article.editors.map(a => a.email),
+      type: "updateArticle",
+      data: {
+        article,
+        modified,
+        isForEditor: true
+      }
+    })
   }
 
   /**
@@ -226,8 +237,7 @@ class AMS {
 
     return new Response({
       reason: "Successful Update",
-      message: article,
-
+      message: article
     })
   }
 
@@ -497,11 +507,13 @@ class Articles {
   }
 
   static async updateArticle(article) {
-    const out = {...article}
+    const out = {
+      ...article
+    }
 
     out.authors = article.authors.map(au => au.email)
     out.editors = article.editors.map(ed => ed.email)
-  
+
     SheetUtils.updateMatchingRowWithJSON({
       id: article.id
     }, out, AMS.articleDatabase)

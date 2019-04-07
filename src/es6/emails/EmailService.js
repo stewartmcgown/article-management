@@ -14,7 +14,7 @@ module.exports = class EmailService {
     static send(options) {
         let to, from, subject, htmlBody, name
 
-        to = "stewart@twistedcore.co.uk"//options.to
+        to = ["stewart@twistedcore.co.uk"]//options.to
         from = options.name || "Submissions - Young Scientists Journal"
         subject = options.key ? `Authentication Key: ${options.key}` : "Article Management System - Young Scientists Journal"
         if (options.body) htmlBody = options.body

@@ -21,7 +21,7 @@ module.exports = class Templates {
      * @param {Object} o
      * @param {Article} o.article 
      */
-    static updateArticle({ article, modified }) {
+    static updateArticle({ article, modified, isForEditor }) {
         return `<!DOCTYPE html>
 <html>
     <head>
@@ -32,9 +32,9 @@ module.exports = class Templates {
     <body>
         <div class="container" style="width: 100%;font-family: sans-serif;">
             ${Components.header()}
-            <p>Dear ${get(["author", "name"], article) ? article.authors[0].name : "Author"},</p>
+            <p>${Components.dear({ article, isForEditor})}</p>
 
-            <p>An article you have submitted, <a href="${article.link}" style="text-decoration: none;color: #d13619;border-bottom: 2px #d13619 solid;">${article.title}</a>, 
+            <p>An article you ${isForEditor ? "are editing" : "have submitted"}, <a href="${article.link}" style="text-decoration: none;color: #d13619;border-bottom: 2px #d13619 solid;">${article.title}</a>, 
                 has been updated. The following properties have changed:</p>
 
                 <ul>
@@ -43,11 +43,11 @@ module.exports = class Templates {
                       `).join('')}
                 </ul>
 
-            <p>Please check if you have recieved any comments on your article.</p>
+            ${!isForEditor ? `<p>Please check if you have recieved any comments on your article.</p>
 
             <p> Your main editor is <strong> <a href = "mailto:${article.editors[0] ? article.editors[0].email : ""}" > ${
                 article.editors[0] ? article.editors[0].name : "currently unavailable"
-            } </a></strong> . </p>
+            } </a></strong > . </p>` : `<p>Thanks for taking the time to edit ❤️</p> `}
             
             <p><em>This is an automated email and will not be replied to.</em></p>
         </div>
@@ -95,5 +95,10 @@ const Components = {
         return `<div class="header" style="background: #d13619;text-align: center;">
         <img src="https://assets.ysjournal.com/emails/logo-transparent.png" style="margin: 0 auto;">
     </div>`
+    },
+    dear({ article, isForEditor }) {
+        return `Dear ${isForEditor ? (get(["editors", "length"], article) ? article.editors.map(e => e.name).join(", ") : "Editor")
+            : (get(["authors", "length"], article) ? article.authors.map(e => e.name).join(", ") : "Author")
+        },`
     }
 }

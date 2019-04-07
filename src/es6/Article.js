@@ -96,7 +96,7 @@ module.exports = class Article {
      * @param {String} row.markingGrid
      * @param {String} row.copyright
      */
-    constructor(row, editors, authors) {
+    constructor(row, editors, authors, includeHidden = false) {
         Object.keys(Attributes).forEach(a => {
             if (row[a]) {
                 if (Attributes[a] instanceof Function) {
