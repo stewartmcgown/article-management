@@ -20,6 +20,8 @@ const searchQueryParser = require("search-string")
 const ArticleCreator = require("./ArticleCreator")
 const SheetNames = require("./Sheets")
 const GoogleWrapper = require("./utils/GoogleWrapper")
+const Logger = require("./Logger")
+
 
 const Strings = {
   FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
@@ -207,7 +209,8 @@ class AMS {
    */
   static async updateArticle({
     data,
-    level
+    level,
+    user
   }) {
     if (!data.id || !data.properties) return new ErrorResponse(Strings.MISSING_BODY)
     let id = data.id,
@@ -234,6 +237,8 @@ class AMS {
     AMS.processModified(article, modified) // Can be async as we don't rely on return
 
     Articles.updateArticle(article)
+
+    Logger.log("Update", user.email, `${article.id} updated`)
 
     return new Response({
       reason: "Successful Update",

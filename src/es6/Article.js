@@ -3,7 +3,8 @@ const Editor = require("./people/Editor");
 const State = require("./State")
 const {
     parseDateString,
-    assignExisting
+    assignExisting,
+    removeDuplicatesProperties
 } = require("./utils/Utils");
 
 const Strings = {
@@ -169,12 +170,12 @@ module.exports = class Article {
      */
     setAuthor(emails = "", authors = []) {
         emails = emails.split(",")
-        this.authors = authors.filter(j => emails.includes(j.email)) || { email: emails[0] }
+        this.authors = removeDuplicatesProperties(authors.filter(j => emails.includes(j.email)), "email")
     }
 
     setEditor(emails = "", editors = []) {
         emails = emails.split(",")
-        this.editors = editors.filter(j => emails.includes(j.email)) || { email: emails[0] }
+        this.editors = removeDuplicatesProperties(editors.filter(j => emails.includes(j.email)), "email")
     }
 
     setLink() {

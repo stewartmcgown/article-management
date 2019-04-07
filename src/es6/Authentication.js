@@ -288,9 +288,7 @@ class Authentication {
             // Date is too old, so Invalidate key
             this.invalidateAuthToken()
             Logger.unauthorised("Authentication", this.email)
-            return new AuthenticationResource({
-                message: "Authtoken has expired",
-            })
+            return new ErrorResponse("authtokenExpired")
         } else {
             const user = await Editors.getEditorByEmail(authTokenEntry.email)
             // Date is in range

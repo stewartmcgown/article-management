@@ -20,6 +20,24 @@ const get = (p, o) => p.reduce((xs, x) => (xs && xs[x] ? xs[x] : null), o)
 const mapToSpecificProperty = (ao, p) => ao.map(a => a[p])
 
 /**
+ * 
+ * 
+ * @param {Array.<Object>} ao 
+ * @param {String} p 
+ */
+const removeDuplicatesProperties = (ao, p) => { 
+	const uniques = new Set()
+	return ao.filter(a => { 
+		if (uniques.has(a[p])) {
+			return false
+		} else {
+			uniques.add(a[p])
+			return true
+		}
+	})
+}
+
+/**
  *
  * @param {Object} target object to update
  * @param {Object} source source of properties
@@ -242,5 +260,6 @@ module.exports = {
 	swapObjectKeys,
 	camelize,
 	JSONToAlignedArray,
-	mapToSpecificProperty
+	mapToSpecificProperty,
+	removeDuplicatesProperties
 }
