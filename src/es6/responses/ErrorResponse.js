@@ -1,11 +1,11 @@
-module.exports =  class ErrorResponse {
+module.exports = class ErrorResponse {
     /**
+     * Represents an error returned by the system
+     * 
      * @param {String} error
      * @param {String} message
      */
-    constructor(error, message) {
-        this.error = {}
-        this.error.error = error
-        this.error.message = message
+    constructor(error) {
+        this.error = error
     }
 }

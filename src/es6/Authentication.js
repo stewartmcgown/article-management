@@ -1,5 +1,6 @@
 const ExtendableError = require('./utils/ExtendableError');
 const ErrorResponse = require("./responses/ErrorResponse")
+const Errors = require('./Errors.js')
 const SheetUtils = require('./utils/SheetUtils');
 const EmailService = require('./emails/EmailService');
 const AMS = require('./AMS');
@@ -288,7 +289,7 @@ class Authentication {
             // Date is too old, so Invalidate key
             this.invalidateAuthToken()
             Logger.unauthorised("Authentication", this.email)
-            return new ErrorResponse("authtokenExpired")
+            return new ErrorResponse(Errors.EXPIRED_AUTH_TOKEN)
         } else {
             const user = await Editors.getEditorByEmail(authTokenEntry.email)
             // Date is in range
@@ -343,7 +344,7 @@ class Authentication {
         if (!this.authToken && this.email) {
             let matchingUsers = await this.getUsersFromSheet()
             if (!matchingUsers.length) {
-                return new ErrorResponse("editorNotRegistered", "User was not found.")
+                return new ErrorResponse(Errors.EDITOR_NOT_FOUND)
             } else {
                 this.user = matchingUsers[0]
                 this.setLevel(this.user.level)

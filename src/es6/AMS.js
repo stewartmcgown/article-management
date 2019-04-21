@@ -6,6 +6,7 @@ const Authors = require("./Authors")
 const EmailService = require("./emails/EmailService");
 const Response = require('./responses/Response')
 const ErrorResponse = require("./responses/ErrorResponse")
+const Errors = require('./Errors.js')
 const {
   objectToKeyValues,
   stemFlatten,
@@ -21,15 +22,6 @@ const ArticleCreator = require("./ArticleCreator")
 const SheetNames = require("./Sheets")
 const GoogleWrapper = require("./utils/GoogleWrapper")
 const Logger = require("./Logger")
-
-
-const Strings = {
-  FUNCTIONALITY_NOT_IMPLEMENTED: "Functionality not yet implemented.",
-  MISSING_BODY: "Request body missing.",
-  SUCCESS: "Success",
-  INTERNAL_ERROR: "Internal Error",
-  NOT_FOUND: "Article not found"
-}
 
 Object.freeze(Strings)
 
@@ -144,9 +136,7 @@ class AMS {
     params
   }) {
     if (!data) {
-      return new ErrorResponse({
-        error: "Missing properties"
-      })
+      return new ErrorResponse(Errors.MISSING_BODY)
     }
 
     const creator = new ArticleCreator(data)
@@ -158,7 +148,7 @@ class AMS {
         message: "Article successfully submitted"
       })
     } catch (e) {
-      return new ErrorResponse("malformedArticleException", "The article is malformed.")
+      return new ErrorResponse(Errors.MALFORMED_ARTICLE)
     }
 
   }
@@ -170,7 +160,7 @@ class AMS {
     let states = await SheetUtils.getSheetAsJSON(AMS.statusSheet)
 
     if (!states) {
-      return new ErrorResponse(Strings.INTERNAL_ERROR)
+      return new ErrorResponse(Errors.INTERNAL_ERROR)
     }
 
     return states
@@ -180,14 +170,14 @@ class AMS {
     data,
     params
   }) {
-    if (!params.id) return new ErrorResponse(Strings.MISSING_BODY)
+    if (!params.id) return new ErrorResponse(Errors.MISSING_BODY)
 
     let article = await SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, {
       id: params.id
     })
 
-    if (!article) return new ErrorResponse(Strings.NOT_FOUND)
-    else if (!article[0]) return new ErrorResponse(Strings.NOT_FOUND)
+    if (!article) return new ErrorResponse(Errors.NOT_FOUND)
+    else if (!article[0]) return new ErrorResponse(Errors.NOT_FOUND)
     else article = article[0]
 
     // Post processing
@@ -195,7 +185,7 @@ class AMS {
 
     return new Response({
       message: article,
-      reason: Strings.SUCCESS
+      reason: Errors.SUCCESS
     })
   }
 
@@ -212,13 +202,13 @@ class AMS {
     level,
     user
   }) {
-    if (!data.id || !data.properties) return new ErrorResponse(Strings.MISSING_BODY)
+    if (!data.id || !data.properties) return new ErrorResponse(Errors.MISSING_BODY)
     let id = data.id,
       properties = data.properties
     let article = await Articles.getArticleById(id)
 
     if (!article || article instanceof ErrorResponse) {
-      return new ErrorResponse("articleNotFound")
+      return new ErrorResponse(Errors.NOT_FOUND)
     }
 
     if (properties.editors) {
@@ -226,7 +216,7 @@ class AMS {
       let editors = await Editors.getEditorsByEmails(emails)
 
       if (editors.length != properties.editors.length) {
-        return new ErrorResponse("editorNotFound", "Make sure emails are entered correctly.")
+        return new ErrorResponse(Errors.EDITOR_NOT_FOUND)
       }
 
       properties.editors = editors
@@ -282,13 +272,13 @@ class AMS {
     params
   }) {
     if (!data) throw new TypeError("Editor cannot be undefined")
-    if (!data.email || !data.name) return new ErrorResponse("Editors must have an email and a name", data)
+    if (!data.email || !data.name) return new ErrorResponse(Errors.EDITOR_MISSING_PARAMS)
     const editor = new Editor(data)
 
     const existing = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, {
       email: editor.email
     })
-    if (existing.length !== 0 || !(existing instanceof Array)) return new ErrorResponse("Email already in use")
+    if (existing.length !== 0 || !(existing instanceof Array)) return new ErrorResponse(Errors.EDITOR_EMAIL_IN_USE)
 
     
 
@@ -319,18 +309,20 @@ class AMS {
     user,
     level
   }) {
-    if (!data.email || !data.properties) return new ErrorResponse("You must specify a partial Editor object and properties to update it with.")
+    if (!data.email || !data.properties) return new ErrorResponse(Errors.MISSING_BODY)
     let email = data.email,
       properties = data.properties
     let editor = await Editors.getEditorByEmail(email)
 
-    if (!editor) return new ErrorResponse("Unable to find editor", editor)
+    if (!editor) return new ErrorResponse(Errors.EDITOR_NOT_FOUND)
 
     // If you aren't an admin, you can only edit yourself
-    if (editor.email != user.email && level < 3) return new ErrorResponse("You may only edit yourself")
+    if (editor.email != user.email && level < 3) return new ErrorResponse(Errors.EDITOR_EDIT_UNAUTHORISED)
 
     editor.assignProperties(properties)
     await Editors.updateEditorByEmail(editor.email, editor.toRow())
+
+    Logger.log(`Editor '${editor.email}' was updated.`, user.email, "Success")
 
     return new Response({
       reason: "updatedEditor",
@@ -430,7 +422,7 @@ class AMS {
         q
       })
 
-    return results[0] || new ErrorResponse("editorNotFound", `No editor found matching ${email}`)
+    return results[0] || new ErrorResponse(Errors.EDITOR_NOT_FOUND)
   }
 
   /**
@@ -508,7 +500,7 @@ class Articles {
 
     let article = articles.find(a => a.id == id)
 
-    if (!article) return new ErrorResponse("aritcleNotFound")
+    if (!article) return new ErrorResponse(Errors.NOT_FOUND)
 
     return new Article(article, editors, authors)
   }

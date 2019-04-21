@@ -4,6 +4,7 @@ const {
 } = require('./utils/Utils');
 const Response = require('./responses/Response')
 const ErrorResponse = require('./responses/ErrorResponse')
+const Errors = require('./Errors.js')
 const {
     Authentication,
     AuthenticationResource,
@@ -20,11 +21,6 @@ class Route {
         this.f = !(f instanceof Function) || f
         this.auth = auth
     }
-}
-
-const Errors = {
-    NO_SUCH_CONTEXT: "No such context exists",
-    CONTEXT_NO_ACTIONS: "Context exists but has no actions"
 }
 
 module.exports = class Router {
@@ -170,12 +166,6 @@ module.exports = class Router {
         this.key = e.params.key
         this.authToken = e.params.authToken
 
-        if (e.path)
-            this.path = e.path.split("/").slice(1)
-        else {
-            throw new Error('No path supplied @ setOptions')
-        }
-
         this.args = Object.assign({}, e.params, {
             email: undefined,
             key: undefined,
@@ -199,6 +189,11 @@ module.exports = class Router {
     }
 
 
+    /**
+     * Handle the routing of a request
+     * 
+     * @returns 
+     */
     async route() {
         if (!this.path)
             return new Response({
@@ -241,7 +236,7 @@ module.exports = class Router {
 
         if (track !== null) {
             if (!track.function) {
-                return new ErrorResponse("Internal Error")
+                return new ErrorResponse(Errors.INTERNAL_ERROR)
             }
             if (auth.authenticationLevel >= track.minimumAuthorisation) {
 
@@ -253,12 +248,12 @@ module.exports = class Router {
                         user: auth.user
                     })
                 } catch (e) {
-                    return new ErrorResponse("Internal Error")
+                    return new ErrorResponse(Errors.INTERNAL_ERROR)
                 }
             } else
-                return new ErrorResponse("You are not authorised to perform that action")
+                return new ErrorResponse(Errors.UNAUTHORISED_ACCESS)
         } else {
-            return new ErrorResponse("Internal Error")
+            return new ErrorResponse(Errors.INTERNAL_ERROR)
         }
 
     }

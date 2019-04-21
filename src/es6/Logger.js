@@ -14,15 +14,15 @@ module.exports = class Logger {
      * @param {String} email 
      * @param {String} result
      */
-    static async log(action, email, result="Success") {
+    static log(action, email, result="Success") {
         SheetUtils.pushRowToSheet([new Date(), action, email, result], LogSheet)
     }
 
-    static async unauthorised(action, email) {
+    static unauthorised(action, email) {
         Logger.log(action, email, Text.Unauthorised)
     }
 
-    static async failure(action, email) {
+    static failure(action, email) {
         Logger.log(action, email, Text.Failure)
     }
 }
