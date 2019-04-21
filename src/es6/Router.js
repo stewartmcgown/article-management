@@ -166,6 +166,12 @@ module.exports = class Router {
         this.key = e.params.key
         this.authToken = e.params.authToken
 
+        if (e.path)
+            this.path = e.path.split("/").slice(1)
+        else {
+            throw new Error('No path supplied @ setOptions')
+        }
+
         this.args = Object.assign({}, e.params, {
             email: undefined,
             key: undefined,
