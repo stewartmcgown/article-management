@@ -125,7 +125,7 @@ module.exports = class Router {
                 "editors": {
                     "create": {
                         function: AMS.createEditor,
-                        minimumAuthorisation: AuthenticationLevels.ADMIN
+                        minimumAuthorisation: AuthenticationLevels.SENIOR
                     },
                     "update": {
                         function: AMS.updateEditor,
