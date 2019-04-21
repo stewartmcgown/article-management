@@ -17,7 +17,20 @@ const Enums = Object.freeze({
     position: Object.values(Positions)
 })
 
-module.exports = class Editor extends Person {
+/**
+ * Before assigning a property, validate it against these criteria
+ */
+const Attributes = Object.freeze({
+    name: "",
+    email: "",
+    position: p => Positions[p] ? p : Positions.Editor,
+    level: l => Levels[l] ? l : Levels.Junior,
+    totalEdited: 0,
+    currentlyEditing: 0,
+    subjects: [],
+})
+
+module.exports = class Editor {
     /**
      * Constructs an editor object
      * 
@@ -30,15 +43,22 @@ module.exports = class Editor extends Person {
      * @param {Number} data.currentlyEditing
      * @param {Array} data.subjects
      */
-    constructor(data) {
-        super(data.name, data.email)
-        this.name = data.name
-        this.email = data.email
-        this.position = data.position || Positions.Editor
-        this.level = data.level || Levels.Junior
-        this.totalEdited = data.totalEdited || 0
-        this.currentlyEditing = data.currentlyEditing || 0
-        this.subjects = data.subjects || []
+    constructor(row) {
+        Object.keys(Attributes).forEach(a => {
+            if (row[a]) {
+                if (Attributes[a] instanceof Function) {
+                    this[a] = Attributes[a](row[a])
+                } else {
+                    this[a] = row[a]
+                }
+            } else {
+                if (Attributes[a] instanceof Function) {
+                    this[a] = Attributes[a]()
+                } else {
+                    this[a] = Attributes[a]
+                }
+            }
+        })
     }
 
     printSubjects() {

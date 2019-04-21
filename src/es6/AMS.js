@@ -225,8 +225,8 @@ class AMS {
       const emails = properties.editors.map(e => e.email)
       let editors = await Editors.getEditorsByEmails(emails)
 
-      if (editors.length === 0) {
-        return new ErrorResponse("editorNotFound")
+      if (editors.length != properties.editors.length) {
+        return new ErrorResponse("editorNotFound", "Make sure emails are entered correctly.")
       }
 
       properties.editors = editors
@@ -289,6 +289,8 @@ class AMS {
       email: editor.email
     })
     if (existing.length !== 0 || !(existing instanceof Array)) return new ErrorResponse("Email already in use")
+
+    
 
     await SheetUtils.pushRowToSheet(editor.toRow(), AMS.baseAuthSheet)
 
