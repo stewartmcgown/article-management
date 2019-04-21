@@ -23,8 +23,6 @@ const SheetNames = require("./Sheets")
 const GoogleWrapper = require("./utils/GoogleWrapper")
 const Logger = require("./Logger")
 
-Object.freeze(Strings)
-
 /**
  * Handles all AMS specific actions when called by the Router.
  * 
