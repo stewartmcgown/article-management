@@ -25,7 +25,7 @@ const AMS = require("../es6/AMS")
       body: request.body
     }, request.method)
 
-    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Origin", process.env.PORT ? "manage.ysjournal.com" : "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     response.setHeader("Content-Type", "application/json")
     //router.route().then(data => response.send(JSON.stringify(data)))

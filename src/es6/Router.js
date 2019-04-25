@@ -162,7 +162,7 @@ module.exports = class Router {
         if (!e.params)
             return
 
-        this.email = e.params.email
+        this.email = e.params.email ? e.params.email.toLowerCase() : null
         this.key = e.params.key
         this.authToken = e.params.authToken
 

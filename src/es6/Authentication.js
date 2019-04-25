@@ -277,9 +277,7 @@ class Authentication {
 
         if (rows.length === 0 || !get(['0', 'dateTime'], rows)) {
             Logger.unauthorised("Authentication", this.email)
-            return new AuthenticationResource({
-                message: "Authtoken not found",
-            })
+            return new ErrorResponse(Errors.EXPIRED_AUTH_TOKEN)
         }
 
         let authTokenEntry = rows[0]

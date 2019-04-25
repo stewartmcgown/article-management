@@ -345,10 +345,12 @@ class AMS {
     const sheet = await SheetUtils.getSheetsAsJSON([AMS.articleDatabase, AMS.baseAuthSheet, AMS.authorSheet], true)
     /** @type {Array.<Article>} */
     let articles = sheet[AMS.articleDatabase]
+
     /** @type {Array.<Author>} */
     const authors = sheet[AMS.authorSheet]
+
     /** @type {Array.<Editor>} */
-    const editors = sheet[AMS.baseAuthSheet]
+    const editors = Editors.fromSheet(sheet[AMS.baseAuthSheet], articles)
 
     articles = articles.map(a => new Article(a, editors, authors))
 
@@ -389,7 +391,8 @@ class AMS {
     params
   }) {
     const q = params.q
-    const sheet = await SheetUtils.getSheetAsJSON(AMS.baseAuthSheet, true)
+    let sheets = await SheetUtils.getSheetsAsJSON([AMS.baseAuthSheet, AMS.articleDatabase], true)
+    let sheet = Editors.fromSheet(sheets[AMS.baseAuthSheet], sheets[AMS.articleDatabase])
     let out = []
     if (typeof q === "string") {
       // TODO: modularise this

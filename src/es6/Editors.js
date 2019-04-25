@@ -22,6 +22,19 @@ class Editors {
     static async updateEditorByEmail(email, rowData) {
         SheetUtils.updateMatchingRow({ email }, rowData, "Logins")
     }
+
+    /**
+     * 
+     * @param {Array.<Editor>} editors 
+     * @param {Array.<Article>} articles 
+     */
+    static fromSheet(editors, articles) {
+        return editors.map(e => {
+            e.totalEdited = articles.filter(a => a.editors.includes(e.email)).length
+            e.currentlyEditing = articles.filter(a => a.editors.includes(e.email) && a.status != "Published").length
+            return e
+        })
+    }
 }
 
 module.exports = Editors
