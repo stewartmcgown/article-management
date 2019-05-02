@@ -81,6 +81,8 @@ class Authentication {
             email: this.email
         })
 
+        matchingUsers.map(m => m.email = m.email.toLowerCase())
+
         return matchingUsers
 
     }
