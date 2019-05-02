@@ -77,6 +77,22 @@ class GoogleWrapper {
         })
     }
 
+    static getDoc({ id }) {
+        this.authorise()
+        return new Promise((resolve, reject) => {
+            drive.files.export({
+                fileId: id,
+                mimeType: 'text/html'
+            }, {
+                responseType: 'stream'
+            },function(err, response){
+                if(err)return reject(err);
+                
+                resolve(response.data)
+           });
+        })
+    }
+
     /**
      * 
      * @param {String} id 

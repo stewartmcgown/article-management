@@ -16,6 +16,7 @@ class ArticleCreator {
      * @param {Object} creator.author
      */
     constructor({ article, author, data}) {
+        /** @type {Article} */
         this.article = article
         this.data = data
 
@@ -69,6 +70,8 @@ class ArticleCreator {
         // Append row
         //console.log(Object.values(this.article))
         SheetUtils.pushJSONToSheet(this.article, SheetNames.articleDatabase)
+
+        
     }
 }
 

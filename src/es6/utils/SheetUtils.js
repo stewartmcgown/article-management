@@ -126,7 +126,6 @@ class SheetUtils {
      * 
      * @param {String} sheetName name of the sheet to search
      * @param {Object} properties contains key-value pairs to search for
-     * @param {Boolean} allowMultiple should we return multiple results
      * 
      * @return {Array.<Object>} matching row(s)
      */
@@ -142,6 +141,24 @@ class SheetUtils {
             return []
         }
         return rows
+    }
+
+    /**
+     * Using a property, check if a given sheet contains a matching row
+     * with the same value as the properties value
+     * 
+     * @param {String} sheetName name of the sheet to search
+     * @param {Object} properties contains key-value pairs to search for
+     * 
+     * @return {Object} matching row(s)
+     */
+    static async getMatchingRowFromSheet(sheetName, properties) {
+        if (!properties || !sheetName) return null;
+
+        let sheet = await this.getSheetAsJSON(sheetName)
+
+        return sheet.find(r => partialMatch(r, properties))
+
     }
 
     static async removeMatchingRowFromSheet(sheetName, properties) {

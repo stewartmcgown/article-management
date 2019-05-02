@@ -116,6 +116,10 @@ module.exports = class Router {
                     "status": {
                         function: AMS.changeStatusArticle,
                         minimumAuthorisation: AuthenticationLevels.JUNIOR
+                    },
+                    publish: {
+                        function: AMS.publishArticle,
+                        minimumAuthorisation: AuthenticationLevels.ADMIN
                     }
                 },
                 "editors": {
@@ -254,7 +258,8 @@ module.exports = class Router {
                         user: auth.user
                     })
                 } catch (e) {
-                    return new ErrorResponse(Errors.INTERNAL_ERROR)
+                    console.log(e)
+                    return new ErrorResponse(Errors.INTERNAL_ERROR + ": Caught")
                 }
             } else
                 return new ErrorResponse(Errors.UNAUTHORISED_ACCESS)

@@ -22,6 +22,8 @@ const ArticleCreator = require("./ArticleCreator")
 const SheetNames = require("./Sheets")
 const GoogleWrapper = require("./utils/GoogleWrapper")
 const Logger = require("./Logger")
+const WordpressAPI = require("./wordpress/WordpressAPI")
+
 
 /**
  * Handles all AMS specific actions when called by the Router.
@@ -149,6 +151,29 @@ class AMS {
       return new ErrorResponse(Errors.MALFORMED_ARTICLE)
     }
 
+  }
+
+  static async publishArticle({
+    data,
+    params
+  }) {
+    const article = await Articles.getArticleById(params.id)
+
+    const content = await Articles.getArticleContent(params.id)
+
+    const result = await new WordpressAPI().createPost({
+      title: article.title,
+      content
+    })
+
+    if (result) {
+      return new Response({
+        message: "Published Article"
+      })
+    } else {
+      return new ErrorResponse("Failed to publish article")
+    }
+    
   }
 
   static async getAllStates({
@@ -517,6 +542,14 @@ class Articles {
     SheetUtils.updateMatchingRowWithJSON({
       id: article.id
     }, out, AMS.articleDatabase)
+  }
+
+  static async getArticleContent(id) {
+    const article = await GoogleWrapper.getDoc({ id })
+
+    console.log(article)
+
+    return "Hello!"
   }
 
 }
