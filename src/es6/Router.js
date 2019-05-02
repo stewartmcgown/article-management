@@ -103,7 +103,7 @@ module.exports = class Router {
                     },
                     "update": {
                         function: AMS.updateArticle,
-                        minimumAuthorisation: AuthenticationLevels.SENIOR
+                        minimumAuthorisation: AuthenticationLevels.JUNIOR
                     },
                     "delete": {
                         function: AMS.deleteArticle,
