@@ -16,7 +16,10 @@ const AMS = require("../es6/AMS")
   app.use(express.json())
 
   app.all("*", async (request, response) => {
-    
+    if (req.method === "OPTIONS") {
+      return response.status(200).end();
+    }
+
     const parts = url.parse(request.url, true)
     const router = new Router({
       path: parts.pathname,
