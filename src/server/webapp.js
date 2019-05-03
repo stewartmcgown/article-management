@@ -16,9 +16,7 @@ const AMS = require("../es6/AMS")
   app.use(express.json())
 
   app.all("*", async (request, response) => {
-    if (request.method === "OPTIONS") {
-      return response.status(200).end();
-    }
+    
 
     const parts = url.parse(request.url, true)
     const router = new Router({
@@ -30,6 +28,11 @@ const AMS = require("../es6/AMS")
 
     response.header("Access-Control-Allow-Origin", "*");
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    if (request.method === "OPTIONS") {
+      return response.status(200).end();
+    }
+
     response.setHeader("Content-Type", "application/json")
     //router.route().then(data => response.send(JSON.stringify(data)))
     router.route().then(data => {
