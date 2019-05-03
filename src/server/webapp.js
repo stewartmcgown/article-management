@@ -16,7 +16,7 @@ const AMS = require("../es6/AMS")
   app.use(express.json())
 
   app.all("*", async (request, response) => {
-    if (req.method === "OPTIONS") {
+    if (request.method === "OPTIONS") {
       return response.status(200).end();
     }
 
