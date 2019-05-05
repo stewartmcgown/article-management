@@ -6,30 +6,10 @@ A system for managing articles submitted by the many contributing authors of the
 ## API
 AMS is a RESTful API that gives powerful tools to editors who want to manage a collection of scientific articles, using a token-based authorisation system.
 
-### Routes
-
-List of possible API paths
-
-**GET**
-- articles
-    - list
-- article
-    - info
-- authentication 
-    - authenticate
-
-**POST**
-- article
-    - create
-    - update
-
-
 ## Technical
 
- - API built on Google Apps Script
- - Modularity allows for switching to alternative platform
- - Written in ES6+, transpiles to ES5.
- - Interfaces with a Spreadsheet
+ - API built to run on NodeJS
+ - Interfaces with a Spreadsheet DB (will switch to MongoDB)
  - Data comes from the [article-submissions](https://github.com/youngscientists/article-submissions) form.
 
 > Built with :heart: for the [Young Scientists Journal](https://ysjournal.com).
