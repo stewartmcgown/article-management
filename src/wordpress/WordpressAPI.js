@@ -6,7 +6,7 @@ class WordpressAPI {
       url: 'https://ysjournal.com',
       username: 'submissions',
       password:
-        process.env.wp_password || require('../../../wordpress.json').password
+        process.env.wp_password || require('../../wordpress.json').password
     })
   }
 
