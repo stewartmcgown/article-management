@@ -1,8 +1,11 @@
 {
   "name": "ams-dev",
   "version": "2.0.0",
-  "description": "![AMS Logo](https://assets.ysjournal.com/img/article-management.png)",
-  "main": "src/servs.js",
+  "main": "src/serve.js",
+  "scripts": {
+    "start": "node src/server/webapp.js",
+    "dev": "nodemon src/server/webapp.js"
+  },
   "dependencies": {
     "base64url": "^3.0.1",
     "chalk": "^2.4.1",
@@ -14,27 +17,14 @@
     "memcache": "^0.3.0",
     "memory-cache": "^0.2.0",
     "mersenne-twister": "^1.1.0",
-    "nodemon": "^1.18.9",
-    "npm": "^6.9.0",
-    "pg": "^7.8.0",
     "search-query-parser": "^1.4.1",
     "search-string": "^3.1.0",
     "uuid-token-generator": "^1.0.0",
     "wordpress": "^1.4.1"
   },
-  "devDependencies": {},
-  "scripts": {
-    "start": "node src/server/webapp.js",
-    "dev": "nodemon src/server/webapp.js"
+  "devDependencies": {
+    "nodemon": "^1.19.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/youngscientists/article-management.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/youngscientists/article-management/issues"
-  },
-  "homepage": "https://github.com/youngscientists/article-management#readme"
+  "author": "Young Scientists Journal",
+  "license": "MIT"
 }
