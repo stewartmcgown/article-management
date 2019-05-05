@@ -1,5 +1,5 @@
 class ArticleNotFoundResponse {
-    constructor(id) {
-        super()
-    }
+  constructor(id) {
+    super()
+  }
 }

@@ -1,11 +1,11 @@
-const SheetUtils = require("./utils/SheetUtils");
-const Article = require("./Article");
-const Editor = require("./people/Editor");
-const Editors = require("./Editors")
-const Authors = require("./Authors")
-const EmailService = require("./emails/EmailService");
+const SheetUtils = require('./utils/SheetUtils')
+const Article = require('./Article')
+const Editor = require('./people/Editor')
+const Editors = require('./Editors')
+const Authors = require('./Authors')
+const EmailService = require('./emails/EmailService')
 const Response = require('./responses/Response')
-const ErrorResponse = require("./responses/ErrorResponse")
+const ErrorResponse = require('./responses/ErrorResponse')
 const Errors = require('./Errors.js')
 const {
   objectToKeyValues,
@@ -16,18 +16,17 @@ const {
   flatSearch,
   JSONToAlignedArray,
   mapToSpecificProperty
-} = require("./utils/Utils")
-const searchQueryParser = require("search-string")
-const ArticleCreator = require("./ArticleCreator")
-const SheetNames = require("./Sheets")
-const GoogleWrapper = require("./utils/GoogleWrapper")
-const Logger = require("./Logger")
-const WordpressAPI = require("./wordpress/WordpressAPI")
-
+} = require('./utils/Utils')
+const searchQueryParser = require('search-string')
+const ArticleCreator = require('./ArticleCreator')
+const SheetNames = require('./Sheets')
+const GoogleWrapper = require('./utils/GoogleWrapper')
+const Logger = require('./Logger')
+const WordpressAPI = require('./wordpress/WordpressAPI')
 
 /**
  * Handles all AMS specific actions when called by the Router.
- * 
+ *
  * @author Stewart McGown
  * @see https://drive.google.com/open?id=1nkLn0BRqyT5ZotY4YFy-L_2w5WFMvFJZsgGdFQlqSRU
  */
@@ -39,56 +38,58 @@ class AMS {
   }
 
   static get rootAppID() {
-    return "17yVLJ8L836_vKIEnkxIBN1DIxnX6PgvvfinLTFZyPAI"
+    return '17yVLJ8L836_vKIEnkxIBN1DIxnX6PgvvfinLTFZyPAI'
   }
 
   static get rootFolderID() {
-    return "1dOuWu8QiLUH2FxgAYzICMx3k91Iw3Ouw"
+    return '1dOuWu8QiLUH2FxgAYzICMx3k91Iw3Ouw'
   }
 
   /**
    * Use these static async members to get the name the sheet you need
    */
   static get baseAuthSheet() {
-    return "Logins"
+    return 'Logins'
   }
   static get keySheet() {
-    return "Keys"
+    return 'Keys'
   }
   static get authTokenSheet() {
-    return "AuthTokens"
+    return 'AuthTokens'
   }
   static get articleDatabase() {
-    return "Database"
+    return 'Database'
   }
   static get logSheet() {
-    return "Logs"
+    return 'Logs'
   }
   static get statusSheet() {
-    return "States"
+    return 'States'
   }
   static get authorSheet() {
-    return "Authors"
+    return 'Authors'
   }
 
   /**
    * Process the modified attributes of an article.
-   * 
+   *
    * This will include sending emails, tidying up database entries etc.
-   * 
-   * @param {Object} modified 
+   *
+   * @param {Object} modified
    */
   static processModified(article, modified) {
     // Handle editor/author changes
-    if (modified.editors) modified.editors = mapToSpecificProperty(modified.editors, "email")
-    if (modified.authors) modified.authors = mapToSpecificProperty(modified.authors, "email")
+    if (modified.editors)
+      modified.editors = mapToSpecificProperty(modified.editors, 'email')
+    if (modified.authors)
+      modified.authors = mapToSpecificProperty(modified.authors, 'email')
 
     modified = objectToKeyValues(stemFlatten(modified))
 
     // Update the author
     EmailService.send({
       to: article.authors.map(a => a.email),
-      type: "updateArticle",
+      type: 'updateArticle',
       data: {
         article,
         modified
@@ -98,7 +99,7 @@ class AMS {
     // Update the editors
     EmailService.send({
       to: article.editors.map(a => a.email),
-      type: "updateArticle",
+      type: 'updateArticle',
       data: {
         article,
         modified,
@@ -109,32 +110,29 @@ class AMS {
 
   /**
    * Completely handles the creation of a single article.
-   * 
+   *
    * 1. First, the article is processed to check for any missing
    * information. If there is any, it will attempt to fix that.
-   * 
+   *
    * 2. Next, the article is added to the Google Drive.
-   * 
+   *
    * 3. The article's information is added to the database.
-   * 
+   *
    * 4. Emails relating to the article are sent.
-   * 
+   *
    * Submissions should be structured as follows:
    * {
    *  article: Article,
    *  author: Author,
-   *  data: { 
+   *  data: {
    *    encoded: Binary,
    *    mimeType: String
    * }
-   * 
+   *
    * @param {Object} body Request body, hopefully containing an article.
    * @param {Article} body.article dd
    */
-  static async createArticle({
-    data,
-    params
-  }) {
+  static async createArticle({ data, params }) {
     if (!data) {
       return new ErrorResponse(Errors.MISSING_BODY)
     }
@@ -145,18 +143,14 @@ class AMS {
       await creator.upload()
 
       return new Response({
-        message: "Article successfully submitted"
+        message: 'Article successfully submitted'
       })
     } catch (e) {
       return new ErrorResponse(Errors.MALFORMED_ARTICLE)
     }
-
   }
 
-  static async publishArticle({
-    data,
-    params
-  }) {
+  static async publishArticle({ data, params }) {
     const article = await Articles.getArticleById(params.id)
 
     const content = await Articles.getArticleContent(params.id)
@@ -168,18 +162,14 @@ class AMS {
 
     if (result) {
       return new Response({
-        message: "Published Article"
+        message: 'Published Article'
       })
     } else {
-      return new ErrorResponse("Failed to publish article")
+      return new ErrorResponse('Failed to publish article')
     }
-    
   }
 
-  static async getAllStates({
-    data,
-    level
-  }) {
+  static async getAllStates({ data, level }) {
     let states = await SheetUtils.getSheetAsJSON(AMS.statusSheet)
 
     if (!states) {
@@ -189,15 +179,15 @@ class AMS {
     return states
   }
 
-  static async getArticle({
-    data,
-    params
-  }) {
+  static async getArticle({ data, params }) {
     if (!params.id) return new ErrorResponse(Errors.MISSING_BODY)
 
-    let article = await SheetUtils.getMatchingRowsFromSheet(AMS.articleDatabase, {
-      id: params.id
-    })
+    let article = await SheetUtils.getMatchingRowsFromSheet(
+      AMS.articleDatabase,
+      {
+        id: params.id
+      }
+    )
 
     if (!article) return new ErrorResponse(Errors.NOT_FOUND)
     else if (!article[0]) return new ErrorResponse(Errors.NOT_FOUND)
@@ -214,18 +204,15 @@ class AMS {
 
   /**
    * Updates an article in the database with the given properties.
-   * 
+   *
    * This is a general update, so general update email will be sent.
-   * 
+   *
    * @param {Object} data
    * @param {Number} level
    */
-  static async updateArticle({
-    data,
-    level,
-    user
-  }) {
-    if (!data.id || !data.properties) return new ErrorResponse(Errors.MISSING_BODY)
+  static async updateArticle({ data, level, user }) {
+    if (!data.id || !data.properties)
+      return new ErrorResponse(Errors.MISSING_BODY)
     let id = data.id,
       properties = data.properties
     let article = await Articles.getArticleById(id)
@@ -251,35 +238,29 @@ class AMS {
 
     Articles.updateArticle(article)
 
-    Logger.log("Update", user.email, `${article.id} updated`)
+    Logger.log('Update', user.email, `${article.id} updated`)
 
     return new Response({
-      reason: "Successful Update",
+      reason: 'Successful Update',
       message: article
     })
   }
 
-  static async assignArticle(article) {
-
-  }
-
+  static async assignArticle(article) {}
 
   /**
    * Delete an article.
-   * 
+   *
    * @param {Article} article Article to delete. May be partial.
    */
-  static async deleteArticle({
-    data,
-    params
-  }) {
-    if (!params.id) throw new TypeError("Article cannot be undefined")
+  static async deleteArticle({ data, params }) {
+    if (!params.id) throw new TypeError('Article cannot be undefined')
     await SheetUtils.removeMatchingRowFromSheet(AMS.articleDatabase, {
       id
     })
 
     return new Response({
-      reason: "deleteArticle",
+      reason: 'deleteArticle',
       message: {
         id: params.id
       }
@@ -287,52 +268,49 @@ class AMS {
   }
 
   /**
-   * 
+   *
    * @param {Object} partialEditor
    */
-  static async createEditor({
-    data,
-    params
-  }) {
-    if (!data) throw new TypeError("Editor cannot be undefined")
-    if (!data.email || !data.name) return new ErrorResponse(Errors.EDITOR_MISSING_PARAMS)
+  static async createEditor({ data, params }) {
+    if (!data) throw new TypeError('Editor cannot be undefined')
+    if (!data.email || !data.name)
+      return new ErrorResponse(Errors.EDITOR_MISSING_PARAMS)
     const editor = new Editor(data)
 
-    const existing = await SheetUtils.getMatchingRowsFromSheet(AMS.baseAuthSheet, {
-      email: editor.email
-    })
-    if (existing.length !== 0 || !(existing instanceof Array)) return new ErrorResponse(Errors.EDITOR_EMAIL_IN_USE)
-
-    
+    const existing = await SheetUtils.getMatchingRowsFromSheet(
+      AMS.baseAuthSheet,
+      {
+        email: editor.email
+      }
+    )
+    if (existing.length !== 0 || !(existing instanceof Array))
+      return new ErrorResponse(Errors.EDITOR_EMAIL_IN_USE)
 
     await SheetUtils.pushRowToSheet(editor.toRow(), AMS.baseAuthSheet)
 
     // Update the author
     EmailService.send({
       to: editor.email,
-      type: "createEditor",
+      type: 'createEditor',
       data: {
         editor
       }
     })
 
     return new Response({
-      reason: "createEditor",
+      reason: 'createEditor',
       message: editor
     })
   }
 
   /**
-   * 
+   *
    * @param {Editor} editor partial editor object
-   * @param {Object} properties 
+   * @param {Object} properties
    */
-  static async updateEditor({
-    data,
-    user,
-    level
-  }) {
-    if (!data.email || !data.properties) return new ErrorResponse(Errors.MISSING_BODY)
+  static async updateEditor({ data, user, level }) {
+    if (!data.email || !data.properties)
+      return new ErrorResponse(Errors.MISSING_BODY)
     let email = data.email,
       properties = data.properties
     let editor = await Editors.getEditorByEmail(email)
@@ -340,34 +318,30 @@ class AMS {
     if (!editor) return new ErrorResponse(Errors.EDITOR_NOT_FOUND)
 
     // If you aren't an admin, you can only edit yourself
-    if (editor.email != user.email && level < 3) return new ErrorResponse(Errors.EDITOR_EDIT_UNAUTHORISED)
+    if (editor.email != user.email && level < 3)
+      return new ErrorResponse(Errors.EDITOR_EDIT_UNAUTHORISED)
 
     editor.assignProperties(properties)
     await Editors.updateEditorByEmail(editor.email, editor.toRow())
 
-    Logger.log(`Editor '${editor.email}' was updated.`, user.email, "Success")
+    Logger.log(`Editor '${editor.email}' was updated.`, user.email, 'Success')
 
     return new Response({
-      reason: "updatedEditor",
-      message: editor,
+      reason: 'updatedEditor',
+      message: editor
     })
   }
 
+  static async getAllSubjects(body, { q }) {}
 
-  static async getAllSubjects(body, {
-    q
-  }) {
-
-  }
-
-  static async getAllArticles({
-    data,
-    params
-  }) {
+  static async getAllArticles({ data, params }) {
     if (!params) return new ErrorResponse()
     const q = params.q
 
-    const sheet = await SheetUtils.getSheetsAsJSON([AMS.articleDatabase, AMS.baseAuthSheet, AMS.authorSheet], true)
+    const sheet = await SheetUtils.getSheetsAsJSON(
+      [AMS.articleDatabase, AMS.baseAuthSheet, AMS.authorSheet],
+      true
+    )
     /** @type {Array.<Article>} */
     let articles = sheet[AMS.articleDatabase]
 
@@ -380,68 +354,64 @@ class AMS {
     articles = articles.map(a => new Article(a, editors, authors))
 
     let out = []
-    if (typeof q === "string") {
+    if (typeof q === 'string') {
       let b = {},
         parsed = AMS.parseQueryString(q)
       if (parsed.conditionArray.length === 0) {
         b = q
         out = flatSearch(articles, b, true)
       } else {
-        parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
+        parsed.conditionArray.forEach(x => (b[x.keyword] = x.value))
         console.log(b)
         out = partialSearch(articles, b, true) // TODO: allow negated search terms
       }
-
     } else {
       out = articles
     }
 
     // Insert authors
 
-
     return out
-
   }
 
   /**
    * Find all the editors. Optionally search with a query
-   *  
-   * @param {Object} body 
+   *
+   * @param {Object} body
    * @param {Object} o
    * @param {String} [o.q] query
    * @returns {Array.<Editor>} list of editors
    */
-  static async getAllEditors({
-    data,
-    params
-  }) {
+  static async getAllEditors({ data, params }) {
     const q = params.q
-    let sheets = await SheetUtils.getSheetsAsJSON([AMS.baseAuthSheet, AMS.articleDatabase], true)
-    let sheet = Editors.fromSheet(sheets[AMS.baseAuthSheet], sheets[AMS.articleDatabase])
+    let sheets = await SheetUtils.getSheetsAsJSON(
+      [AMS.baseAuthSheet, AMS.articleDatabase],
+      true
+    )
+    let sheet = Editors.fromSheet(
+      sheets[AMS.baseAuthSheet],
+      sheets[AMS.articleDatabase]
+    )
     let out = []
-    if (typeof q === "string") {
+    if (typeof q === 'string') {
       // TODO: modularise this
       let b = {},
         parsed = AMS.parseQueryString(q)
       if (parsed.conditionArray.length === 0) {
         b = q
-        return flatSearch(sheet.map((a) => new Editor(a)), b, true)
+        return flatSearch(sheet.map(a => new Editor(a)), b, true)
       } else {
-        parsed.conditionArray.forEach(x => b[x.keyword] = x.value)
-        return partialSearch(sheet.map((a) => new Editor(a)), b, true) // TODO: allow negated search terms
+        parsed.conditionArray.forEach(x => (b[x.keyword] = x.value))
+        return partialSearch(sheet.map(a => new Editor(a)), b, true) // TODO: allow negated search terms
       }
-
     } else {
-      out = sheet.map((a) => new Editor(a))
+      out = sheet.map(a => new Editor(a))
     }
 
     return out
   }
 
-  static async getEditorByEmail({
-    data,
-    params
-  }) {
+  static async getEditorByEmail({ data, params }) {
     const email = params.email
     const q = `email:${email}`,
       results = AMS.getAllEditors(null, {
@@ -452,7 +422,7 @@ class AMS {
   }
 
   /**
-   * @param {String} id 
+   * @param {String} id
    * @return {Array} rows matching the ID
    */
   static async getInfo(id) {
@@ -461,11 +431,10 @@ class AMS {
 
   /**
    * Search all parts of the API for a given query.
-   * @param {String} query 
+   * @param {String} query
    */
   static async doSearch(query) {
     let collected = []
-
   }
 
   /**
@@ -479,35 +448,30 @@ class AMS {
 
   /**
    * Query strings should be in the form of:
-   * 
+   *
    * property:value property2:value etc..
-   * 
-   * @param {String} query 
+   *
+   * @param {String} query
    * @return {Object} a parsed query object
    */
   static parseQueryString(query) {
     return searchQueryParser.parse(query)
-
   }
 
-  static getMatchingArray() {
-
-  }
+  static getMatchingArray() {}
 
   /**
    * Get the authors profile picture
-   * 
-   * @param {String} email 
+   *
+   * @param {String} email
    * @return {String} url of profile picture
    */
-  static getAuthorProfile(email) {
-
-  }
+  static getAuthorProfile(email) {}
 
   /**
    * Get last revision based on ID
-   * 
-   * @param {String} id 
+   *
+   * @param {String} id
    */
   static async getLastRevision(id) {
     SheetUtils.getLastRevision(id)
@@ -516,7 +480,10 @@ class AMS {
 
 class Articles {
   static async getArticleById(id) {
-    const sheet = await SheetUtils.getSheetsAsJSON([AMS.articleDatabase, AMS.baseAuthSheet, AMS.authorSheet], true)
+    const sheet = await SheetUtils.getSheetsAsJSON(
+      [AMS.articleDatabase, AMS.baseAuthSheet, AMS.authorSheet],
+      true
+    )
     /** @type {Array.<Article>} */
     let articles = sheet[AMS.articleDatabase]
     /** @type {Array.<Author>} */
@@ -539,9 +506,13 @@ class Articles {
     out.authors = article.authors.map(au => au.email)
     out.editors = article.editors.map(ed => ed.email)
 
-    SheetUtils.updateMatchingRowWithJSON({
-      id: article.id
-    }, out, AMS.articleDatabase)
+    SheetUtils.updateMatchingRowWithJSON(
+      {
+        id: article.id
+      },
+      out,
+      AMS.articleDatabase
+    )
   }
 
   static async getArticleContent(id) {
@@ -549,11 +520,8 @@ class Articles {
 
     console.log(article)
 
-    return "Hello!"
+    return 'Hello!'
   }
-
 }
-
-
 
 module.exports = AMS
