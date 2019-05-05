@@ -27,7 +27,7 @@ class GoogleWrapper {
     oauth.setCredentials({
       refresh_token:
         process.env.refresh_token ||
-        require('../../../private.json').refresh_token
+        require('../../private.json').refresh_token
     })
   }
 
