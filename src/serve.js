@@ -5,8 +5,8 @@ const {
     google
 } = require('googleapis')
 var OAuth2 = google.auth.OAuth2
-const ClientId = "173181351763-e0i3cevf5l6p0rf0phtoibtgibuc724q.apps.googleusercontent.com";
-const ClientSecret = "8A7Dqz1S3gcfXJhRRRJzucsF";
+const ClientId = process.env.google_client_id 
+const ClientSecret = process.env.google_client_secret
 const RedirectionUrl = "http://localhost:8081/oauthCallback";
 
 var app = express();
