@@ -1,8 +1,16 @@
-FROM node:latest
-RUN mkdir -p /usr/src/app
+FROM node:alpine
+
+# Create work directory
 WORKDIR /usr/src/app
-COPY package.json /usr/src/app/
-RUN npm install
+
+# Install runtime dependencies
+RUN npm install yarn -g
+
+# Copy app source to work directory
 COPY . /usr/src/app
-EXPOSE 3000
-CMD [ “npm”, “start” ]
+
+# Install app dependencies
+RUN yarn install
+
+# Build and run the app
+CMD npm start serve
