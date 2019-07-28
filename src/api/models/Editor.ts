@@ -1,7 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 import { Subject } from './Article';
+import { User } from './User';
 
 export enum Positions {
     EDITOR = 'Editor',
@@ -15,17 +16,7 @@ export enum Levels {
 }
 
 @Entity()
-export class Editor {
-    @PrimaryColumn('uuid')
-    public id: string;
-
-    @Column()
-    @IsNotEmpty()
-    public name: string;
-
-    @Column()
-    @IsNotEmpty()
-    public email: string;
+export class Editor extends User {
 
     @Column()
     @IsNotEmpty()
@@ -43,7 +34,9 @@ export class Editor {
     @IsNotEmpty()
     public currentlyEditing: number;
 
-    @Column()
+    @Column({
+        type: 'enum',
+    })
     @IsNotEmpty()
     public subjects: Subject[];
 }

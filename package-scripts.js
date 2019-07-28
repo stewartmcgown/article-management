@@ -36,10 +36,10 @@ module.exports = {
          */
         setup: {
             script: series(
-                'yarn install',
+                'npm install',
                 'nps db.setup',
             ),
-            description: 'Setup`s the development environment(yarn & database)'
+            description: 'Setup`s the development environment(npm & database)'
         },
         /**
          * Creates the needed configuration files
@@ -153,14 +153,6 @@ module.exports = {
                 ),
                 description: 'Downgrades the database'
             },
-            seed: {
-                script: series(
-                    'nps banner.seed',
-                    'nps config',
-                    runFast('./commands/seed.ts')
-                ),
-                description: 'Seeds generated records into the database'
-            },
             drop: {
                 script: runFast('./node_modules/typeorm/cli.js schema:drop'),
                 description: 'Drops the schema of the database'
@@ -169,7 +161,6 @@ module.exports = {
                 script: series(
                     'nps db.drop',
                     'nps db.migrate',
-                    'nps db.seed'
                 ),
                 description: 'Recreates the database with seeded data'
             }
@@ -299,7 +290,7 @@ function run(path) {
 }
 
 function runFast(path) {
-    return `ts-node --transpileOnly ${path}`;
+    return `ts-node --transpile-only ${path}`;
 }
 
 function tslint(path) {

@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - "8.9.4"
 install:
-  - yarn install
+  - npm install
 env:
   - DB_TYPE="sqlite" DB_DATABASE="./mydb.sql" DB_LOGGING=false
 script:

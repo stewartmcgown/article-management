@@ -1,5 +1,10 @@
 import { IsNotEmpty } from 'class-validator';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+    Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn, UpdateDateColumn
+} from 'typeorm';
+
+import { Author } from './Author';
+import { Editor } from './Editor';
 
 export enum Status {
         'In Review',
@@ -80,8 +85,10 @@ export class Article {
     @Column()
     public copyright: string;
 
-    @Column()
-    public trashed = false;
+    @Column({
+        default: false,
+    })
+    public trashed: boolean;
 
     @IsNotEmpty()
     @Column()
@@ -94,4 +101,11 @@ export class Article {
     @Column()
     public modified: Date;
 
+    @ManyToMany(type => Editor)
+    @JoinTable()
+    public editors: Editor[];
+
+    @ManyToMany(type => Author)
+    @JoinTable()
+    public authors: Author[];
 }

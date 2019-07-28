@@ -10,7 +10,7 @@ RUN npm install yarn -g
 COPY . /usr/src/app
 
 # Install app dependencies
-RUN yarn install
+RUN npm install
 
 # Build and run the app
 CMD npm start serve
