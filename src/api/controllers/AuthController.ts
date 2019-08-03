@@ -13,12 +13,12 @@ export class AuthController {
 
     @Post('/pin')
     public pin(@Body() request: PinRequest): Promise<PinResponse> {
-        return
+        return undefined;
     }
 
     @Post('/token')
     public token(@Body() request: TokenRequest): Promise<TokenResponse> {
-
+        return undefined;
     }
 
 }
