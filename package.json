@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nps",
     "test": "npm start test",
+    "test:all": "npm start test.all",
     "build": "npm start build",
     "presetup": "npm install",
     "setup": "npm start config && npm start setup.script",
@@ -88,7 +89,7 @@
       "json"
     ],
     "testEnvironment": "node",
-    "setupTestFrameworkScriptFile": "./test/unit/lib/setup.ts"
+    "setupFilesAfterEnv": ["./test/unit/lib/setup.ts"]
   },
   "license": "MIT",
   "devDependencies": {

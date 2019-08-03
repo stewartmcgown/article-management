@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 import { Field } from 'type-graphql';
-import { AfterLoad, Column, Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 import { Subject } from './Article';
 import { User } from './User';
@@ -19,20 +19,27 @@ export enum Levels {
 @Entity()
 export class Editor extends User {
 
-    @Column()
+    @Column({
+        type: 'enum',
+        enum: Positions,
+    })
     @IsNotEmpty()
     @Field()
     public position: Positions;
 
-    @Column()
+    @Column({
+        type: 'enum',
+        enum: Levels,
+    })
     @IsNotEmpty()
     @Field()
     public level: Levels;
 
     @Column({
         type: 'enum',
+        enum: Subject,
     })
     @IsNotEmpty()
-    @Field()
+    @Field(type => [Subject])
     public subjects: Subject[];
 }

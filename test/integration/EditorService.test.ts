@@ -1,12 +1,14 @@
 import { Container } from 'typedi';
 import { Connection } from 'typeorm';
 
-import { Pet } from '../../src/api/models/Pet';
-import { PetService } from '../../src/api/services/PetService';
+import { Subject } from '../../src/api/models/Article';
+import { Editor, Levels, Positions } from '../../src/api/models/Editor';
+import { EditorService } from '../../src/api/services/EditorService';
 import { closeDatabase, createDatabaseConnection, migrateDatabase } from '../utils/database';
 import { configureLogger } from '../utils/logger';
 
-describe('PetService', () => {
+import uuid = require('uuid');
+describe('EditorService', () => {
 
     // -------------------------------------------------------------------------
     // Setup up
@@ -29,22 +31,23 @@ describe('PetService', () => {
     // Test cases
     // -------------------------------------------------------------------------
 
-    test('should create a new pet in the database', async (done) => {
-        const pet = new Pet();
-        pet.id = 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx';
-        pet.name = 'test';
-        pet.age = 1;
-        const service = Container.get<PetService>(PetService);
-        const resultCreate = await service.create(pet);
-        expect(resultCreate.name).toBe(pet.name);
-        expect(resultCreate.age).toBe(pet.age);
+    test('should create a new editor in the database', async (done) => {
+        const editor = new Editor();
+        editor.id = uuid.v4();
+        editor.name = 'test';
+        editor.level = Levels.JUNIOR;
+        editor.position = Positions.EDITOR;
+        editor.subjects = [Subject.Biology];
+        const service = Container.get<EditorService>(EditorService);
+        const resultCreate = await service.create(editor);
+
+        expect(resultCreate).toEqual(editor);
 
         const resultFind = await service.findOne(resultCreate.id);
         if (resultFind) {
-            expect(resultFind.name).toBe(pet.name);
-            expect(resultFind.age).toBe(pet.age);
+            expect(resultCreate).toEqual(editor);
         } else {
-            fail('Could not find pet');
+            fail('Could not find editor');
         }
         done();
     });

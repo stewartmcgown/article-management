@@ -170,6 +170,7 @@ module.exports = {
          */
         test: {
             default: 'nps test.unit',
+            all: series('nps test.unit', 'nps test.integration', 'nps test.e2e'),
             unit: {
                 default: {
                     script: series(

@@ -119,11 +119,11 @@ export class Article  {
 
     @ManyToMany(type => Editor)
     @JoinTable()
-    @Field()
+    @Field(type => [Editor])
     public editors: Editor[];
 
     @ManyToMany(type => Author)
     @JoinTable()
-    @Field()
+    @Field(type => [Author])
     public authors: Author[];
 }
