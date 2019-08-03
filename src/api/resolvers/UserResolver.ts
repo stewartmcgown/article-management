@@ -1,28 +1,28 @@
 import { FieldResolver, Query, Resolver, Root } from 'type-graphql';
 import { Service } from 'typedi';
 
-import { User as UserModel } from '../models/User';
+import { Editor as EditorModel } from '../models/Editor';
+import { EditorService } from '../services/EditorService';
 import { PetService } from '../services/PetService';
-import { UserService } from '../services/UserService';
-import { User } from '../types/User';
+import { Editor } from '../types/Editor';
 
 @Service()
-@Resolver(of => User)
-export class UserResolver {
+@Resolver(of => Editor)
+export class EditorResolver {
 
     constructor(
-        private userService: UserService,
+        private editorService: EditorService,
         private petService: PetService
         ) {}
 
-    @Query(returns => [User])
-    public users(): Promise<any> {
-      return this.userService.find();
+    @Query(returns => [Editor])
+    public editors(): Promise<any> {
+      return this.editorService.find();
     }
 
     @FieldResolver()
-    public async pets(@Root() user: UserModel): Promise<any> {
-        return this.petService.findByUser(user);
+    public async pets(@Root() editor: EditorModel): Promise<any> {
+        return this.petService.findByEditor(editor);
     }
 
 }

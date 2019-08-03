@@ -4,10 +4,13 @@
  * Define all your possible custom events here.
  */
 export const events = {
-    user: {
-        created: 'onUserCreate',
+    editor: {
+        created: 'onEditorCreate',
     },
-    pet: {
-        created: 'onPetCreate',
+    author: {
+        created: 'onAuthorCreate',
+    },
+    article: {
+        created: 'onArticleCreate',
     },
 };

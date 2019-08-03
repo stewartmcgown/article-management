@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { Field } from 'type-graphql';
 import { Column, Entity } from 'typeorm';
 
 import { User } from './User';
@@ -6,21 +7,26 @@ import { User } from './User';
 @Entity()
 export class Author extends User {
 
-        @Column()
-        @IsNotEmpty()
-        public school: string;
+    @Column()
+    @IsNotEmpty()
+    @Field()
+    public school: string;
 
-        @Column()
-        @IsNotEmpty()
-        public biography: string;
+    @Column()
+    @IsNotEmpty()
+    @Field()
+    public biography: string;
 
-        @Column()
-        @IsNotEmpty()
-        public country: string;
+    @Column()
+    @IsNotEmpty()
+    @Field()
+    public country: string;
 
-        @Column()
-        public teacher: string;
+    @Column()
+    @Field()
+    public teacher: string;
 
-        @Column()
-        public profile: string;
+    @Column()
+    @Field()
+    public profile: string;
 }

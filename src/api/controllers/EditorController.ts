@@ -2,47 +2,47 @@ import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req
 } from 'routing-controllers';
 
-import { UserNotFoundError } from '../errors/UserNotFoundError';
-import { User } from '../models/User';
-import { UserService } from '../services/EditorService';
+import { EditorNotFoundError } from '../errors/EditorNotFoundError';
+import { Editor } from '../models/Editor';
+import { EditorService } from '../services/EditorService';
 
 @Authorized()
-@JsonController('/users')
-export class UserController {
+@JsonController('/editors')
+export class EditorController {
 
     constructor(
-        private userService: UserService
+        private editorService: EditorService
     ) { }
 
     @Get()
-    public find(): Promise<User[]> {
-        return this.userService.find();
+    public find(): Promise<Editor[]> {
+        return this.editorService.find();
     }
 
     @Get('/me')
-    public findMe(@Req() req: any): Promise<User[]> {
-        return req.user;
+    public findMe(@Req() req: any): Promise<Editor[]> {
+        return req.editor;
     }
 
     @Get('/:id')
-    @OnUndefined(UserNotFoundError)
-    public one(@Param('id') id: string): Promise<User | undefined> {
-        return this.userService.findOne(id);
+    @OnUndefined(EditorNotFoundError)
+    public one(@Param('id') id: string): Promise<Editor | undefined> {
+        return this.editorService.findOne(id);
     }
 
     @Post()
-    public create(@Body() user: User): Promise<User> {
-        return this.userService.create(user);
+    public create(@Body() editor: Editor): Promise<Editor> {
+        return this.editorService.create(editor);
     }
 
     @Put('/:id')
-    public update(@Param('id') id: string, @Body() user: User): Promise<User> {
-        return this.userService.update(id, user);
+    public update(@Param('id') id: string, @Body() editor: Editor): Promise<Editor> {
+        return this.editorService.update(id, editor);
     }
 
     @Delete('/:id')
     public delete(@Param('id') id: string): Promise<void> {
-        return this.userService.delete(id);
+        return this.editorService.delete(id);
     }
 
 }

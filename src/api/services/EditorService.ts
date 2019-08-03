@@ -19,7 +19,7 @@ export class EditorService {
 
     public find(): Promise<Editor[]> {
         this.log.info('Find all editors');
-        return this.editorRepository.find({ relations: ['pets'] });
+        return this.editorRepository.find();
     }
 
     public findOne(id: string): Promise<Editor | undefined> {

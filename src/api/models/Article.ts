@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { Field } from 'type-graphql';
 import {
     Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn, UpdateDateColumn
 } from 'typeorm';
@@ -43,69 +44,86 @@ export enum Subject {
  * Represents an Article
  */
 @Entity()
-export class Article {
+export class Article  {
 
     @PrimaryColumn('uuid')
+    @Field()
     public id: string;
 
     @CreateDateColumn()
     @Column()
+    @Field()
     public date: Date;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public title: string;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public type: Type;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public status: Status;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public docId: string;
 
     @Column()
+    @Field()
     public deadline: Date;
 
     @Column()
+    @Field()
     public notes: string;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public folderId: string;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public markingGridId: string;
 
     @Column()
+    @Field()
     public copyright: string;
 
     @Column({
         default: false,
     })
+    @Field()
     public trashed: boolean;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public summary: string;
 
     @Column()
+    @Field()
     public reason: string;
 
     @UpdateDateColumn()
     @Column()
+    @Field()
     public modified: Date;
 
     @ManyToMany(type => Editor)
     @JoinTable()
+    @Field()
     public editors: Editor[];
 
     @ManyToMany(type => Author)
     @JoinTable()
+    @Field()
     public authors: Author[];
 }
