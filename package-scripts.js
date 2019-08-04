@@ -137,10 +137,18 @@ module.exports = {
          * Database scripts
          */
         db: {
+            generateMigrations: {
+                script: series(
+                    rimraf('./src/database/migrations/*.ts'),
+                    runFast('./node_modules/typeorm/cli.js migration:generate -n Database'),
+                ),
+                description: 'Generates seeds for database from models',
+            },
             migrate: {
                 script: series(
                     'nps banner.migrate',
                     'nps config',
+                    'nps db.generateMigrations',
                     runFast('./node_modules/typeorm/cli.js migration:run')
                 ),
                 description: 'Migrates the database to newest version available'

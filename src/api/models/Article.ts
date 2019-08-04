@@ -61,14 +61,28 @@ export class Article  {
     public title: string;
 
     @IsNotEmpty()
-    @Column()
+    @Column({
+        type: 'enum',
+        enum: Type,
+        default: Type['Review Article'],
+    })
     @Field()
     public type: Type;
 
     @IsNotEmpty()
-    @Column()
+    @Column({
+        type: 'enum',
+        enum: Status,
+        default: Status.Submitted,
+    })
     @Field()
     public status: Status;
+
+    @IsNotEmpty()
+    @Column({
+        type: 'enum',
+        enum: Subject,
+    })
 
     @IsNotEmpty()
     @Column()

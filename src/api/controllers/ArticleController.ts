@@ -4,9 +4,9 @@ import {
 
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
 import { Article } from '../models/Article';
+import { Levels } from '../models/Editor';
 import { ArticleService } from '../services/ArticleService';
 
-@Authorized()
 @JsonController('/articles')
 export class ArticleController {
 
@@ -14,16 +14,19 @@ export class ArticleController {
         private articleService: ArticleService
     ) { }
 
+    @Authorized(Levels.JUNIOR)
     @Get()
     public find(): Promise<Article[]> {
         return this.articleService.find();
     }
 
+    @Authorized(Levels.JUNIOR)
     @Get('/me')
     public findMe(@Req() req: any): Promise<Article[]> {
         return req.article;
     }
 
+    @Authorized(Levels.JUNIOR)
     @Get('/:id')
     @OnUndefined(ArticleNotFoundError)
     public one(@Param('id') id: string): Promise<Article | undefined> {
@@ -35,11 +38,13 @@ export class ArticleController {
         return this.articleService.create(article);
     }
 
+    @Authorized(Levels.JUNIOR)
     @Put('/:id')
     public update(@Param('id') id: string, @Body() article: Article): Promise<Article> {
         return this.articleService.update(id, article);
     }
 
+    @Authorized(Levels.ADMIN)
     @Delete('/:id')
     public delete(@Param('id') id: string): Promise<void> {
         return this.articleService.delete(id);

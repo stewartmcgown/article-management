@@ -70,7 +70,7 @@
     "typeorm": "^0.2.18",
     "typeorm-seeding": "^1.0.0-rc.1",
     "typeorm-typedi-extensions": "^0.2.3",
-    "typescript": "3.5.3",
+    "typescript": "^3.6.0-dev.20190804",
     "uuid": "^3.3.2",
     "winston": "3.2.1"
   },
@@ -89,7 +89,9 @@
       "json"
     ],
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["./test/unit/lib/setup.ts"]
+    "setupFilesAfterEnv": [
+      "./test/unit/lib/setup.ts"
+    ]
   },
   "license": "MIT",
   "devDependencies": {

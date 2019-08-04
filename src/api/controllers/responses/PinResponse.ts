@@ -1,3 +1,3 @@
 export interface PinResponse {
-    message: string;
+    success: boolean;
 }

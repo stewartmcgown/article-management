@@ -14,4 +14,9 @@ export class ArticleEventSubscriber {
         log.info('Article ' + article.toString() + ' created!');
     }
 
+    @On(events.article.updated)
+    public onArticleUpdated(article: Article): void {
+        log.info('Article ' + article.toString() + ' updated!');
+    }
+
 }

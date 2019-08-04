@@ -18,4 +18,10 @@ export abstract class User  {
     @Field()
     public email: string;
 
+    @Column({ nullable: true, select: false })
+    public secret: string;
+
+    @Column({ nullable: true, select: false })
+    public token: string;
+
 }

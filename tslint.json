@@ -124,5 +124,11 @@
             "check-separator",
             "check-type"
         ]
-    }
+    },
+    "linterOptions": {
+        "exclude": [
+            "src/database/migrations/**"
+        ]
+    },
+    "defaultSeverity": "error"
 }

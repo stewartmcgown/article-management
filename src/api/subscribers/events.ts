@@ -12,5 +12,15 @@ export const events = {
     },
     article: {
         created: 'onArticleCreate',
+        updated: 'onArticleUpdate',
+    },
+    pin: {
+        issued: 'onPinIssued',
     },
 };
+
+export interface PinIssuedEvent {
+    pin: string;
+
+    email: string;
+}

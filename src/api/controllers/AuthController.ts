@@ -1,24 +1,26 @@
-import {
-    Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req
-} from 'routing-controllers';
+import { Body, JsonController, Post } from 'routing-controllers';
 
+import { AuthService } from '../../auth/AuthService';
 import { PinRequest } from './requests/PinRequest';
 import { TokenRequest } from './requests/TokenRequest';
 import { PinResponse } from './responses/PinResponse';
 import { TokenResponse } from './responses/TokenResponse';
 
-@Authorized()
 @JsonController('/auth')
 export class AuthController {
 
+    constructor(
+        private authService: AuthService
+    ) { }
+
     @Post('/pin')
     public pin(@Body() request: PinRequest): Promise<PinResponse> {
-        return undefined;
+        return this.authService.issuePin(request.email);
     }
 
     @Post('/token')
     public token(@Body() request: TokenRequest): Promise<TokenResponse> {
-        return undefined;
+        return this.authService.issueToken(request.pin, request.email);
     }
 
 }
