@@ -20,8 +20,8 @@ class GoogleWrapper {
 
   static authorise() {
     oauth = new google.auth.OAuth2(
-      '173181351763-e0i3cevf5l6p0rf0phtoibtgibuc724q.apps.googleusercontent.com',
-      '8A7Dqz1S3gcfXJhRRRJzucsF',
+      process.env.google_client_id,
+      process.env.google_client_secret,
       'http://localhost:8081/oauthCallback'
     )
     oauth.setCredentials({
