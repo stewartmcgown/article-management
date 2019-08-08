@@ -17,7 +17,7 @@ describe('AuthService', () => {
     beforeEach(() => {
         log = new LogMock();
         editorRepository = new RepositoryMock<Editor>();
-        authorRepository = new RepositoryMock<Author>();
+        // authorRepository = new RepositoryMock<Author>();
         eventDispatcher = new EventDispatcherMock();
 
         authService = new AuthService(log, editorRepository as any, /* authorRepository as any,*/ eventDispatcher as any); // Allows polymorphism
