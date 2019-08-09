@@ -1,5 +1,4 @@
 import { IsNotEmpty } from 'class-validator';
-import { Field } from 'type-graphql';
 import { Column, Entity } from 'typeorm';
 
 import { User } from './User';
@@ -24,7 +23,6 @@ export class Editor extends User {
         default: Positions.EDITOR,
     })
     @IsNotEmpty()
-    @Field()
     public position: Positions;
 
     @Column({
@@ -33,12 +31,10 @@ export class Editor extends User {
         default: Levels.JUNIOR,
     })
     @IsNotEmpty()
-    @Field()
     public level: Levels;
 
     @Column({
         array: true,
     })
-    @Field(type => [String])
     public subjects: string;
 }

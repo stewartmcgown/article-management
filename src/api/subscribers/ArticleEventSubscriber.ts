@@ -1,8 +1,8 @@
 import { EventSubscriber, On } from 'event-dispatch';
-import { MailSender } from 'src/mail/MailSender';
 import { Inject } from 'typedi';
 
 import { Logger } from '../../lib/logger';
+import { ArticleSender } from '../../mail/ArticleSender';
 import { Article } from '../models/Article';
 import { events } from './events';
 
@@ -11,14 +11,14 @@ const log = new Logger(__filename);
 @EventSubscriber()
 export class ArticleEventSubscriber {
 
-    constructor(@Inject() private mailSender: MailSender) {}
+    constructor(@Inject() private articleSender: ArticleSender) {}
 
     @On(events.article.created)
     public onArticleCreate(article: Article): void {
         log.info('Article ' + article.toString() + ' created!');
-        this.mailSender.sendArticle(article, {
+        this.articleSender.sendArticle(article, {
             isNew: true,
-        })
+        });
     }
 
     @On(events.article.updated)

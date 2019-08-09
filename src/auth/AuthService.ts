@@ -8,6 +8,7 @@ import { TokenResponse } from '../api/controllers/responses/TokenResponse';
 import { UserNotFoundError } from '../api/errors/UserNotFoundError';
 import { User } from '../api/models/User';
 import { EditorRepository } from '../api/repositories/EditorRepository';
+import { events } from '../api/subscribers/events';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/EventDispatcher';
 import { Logger, LoggerInterface } from '../decorators/Logger';
 import { env } from '../env';
@@ -46,10 +47,8 @@ export class AuthService {
            where: {
                email,
            },
-           select: ['id', 'secret'],
+           select: ['id', 'secret', 'email', 'name'],
        });
-
-       this.log.debug(user.toString());
 
        if (!user) {
            throw new UserNotFoundError();
@@ -68,9 +67,9 @@ export class AuthService {
 
         this.log.info('Dispatching new pin...');
 
-        this.eventDispatcher.dispatch('pin.issued', {
+        this.eventDispatcher.dispatch(events.pin.issued, {
             pin,
-            email,
+            user,
         });
 
         return {

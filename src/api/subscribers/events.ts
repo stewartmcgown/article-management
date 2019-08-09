@@ -1,3 +1,5 @@
+import { User } from '../models/User';
+
 /**
  * events
  * ---------------------
@@ -22,5 +24,5 @@ export const events = {
 export interface PinIssuedEvent {
     pin: string;
 
-    email: string;
+    user: User;
 }

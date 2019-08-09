@@ -1,5 +1,4 @@
 import { IsNotEmpty } from 'class-validator';
-import { Field } from 'type-graphql';
 import {
     Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn, UpdateDateColumn
 } from 'typeorm';
@@ -47,17 +46,14 @@ export enum Subject {
 export class Article  {
 
     @PrimaryColumn('uuid')
-    @Field()
     public id: string;
 
     @CreateDateColumn()
     @Column()
-    @Field()
     public date: Date;
 
     @IsNotEmpty()
     @Column()
-    @Field()
     public title: string;
 
     @IsNotEmpty()
@@ -66,7 +62,6 @@ export class Article  {
         enum: Type,
         default: Type['Review Article'],
     })
-    @Field()
     public type: Type;
 
     @IsNotEmpty()
@@ -75,7 +70,6 @@ export class Article  {
         enum: Status,
         default: Status.Submitted,
     })
-    @Field()
     public status: Status;
 
     @IsNotEmpty()
@@ -83,61 +77,50 @@ export class Article  {
         type: 'enum',
         enum: Subject,
     })
+    public subject: Subject;
 
     @IsNotEmpty()
     @Column()
-    @Field()
     public docId: string;
 
     @Column()
-    @Field()
     public deadline: Date;
 
     @Column()
-    @Field()
     public notes: string;
 
     @IsNotEmpty()
     @Column()
-    @Field()
     public folderId: string;
 
     @IsNotEmpty()
     @Column()
-    @Field()
     public markingGridId: string;
 
     @Column()
-    @Field()
     public copyright: string;
 
     @Column({
         default: false,
     })
-    @Field()
     public trashed: boolean;
 
     @IsNotEmpty()
     @Column()
-    @Field()
     public summary: string;
 
     @Column()
-    @Field()
     public reason: string;
 
     @UpdateDateColumn()
     @Column()
-    @Field()
     public modified: Date;
 
     @ManyToMany(type => Editor)
     @JoinTable()
-    @Field(type => [Editor])
     public editors: Editor[];
 
     @ManyToMany(type => Author)
     @JoinTable()
-    @Field(type => [Author])
     public authors: Author[];
 }

@@ -1,16 +1,17 @@
 import { EventSubscriber, On } from 'event-dispatch';
+import { Inject } from 'typedi';
 
-import { Logger } from '../../lib/logger';
+import { AuthSender } from '../../mail/AuthSender';
 import { events, PinIssuedEvent } from './events';
-
-const log = new Logger(__filename);
 
 @EventSubscriber()
 export class PinEventSubscriber {
 
+    constructor(@Inject() private pinSender: AuthSender) {}
+
     @On(events.pin.issued)
-    public onArticleIssue(pinEvent: PinIssuedEvent): void {
-        log.info(pinEvent.email);
+    public onPinIssued(pinEvent: PinIssuedEvent): void {
+        this.pinSender.sendPIN(pinEvent);
     }
 
 }
