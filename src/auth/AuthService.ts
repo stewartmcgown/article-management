@@ -1,5 +1,5 @@
 import * as jwt from 'jsonwebtoken';
-import { authenticator } from 'otplib';
+import * as otplib from 'otplib';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
@@ -18,14 +18,24 @@ import { InvalidPinError } from './errors/InvalidPinError';
 export class AuthService {
 
     private static EXPIRES_IN = '1h';
-    private static AUTHORIZATION_HEADER_KEY = 'Authorization';
+    private static AUTHORIZATION_HEADER_KEY = 'authorization';
+
+    /**
+     * How long between PIN requests?
+     */
+    private static PIN_REQUEST_TIMEOUT = 6000;
 
     constructor(
         @Logger(__filename) private log: LoggerInterface,
         @OrmRepository() private editorRepository: EditorRepository,
         // @OrmRepository() private authorRepository: AuthorRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface
-    ) { }
+    ) {
+        otplib.authenticator.options = {
+            step: 60,
+            window: 1,
+        };
+    }
 
     public parseTokenFromRequest(request: any): string {
         const authHeader: string = request.headers[AuthService.AUTHORIZATION_HEADER_KEY];
@@ -47,7 +57,7 @@ export class AuthService {
            where: {
                email,
            },
-           select: ['id', 'secret', 'email', 'name'],
+           select: ['id', 'secret', 'email', 'name', 'lastPinIssued'],
        });
 
        if (!user) {
@@ -55,15 +65,22 @@ export class AuthService {
         }
 
         if (!user.secret) {
-            user.secret = authenticator.generateSecret();
-            this.editorRepository.save(user); // Async is fine here
+            user.secret = otplib.authenticator.generateSecret();
         }
 
-        const pin = authenticator.generate(user.secret);
+        if (user.lastPinIssued instanceof Date && this.tooSoonToIssuePin(user.lastPinIssued)) {
+            throw new Error(`You're doing that too much.`);
+        }
+
+        const pin = otplib.authenticator.generate(user.secret);
 
         if (!pin) {
             throw new Error();
         }
+
+        user.lastPinIssued = new Date();
+
+        this.editorRepository.save(user);
 
         this.log.info('Dispatching new pin...');
 
@@ -95,7 +112,10 @@ export class AuthService {
             select: ['id', 'email', 'secret'],
         });
 
-        const pinValid = authenticator.check(pin, user.secret);
+        const pinValid = otplib.authenticator.verify({
+            token: pin,
+            secret: user.secret,
+        });
 
         if (pinValid !== true) {
             throw new InvalidPinError();
@@ -111,6 +131,14 @@ export class AuthService {
         return {
             token,
         };
+    }
+
+    /**
+     * @param lastIssue the last issue date
+     * @return if it is too soon to issue a pin or not
+     */
+    private tooSoonToIssuePin(lastIssue: Date): boolean {
+        return (new Date().getTime() - lastIssue.getTime()) < AuthService.PIN_REQUEST_TIMEOUT;
     }
 
     private secret(): string {

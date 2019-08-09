@@ -1,6 +1,8 @@
 import { createTransport } from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
+import { env } from '../env';
+
 export abstract class MailSender {
 
     protected mailer: Mail;
@@ -9,8 +11,11 @@ export abstract class MailSender {
 
     constructor() {
         this.mailer = createTransport({
-            sendmail: true,
-            newline: 'unix',
+            service: 'gmail',
+            auth: {
+                user: env.mail.user,
+                pass: env.mail.pass,
+            },
         });
     }
 

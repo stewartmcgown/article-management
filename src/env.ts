@@ -74,4 +74,8 @@ export const env = {
         username: getOsEnv('MONITOR_USERNAME'),
         password: getOsEnv('MONITOR_PASSWORD'),
     },
+    mail: {
+        user: getOsEnv('MAIL_USER'),
+        pass: getOsEnv('MAIL_PASS'),
+    },
 };

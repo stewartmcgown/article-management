@@ -14,7 +14,7 @@ export abstract class User  {
     @Column()
     public email: string;
 
-    @Column()
+    @Column({ nullable: true })
     public lastPinIssued: Date;
 
     @Column({ nullable: true, select: false })

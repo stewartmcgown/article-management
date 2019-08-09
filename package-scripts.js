@@ -161,6 +161,14 @@ module.exports = {
                 ),
                 description: 'Downgrades the database'
             },
+            seed: {
+                script: series(
+                    'nps banner.seed',
+                    'nps config',
+                    runFast('./commands/seed.ts')
+                ),
+                description: 'Seeds generated records into the database'
+            },
             drop: {
                 script: runFast('./node_modules/typeorm/cli.js schema:drop'),
                 description: 'Drops the schema of the database'
@@ -169,6 +177,7 @@ module.exports = {
                 script: series(
                     'nps db.drop',
                     'nps db.migrate',
+                    'nps db.seed',
                 ),
                 description: 'Recreates the database with seeded data'
             }

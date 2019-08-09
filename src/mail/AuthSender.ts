@@ -17,7 +17,7 @@ export class AuthSender extends MailSender {
 
                 Never reveal your PIN to anyone.
 
-                It will expire in one hour.
+                It will expire in one minute.
 
                 - Submissions Team
             `,
