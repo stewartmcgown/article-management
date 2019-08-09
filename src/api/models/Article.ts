@@ -7,36 +7,36 @@ import { Author } from './Author';
 import { Editor } from './Editor';
 
 export enum Status {
-        'In Review',
-        'Failed Data Check',
-        'Passed Data Check',
-        'Technical Review',
-        'Revisions Requested',
-        'Ready to Publish',
-        'Published',
-        'Submitted',
-        'Rejected',
-        'Final Review',
+        'In Review' = 'In Review',
+        'Failed Data Check' = 'Failed Data Check',
+        'Passed Data Check' = 'Passed Data Check',
+        'Technical Review' = 'Technical Review',
+        'Revisions Requested' = 'Revisions Requested',
+        'Ready to Publish' = 'Ready to Publish',
+        'Published' = 'Published',
+        'Submitted' = 'Submitted',
+        'Rejected' = 'Rejected',
+        'Final Review' = 'Final Review',
 }
 
 export enum Type {
-    'Review Article',
-    'Blog',
-    'Original Research',
-    'Magazine Article',
+    'Review Article' = 'Review Article',
+    'Blog' = 'Blog',
+    'Original Research' = 'Original Research',
+    'Magazine Article' = 'Magazine Article',
 }
 
 export enum Subject {
-    'Biology',
-    'Chemistry',
-    'Computer Science',
-    'Engineering',
-    'Environmental & Earth Science',
-    'Materials Science',
-    'Mathematics',
-    'Medicine',
-    'Physics',
-    'Policy & Ethics',
+    'Biology' = 'Biology',
+    'Chemistry' = 'Chemistry',
+    'Computer Science' = 'Computer Science',
+    'Engineering' = 'Engineering',
+    'Environmental & Earth Science' = 'Environmental & Earth Science',
+    'Materials Science' = 'Materials Science',
+    'Mathematics' = 'Mathematics',
+    'Medicine' = 'Medicine',
+    'Physics' = 'Physics',
+    'Policy & Ethics' = 'Policy & Ethics',
 }
 
 /**

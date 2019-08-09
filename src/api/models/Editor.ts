@@ -33,8 +33,6 @@ export class Editor extends User {
     @IsNotEmpty()
     public level: Levels;
 
-    @Column({
-        array: true,
-    })
+    @Column()
     public subjects: string;
 }

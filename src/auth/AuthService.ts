@@ -17,7 +17,7 @@ import { InvalidPinError } from './errors/InvalidPinError';
 @Service()
 export class AuthService {
 
-    private static EXPIRES_IN = '1h';
+    private static EXPIRES_IN = '24h';
     private static AUTHORIZATION_HEADER_KEY = 'authorization';
 
     /**

@@ -1,6 +1,4 @@
-import { Author } from 'src/api/models/Author';
-import { Editor } from 'src/api/models/Editor';
-
+import { Editor } from '../../../src/api/models/Editor';
 import { AuthService } from '../../../src/auth/AuthService';
 import { EventDispatcherMock } from '../lib/EventDispatcherMock';
 import { LogMock } from '../lib/LogMock';

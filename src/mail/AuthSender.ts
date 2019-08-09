@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 
 import { PinIssuedEvent } from '../api/subscribers/events';
 import { MailSender } from './MailSender';
+import { Templates } from './templates';
 
 @Service()
 export class AuthSender extends MailSender {
@@ -11,7 +12,7 @@ export class AuthSender extends MailSender {
             from: this.from,
             to: pinEvent.user.email,
             subject: `Your AMS Pin`,
-            html: this.render('pin', pinEvent),
+            html: this.render(Templates.pin, pinEvent),
         });
     }
 }

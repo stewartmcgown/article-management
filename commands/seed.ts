@@ -3,7 +3,7 @@ import commander from 'commander';
 import { readdirSync } from 'fs';
 import * as path from 'path';
 import { createConnection, getConnectionOptions } from 'typeorm';
-import { runSeeder, setConnection } from 'typeorm-seeding';
+import { define, runSeeder, setConnection } from 'typeorm-seeding';
 
 // Cli helper
 commander
@@ -15,6 +15,8 @@ commander
     .option('--run <seeds>', 'run specific seeds (file names without extension)', (val) => val.split(','))
     .option('--config <file>', 'path to your ormconfig.json file (must be a json)')
     .parse(process.argv);
+
+const factoryPath = commander.factories || 'src/database/factories/';
 
 // Get cli parameter for a different seeds path
 const seedsPath = (commander.seeds)
@@ -31,8 +33,10 @@ const run = async () => {
     const log = console.log;
 
     let seedFiles: string[];
+    let factoryFiles: string[];
     try {
         seedFiles = readdirSync(seedsPath);
+        factoryFiles = readdirSync(factoryPath);
     } catch (error) {
         return handleError(error);
     }
@@ -45,10 +49,14 @@ const run = async () => {
     // Status logging to print out the amount of factories and seeds.
     log(chalk.bold('seeds'));
     log('🔎 ', chalk.gray.underline(`found:`),
-        chalk.blue.bold(chalk.gray('&'), chalk.blue.bold(`${seedFiles.length} seeds`)));
+        chalk.blue.bold(chalk.blue.bold(`${factoryFiles.length} factories `), chalk.gray('&'), chalk.blue.bold(`${seedFiles.length} seeds`)));
 
     // Get database connection and pass it to the seeder
     try {
+        for (const factoryFile of factoryFiles) {
+            require(path.resolve(factoryPath, factoryFile));
+        }
+
         const connection = await createConnection(await getConnectionOptions());
         setConnection(connection);
     } catch (error) {

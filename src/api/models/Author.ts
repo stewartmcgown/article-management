@@ -18,9 +18,13 @@ export class Author extends User {
     @IsNotEmpty()
     public country: string;
 
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public teacher: string;
 
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public profile: string;
 }

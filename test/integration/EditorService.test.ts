@@ -1,7 +1,6 @@
 import { Container } from 'typedi';
 import { Connection } from 'typeorm';
 
-import { Subject } from '../../src/api/models/Article';
 import { Editor, Levels, Positions } from '../../src/api/models/Editor';
 import { EditorService } from '../../src/api/services/EditorService';
 import { closeDatabase, createDatabaseConnection, migrateDatabase } from '../utils/database';
@@ -37,7 +36,6 @@ describe('EditorService', () => {
         editor.name = 'test';
         editor.level = Levels.JUNIOR;
         editor.position = Positions.EDITOR;
-        editor.subjects = [Subject.Biology];
         const service = Container.get<EditorService>(EditorService);
         const resultCreate = await service.create(editor);
 

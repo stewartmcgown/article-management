@@ -1,9 +1,9 @@
-import { validate } from 'class-validator';
 import Container from 'typedi';
 
-import { Article, Status } from '../../../src/api/models/Article';
+import { Article } from '../../../src/api/models/Article';
 import { Author } from '../../../src/api/models/Author';
 import { Editor } from '../../../src/api/models/Editor';
+import { ArticleSender } from '../../../src/mail/ArticleSender';
 import { MailSender } from '../../../src/mail/MailSender';
 
 describe("Mail functionality", () => {
@@ -23,7 +23,7 @@ describe("Mail functionality", () => {
     let mailService: MailSender;
 
     beforeAll(() => {
-        mailService = Container.get<MailSender>(MailSender);
+        mailService = Container.get<MailSender>(ArticleSender);
     });
 
     test("Recipients should be authors and editors", () => {
