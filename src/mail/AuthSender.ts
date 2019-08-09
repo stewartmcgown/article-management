@@ -11,16 +11,7 @@ export class AuthSender extends MailSender {
             from: this.from,
             to: pinEvent.user.email,
             subject: `Your AMS Pin`,
-            html: `Dear ${pinEvent.user.name},
-                <br />
-                Your one-time PIN is <b>${pinEvent.pin}</b>.
-
-                Never reveal your PIN to anyone.
-
-                It will expire in one minute.
-
-                - Submissions Team
-            `,
+            html: this.render('pin', pinEvent),
         });
     }
 }

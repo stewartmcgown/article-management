@@ -83,10 +83,14 @@ export class Article  {
     @Column()
     public docId: string;
 
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public deadline: Date;
 
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public notes: string;
 
     @IsNotEmpty()
@@ -97,7 +101,9 @@ export class Article  {
     @Column()
     public markingGridId: string;
 
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public copyright: string;
 
     @Column({
@@ -106,14 +112,20 @@ export class Article  {
     public trashed: boolean;
 
     @IsNotEmpty()
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public summary: string;
 
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public reason: string;
 
     @UpdateDateColumn()
-    @Column()
+    @Column({
+        nullable: true,
+    })
     public modified: Date;
 
     @ManyToMany(type => Editor)
