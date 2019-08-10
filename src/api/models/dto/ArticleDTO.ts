@@ -1,23 +1,38 @@
 import { Exclude, Expose } from 'class-transformer';
+import { IsNotEmpty } from 'class-validator';
 
 import { Subject, Type } from '../Article';
 import { Author } from '../Author';
+import { AbstractDTO } from './AbstractDTO';
 
 @Exclude()
-export class ArticleDTO {
-    @Expose() public title: string;
+export class ArticleDTO extends AbstractDTO {
+    @Expose()
+    @IsNotEmpty()
+    public title: string;
 
-    @Expose() public type: Type;
+    @Expose()
+    @IsNotEmpty()
+    public type: Type;
 
-    @Expose() public subject: Subject;
+    @Expose()
+    @IsNotEmpty()
+    public subject: Subject;
 
-    @Expose() public notes: string;
+    @Expose()
+    public notes: string;
 
-    @Expose() public copyright: string;
+    @Expose()
+    public copyright: string;
 
-    @Expose() public summary: string;
+    @Expose()
+    @IsNotEmpty()
+    public summary: string;
 
-    @Expose() public reason: string;
+    @Expose()
+    public reason: string;
 
-    @Expose() public authors: Author[];
+    @Expose()
+    @IsNotEmpty()
+    public authors: Author[];
 }

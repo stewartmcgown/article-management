@@ -1,3 +1,4 @@
+import { validate } from 'class-validator';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 import uuid from 'uuid';
@@ -10,16 +11,17 @@ import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
+import { AbstractService } from './AbstractService';
 
 @Service()
-export class ArticleService {
+export class ArticleService extends AbstractService<ArticleDTO, Article> {
 
     constructor(
         @OrmRepository() private articleRepository: ArticleRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
         @Logger(__filename) private log: LoggerInterface,
         private driveService: Drive
-    ) { }
+    ) { super(Article); }
 
     public find(): Promise<Article[]> {
         this.log.info('Find all articles');
@@ -32,6 +34,11 @@ export class ArticleService {
     }
 
     public async create(articleDto: ArticleDTO, file: Express.Multer.File): Promise<Article> {
+
+        const validationErrors = await validate(articleDto);
+        if (validationErrors.length) {
+            throw validationErrors;
+        }
 
         // DTO -> Class
         const article = new Article();

@@ -1,10 +1,9 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { Column, PrimaryColumn } from 'typeorm';
+import { Column } from 'typeorm';
 
-export abstract class User {
+import { AbstractModel } from './AbstractModel';
 
-    @PrimaryColumn('uuid')
-    public id: string;
+export abstract class User extends AbstractModel {
 
     @IsNotEmpty()
     @Column()
