@@ -1,5 +1,4 @@
 import { plainToClass } from 'class-transformer';
-import { Express } from 'express';
 import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req, UploadedFile
 } from 'routing-controllers';
@@ -37,6 +36,7 @@ export class ArticleController {
 
     @Post()
     public create(@UploadedFile('file') file: Express.Multer.File,
+                  // @UploadedFiles('photos[]') photo: Express.Multer.File[],
                   @Body() body: any): Promise<Article> {
         const article = plainToClass(Article, JSON.parse(body.article)) as any;
         return this.articleService.create(article as Article, file);

@@ -1,22 +1,23 @@
 import { IsNotEmpty } from 'class-validator';
 import {
-    Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn, UpdateDateColumn
+    AfterLoad, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn,
+    UpdateDateColumn
 } from 'typeorm';
 
 import { Author } from './Author';
 import { Editor } from './Editor';
 
 export enum Status {
-        'In Review' = 'In Review',
-        'Failed Data Check' = 'Failed Data Check',
-        'Passed Data Check' = 'Passed Data Check',
-        'Technical Review' = 'Technical Review',
-        'Revisions Requested' = 'Revisions Requested',
-        'Ready to Publish' = 'Ready to Publish',
-        'Published' = 'Published',
-        'Submitted' = 'Submitted',
-        'Rejected' = 'Rejected',
-        'Final Review' = 'Final Review',
+    'In Review' = 'In Review',
+    'Failed Data Check' = 'Failed Data Check',
+    'Passed Data Check' = 'Passed Data Check',
+    'Technical Review' = 'Technical Review',
+    'Revisions Requested' = 'Revisions Requested',
+    'Ready to Publish' = 'Ready to Publish',
+    'Published' = 'Published',
+    'Submitted' = 'Submitted',
+    'Rejected' = 'Rejected',
+    'Final Review' = 'Final Review',
 }
 
 export enum Type {
@@ -43,7 +44,7 @@ export enum Subject {
  * Represents an Article
  */
 @Entity()
-export class Article  {
+export class Article {
 
     @PrimaryColumn('uuid')
     public id: string;
@@ -131,4 +132,11 @@ export class Article  {
     @ManyToMany(type => Author)
     @JoinTable()
     public authors: Author[];
+
+    public link: string;
+
+    @AfterLoad()
+    public getLink(): void {
+        this.link = `https://drive.google.com/open?id=${this.docId}`;
+    }
 }

@@ -1,3 +1,4 @@
+import { GaxiosResponse } from 'gaxios';
 import { drive_v3, google } from 'googleapis';
 import { OAuth2Client } from 'googleapis-common';
 import stream from 'stream';
@@ -29,6 +30,16 @@ export interface CopyFileOptions {
     name?: string;
 }
 
+export interface ShareFileOptions {
+    id: string;
+
+    role: 'fileOrganizer' | 'writer' | 'commenter' | 'reader';
+
+    email: string;
+}
+
+const sleep = (ms = 0) => new Promise(r => setTimeout(r, ms));
+
 @Service()
 export class Drive {
 
@@ -50,8 +61,21 @@ export class Drive {
         this.drive = google.drive('v3');
     }
 
+    public shareFile(options: ShareFileOptions): Promise<string> {
+        return this.executeDriveRequest(this.drive.permissions.create({
+            auth: this.oAuth,
+            fileId: options.id,
+            requestBody: {
+                role: options.role,
+                type: 'user',
+                emailAddress: options.email,
+            },
+            fields: 'id',
+        }));
+    }
+
     public createFolder(options: CreateFolderOptions): Promise<string> {
-        return this.drive.files.create({
+        return this.executeDriveRequest(this.drive.files.create({
             auth: this.oAuth,
             requestBody: {
                 name: options.name,
@@ -59,14 +83,14 @@ export class Drive {
                 parents: [options.parentId],
             },
             fields: 'id',
-        }).then(d => d.data.id);
+        }));
     }
 
     public createFile(options: CreateFileOptions): Promise<string> {
         const bufferStream = new stream.PassThrough();
         bufferStream.end(options.file.buffer);
 
-        return this.drive.files.create({
+        return this.executeDriveRequest(this.drive.files.create({
             auth: this.oAuth,
             requestBody: {
                 name: options.name,
@@ -78,11 +102,11 @@ export class Drive {
                 body: bufferStream,
             },
             fields: 'id',
-        }).then(r => r.data.id);
+        }));
     }
 
     public copy(options: CopyFileOptions): Promise<string> {
-        return this.drive.files.copy({
+        return this.executeDriveRequest(this.drive.files.copy({
             auth: this.oAuth,
             fileId: options.source,
             requestBody: {
@@ -90,6 +114,11 @@ export class Drive {
                 parents: [options.dest],
             },
             fields: 'id',
-        }).then(r => r.data.id);
+        }));
+    }
+
+    private async executeDriveRequest(request: Promise<GaxiosResponse<any>>): Promise<string> {
+        await sleep(500);
+        return request.then(d => d.data.id);
     }
 }

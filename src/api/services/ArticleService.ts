@@ -57,6 +57,21 @@ export class ArticleService {
 
         article.markingGridId = markingGridId;
 
+        // Process permissions asynchronously
+        for (const { email } of article.authors) {
+            this.driveService.shareFile({
+                id: docId,
+                role: 'writer',
+                email,
+            });
+
+            this.driveService.shareFile({
+                id: markingGridId,
+                role: 'reader',
+                email,
+            });
+        }
+
         article.id = uuid.v4();
         const newArticle = await this.articleRepository.save(article);
         this.eventDispatcher.dispatch(events.article.created, newArticle);
