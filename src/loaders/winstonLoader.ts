@@ -18,6 +18,7 @@ export const winstonLoader: MicroframeworkLoader = (settings: MicroframeworkSett
                         format.simple()
                     ),
             }),
+            new transports.File({ filename: 'error.log', level: 'error' }),
         ],
     });
 };
