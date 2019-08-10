@@ -6,6 +6,8 @@ import { authorizationChecker } from '../auth/authorizationChecker';
 import { currentUserChecker } from '../auth/currentUserChecker';
 import { env } from '../env';
 
+import bodyParser = require('body-parser');
+
 export const expressLoader: MicroframeworkLoader = (settings: MicroframeworkSettings | undefined) => {
     if (settings) {
         const connection = settings.getData('connection');
@@ -33,6 +35,8 @@ export const expressLoader: MicroframeworkLoader = (settings: MicroframeworkSett
             authorizationChecker: authorizationChecker(connection),
             currentUserChecker: currentUserChecker(connection),
         });
+
+        expressApp.use(bodyParser({ limit: '10mb' }));
 
         // Run application to listen on given port
         if (!env.isTest) {

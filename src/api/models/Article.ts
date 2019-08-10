@@ -49,7 +49,6 @@ export class Article  {
     public id: string;
 
     @CreateDateColumn()
-    @Column()
     public date: Date;
 
     @IsNotEmpty()
@@ -123,9 +122,6 @@ export class Article  {
     public reason: string;
 
     @UpdateDateColumn()
-    @Column({
-        nullable: true,
-    })
     public modified: Date;
 
     @ManyToMany(type => Editor)

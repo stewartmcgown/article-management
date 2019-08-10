@@ -1,5 +1,7 @@
+import { plainToClass } from 'class-transformer';
+import { Express } from 'express';
 import {
-    Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req
+    Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req, UploadedFile
 } from 'routing-controllers';
 
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
@@ -34,8 +36,10 @@ export class ArticleController {
     }
 
     @Post()
-    public create(@Body() article: Article): Promise<Article> {
-        return this.articleService.create(article);
+    public create(@UploadedFile('file') file: Express.Multer.File,
+                  @Body() body: any): Promise<Article> {
+        const article = plainToClass(Article, JSON.parse(body.article)) as any;
+        return this.articleService.create(article as Article, file);
     }
 
     @Authorized(Levels.JUNIOR)

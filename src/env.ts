@@ -78,4 +78,11 @@ export const env = {
         user: getOsEnv('MAIL_USER'),
         pass: getOsEnv('MAIL_PASS'),
     },
+    google: {
+        refresh_token: getOsEnv('GOOGLE_REFRESH_TOKEN'),
+        client_id: getOsEnv('GOOGLE_CLIENT_ID'),
+        client_secret: getOsEnv('GOOGLE_CLIENT_SECRET'),
+        parent: getOsEnv('GOOGLE_PARENT_ID'),
+        marking_grid: getOsEnv('GOOGLE_MARKING_GRID'),
+    },
 };

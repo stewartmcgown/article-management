@@ -32,6 +32,6 @@ export class ArticleSender extends MailSender {
 
     private getRecipients(article: Article): string[] {
         return article.authors.map(auth => auth.email)
-            .concat(article.editors.map(edit => edit.email));
+            .concat(article.editors ? article.editors.map(edit => edit.email) : []);
     }
 }

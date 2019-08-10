@@ -4,6 +4,8 @@ import uuid from 'uuid';
 
 import { EventDispatcher, EventDispatcherInterface } from '../../decorators/EventDispatcher';
 import { Logger, LoggerInterface } from '../../decorators/Logger';
+import { env } from '../../env';
+import { Drive } from '../../google/Drive';
 import { Article } from '../models/Article';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
@@ -14,7 +16,8 @@ export class ArticleService {
     constructor(
         @OrmRepository() private articleRepository: ArticleRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
-        @Logger(__filename) private log: LoggerInterface
+        @Logger(__filename) private log: LoggerInterface,
+        private driveService: Drive
     ) { }
 
     public find(): Promise<Article[]> {
@@ -27,9 +30,34 @@ export class ArticleService {
         return this.articleRepository.findOne({ id });
     }
 
-    public async create(article: Article): Promise<Article> {
+    public async create(article: Article, file: Express.Multer.File): Promise<Article> {
         this.log.info('Create a new article => ', article.toString());
-        article.id = uuid.v1();
+
+        const folderId = await this.driveService.createFolder({
+            name: article.title,
+            parentId: env.google.parent,
+        });
+
+        article.folderId = folderId;
+
+        const docId = await this.driveService.createFile({
+            name: article.title,
+            file,
+            mimeType: 'application/vnd.google-apps.document',
+            parentId: folderId,
+        });
+
+        article.docId = docId;
+
+        const markingGridId = await this.driveService.copy({
+            source: env.google.marking_grid,
+            dest: folderId,
+            name: `Marking Grid for ${article.title}`,
+        });
+
+        article.markingGridId = markingGridId;
+
+        article.id = uuid.v4();
         const newArticle = await this.articleRepository.save(article);
         this.eventDispatcher.dispatch(events.article.created, newArticle);
         return newArticle;

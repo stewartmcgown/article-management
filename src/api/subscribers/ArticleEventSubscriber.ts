@@ -1,5 +1,5 @@
 import { EventSubscriber, On } from 'event-dispatch';
-import { Inject } from 'typedi';
+import Container from 'typedi';
 
 import { Logger } from '../../lib/logger';
 import { ArticleSender } from '../../mail/ArticleSender';
@@ -11,7 +11,9 @@ const log = new Logger(__filename);
 @EventSubscriber()
 export class ArticleEventSubscriber {
 
-    constructor(@Inject() private articleSender: ArticleSender) {}
+    constructor(private articleSender: ArticleSender) {
+        this.articleSender = Container.get(ArticleSender);
+    }
 
     @On(events.article.created)
     public onArticleCreate(article: Article): void {
