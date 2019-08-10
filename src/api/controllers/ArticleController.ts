@@ -9,6 +9,7 @@ import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
 import { Levels } from '../models/Editor';
 import { ArticleService } from '../services/ArticleService';
+import { ArticleCreateResponse } from './responses/ArticleCreateResponse';
 
 @JsonController('/articles')
 export class ArticleController {
@@ -37,9 +38,12 @@ export class ArticleController {
     }
 
     @Post()
-    public create(@UploadedFile('file') file: Express.Multer.File, @Body() body: any): Promise<Article> {
+    public create(@UploadedFile('file') file: Express.Multer.File, @Body() body: any): Promise<ArticleCreateResponse> {
         const article = plainToClass<ArticleDTO, ObjectLiteral>(ArticleDTO, JSON.parse(body.article));
-        return this.articleService.create(article, file);
+        return this.articleService.create(article, file).then(result => ({
+            id: result.id,
+            title: result.title,
+        }));
     }
 
     @Authorized(Levels.JUNIOR)
