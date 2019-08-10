@@ -7,6 +7,7 @@ import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { env } from '../../env';
 import { Drive } from '../../google/Drive';
 import { Article } from '../models/Article';
+import { ArticleDTO } from '../models/dto/ArticleDTO';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
 
@@ -30,7 +31,12 @@ export class ArticleService {
         return this.articleRepository.findOne({ id });
     }
 
-    public async create(article: Article, file: Express.Multer.File): Promise<Article> {
+    public async create(articleDto: ArticleDTO, file: Express.Multer.File): Promise<Article> {
+
+        // DTO -> Class
+        const article = new Article();
+        Object.assign(article, articleDto);
+
         this.log.info('Create a new article => ', article.toString());
 
         const folderId = await this.driveService.createFolder({
@@ -62,12 +68,6 @@ export class ArticleService {
             this.driveService.shareFile({
                 id: docId,
                 role: 'writer',
-                email,
-            });
-
-            this.driveService.shareFile({
-                id: markingGridId,
-                role: 'reader',
                 email,
             });
         }

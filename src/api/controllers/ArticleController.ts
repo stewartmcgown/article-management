@@ -2,9 +2,11 @@ import { plainToClass } from 'class-transformer';
 import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req, UploadedFile
 } from 'routing-controllers';
+import { ObjectLiteral } from 'typeorm';
 
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
 import { Article } from '../models/Article';
+import { ArticleDTO } from '../models/dto/ArticleDTO';
 import { Levels } from '../models/Editor';
 import { ArticleService } from '../services/ArticleService';
 
@@ -35,11 +37,9 @@ export class ArticleController {
     }
 
     @Post()
-    public create(@UploadedFile('file') file: Express.Multer.File,
-                  // @UploadedFiles('photos[]') photo: Express.Multer.File[],
-                  @Body() body: any): Promise<Article> {
-        const article = plainToClass(Article, JSON.parse(body.article)) as any;
-        return this.articleService.create(article as Article, file);
+    public create(@UploadedFile('file') file: Express.Multer.File, @Body() body: any): Promise<Article> {
+        const article = plainToClass<ArticleDTO, ObjectLiteral>(ArticleDTO, JSON.parse(body.article));
+        return this.articleService.create(article, file);
     }
 
     @Authorized(Levels.JUNIOR)
