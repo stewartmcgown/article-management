@@ -4,9 +4,10 @@ import {
 
 import { AuthorNotFoundError } from '../errors/AuthorNotFoundError';
 import { Author } from '../models/Author';
+import { Levels } from '../models/Editor';
 import { AuthorService } from '../services/AuthorService';
 
-@Authorized()
+@Authorized(Levels.JUNIOR)
 @JsonController('/authors')
 export class AuthorController {
 
@@ -30,16 +31,19 @@ export class AuthorController {
         return this.authorService.findOne(id);
     }
 
+    @Authorized(Levels.SENIOR)
     @Post()
     public create(@Body() author: Author): Promise<Author> {
         return this.authorService.create(author);
     }
 
+    @Authorized(Levels.SENIOR)
     @Put('/:id')
     public update(@Param('id') id: string, @Body() author: Author): Promise<Author> {
         return this.authorService.update(id, author);
     }
 
+    @Authorized(Levels.ADMIN)
     @Delete('/:id')
     public delete(@Param('id') id: string): Promise<void> {
         return this.authorService.delete(id);

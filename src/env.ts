@@ -55,6 +55,7 @@ export const env = {
         database: getOsEnv('TYPEORM_DATABASE'),
         synchronize: toBool(getOsEnvOptional('TYPEORM_SYNCHRONIZE')),
         logging: getOsEnv('TYPEORM_LOGGING'),
+        cache: getOsEnv('TYPEORM_CACHE'),
     },
     graphql: {
         enabled: toBool(getOsEnv('GRAPHQL_ENABLED')),

@@ -16,7 +16,7 @@ export class CreateStewart implements Seeder {
         user.level = Levels.ADMIN;
         user.position = Positions.EDITOR;
         user.subjects = 'Computer Science';
-        return await em.save(user);
+        return em.save(user);
     }
 
 }

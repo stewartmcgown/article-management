@@ -3,10 +3,10 @@ import {
 } from 'routing-controllers';
 
 import { EditorNotFoundError } from '../errors/EditorNotFoundError';
-import { Editor } from '../models/Editor';
+import { Editor, Levels } from '../models/Editor';
 import { EditorService } from '../services/EditorService';
 
-@Authorized()
+@Authorized(Levels.JUNIOR)
 @JsonController('/editors')
 export class EditorController {
 
@@ -30,16 +30,19 @@ export class EditorController {
         return this.editorService.findOne(id);
     }
 
+    @Authorized(Levels.ADMIN)
     @Post()
     public create(@Body() editor: Editor): Promise<Editor> {
         return this.editorService.create(editor);
     }
 
+    @Authorized(Levels.ADMIN)
     @Put('/:id')
     public update(@Param('id') id: string, @Body() editor: Editor): Promise<Editor> {
         return this.editorService.update(id, editor);
     }
 
+    @Authorized(Levels.ADMIN)
     @Delete('/:id')
     public delete(@Param('id') id: string): Promise<void> {
         return this.editorService.delete(id);

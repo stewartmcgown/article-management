@@ -6,7 +6,7 @@ import { Editor } from '../../../src/api/models/Editor';
 import { ArticleSender } from '../../../src/mail/ArticleSender';
 import { MailSender } from '../../../src/mail/MailSender';
 
-describe("Mail functionality", () => {
+describe('Mail functionality', () => {
 
     const mockAuthor = () => {
         const a = new Author();
@@ -26,13 +26,13 @@ describe("Mail functionality", () => {
         mailService = Container.get<MailSender>(ArticleSender);
     });
 
-    test("Recipients should be authors and editors", () => {
+    test('Recipients should be authors and editors', () => {
 
         const article = new Article();
         article.authors = new Array(2).fill(mockAuthor());
         article.editors = new Array(2).fill(mockEditor());
 
-        const recipients = mailService['getRecipients'](article);
+        const recipients = mailService.getRecipients(article);
 
         expect(recipients.length).toBe(4);
         expect(recipients).toEqual(new Array(4).fill('test@test.org'));

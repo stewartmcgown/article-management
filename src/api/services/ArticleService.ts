@@ -1,10 +1,10 @@
-import { validate } from 'class-validator';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 import uuid from 'uuid';
 
 import { EventDispatcher, EventDispatcherInterface } from '../../decorators/EventDispatcher';
 import { Logger, LoggerInterface } from '../../decorators/Logger';
+import { validate, validated } from '../../decorators/Validate';
 import { env } from '../../env';
 import { Drive } from '../../google/Drive';
 import { Article } from '../models/Article';
@@ -33,12 +33,8 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         return this.articleRepository.findOne({ id });
     }
 
-    public async create(articleDto: ArticleDTO, file: Express.Multer.File): Promise<Article> {
-
-        const validationErrors = await validate(articleDto);
-        if (validationErrors.length) {
-            throw validationErrors;
-        }
+    @validated()
+    public async create(@validate() articleDto: ArticleDTO, file: Express.Multer.File): Promise<Article> {
 
         // DTO -> Class
         const article = new Article();
