@@ -7,9 +7,10 @@ import { ObjectLiteral } from 'typeorm';
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
 import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
-import { Levels } from '../models/Editor';
+import { Levels } from '../models/User';
 import { ArticleService } from '../services/ArticleService';
 import { ArticleCreateResponse } from './responses/ArticleCreateResponse';
+import { ArticlePublishResponse } from './responses/ArticlePublishResponse';
 
 @JsonController('/articles')
 export class ArticleController {
@@ -24,7 +25,7 @@ export class ArticleController {
         return this.articleService.find();
     }
 
-    @Authorized(Levels.JUNIOR)
+    @Authorized(Levels.AUTHOR)
     @Get('/me')
     public findMe(@Req() req: any): Promise<Article[]> {
         return req.article;
@@ -47,7 +48,7 @@ export class ArticleController {
         }));
     }
 
-    @Authorized(Levels.JUNIOR)
+    @Authorized([Levels.JUNIOR, Levels.SENIOR, Levels.ADMIN])
     @Put('/:id')
     public update(@Param('id') id: string, @Body() article: Article): Promise<Article> {
         return this.articleService.update(id, article);
@@ -57,6 +58,12 @@ export class ArticleController {
     @Delete('/:id')
     public delete(@Param('id') id: string): Promise<void> {
         return this.articleService.delete(id);
+    }
+
+    @Authorized(Levels.ADMIN)
+    @Post('/publish/:id')
+    public publish(@Param('id') id: string): Promise<ArticlePublishResponse> {
+        return this.articleService.publish(id);
     }
 
 }

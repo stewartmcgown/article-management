@@ -3,6 +3,7 @@ import { define } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
 import { Author } from '../../api/models/Author';
+import { Levels } from '../../api/models/User';
 
 define(Author, (faker: typeof Faker) => {
     const author = new Author();
@@ -17,6 +18,7 @@ define(Author, (faker: typeof Faker) => {
     author.biography = faker.lorem.sentence();
     author.school = faker.company.companyName();
     author.country = faker.address.country();
+    author.level = Levels.AUTHOR;
 
     return author;
 });

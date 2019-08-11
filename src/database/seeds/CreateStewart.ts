@@ -2,7 +2,8 @@ import { Connection } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
-import { Editor, Levels, Positions } from '../../api/models/Editor';
+import { Editor, Positions } from '../../api/models/Editor';
+import { Levels } from '../../api/models/User';
 
 export class CreateStewart implements Seeder {
 

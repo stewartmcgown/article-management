@@ -7,6 +7,8 @@ import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { validate, validated } from '../../decorators/Validate';
 import { env } from '../../env';
 import { Drive } from '../../google/Drive';
+import { WordpressService } from '../../lib/wordpress';
+import { ArticlePublishResponse } from '../controllers/responses/ArticlePublishResponse';
 import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
 import { ArticleRepository } from '../repositories/ArticleRepository';
@@ -20,7 +22,8 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         @OrmRepository() private articleRepository: ArticleRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
         @Logger(__filename) private log: LoggerInterface,
-        private driveService: Drive
+        private driveService: Drive,
+        private wordpressService: WordpressService
     ) { super(Article); }
 
     public find(): Promise<Article[]> {
@@ -91,6 +94,15 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         this.log.info('Delete a article');
         await this.articleRepository.delete(id);
         return;
+    }
+
+    public async publish(id: string): Promise<ArticlePublishResponse> {
+        const article = await this.articleRepository.findOne(id);
+        const wordpress = await this.wordpressService.publishArticle(article);
+        return {
+            article,
+            wordpress,
+        };
     }
 
 }

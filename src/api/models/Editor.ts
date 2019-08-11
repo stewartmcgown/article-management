@@ -8,12 +8,6 @@ export enum Positions {
     PRODUCTION = 'Production',
 }
 
-export enum Levels {
-    JUNIOR = 'Junior',
-    SENIOR = 'Senior',
-    ADMIN = 'Admin',
-}
-
 @Entity()
 export class Editor extends User {
 
@@ -24,14 +18,6 @@ export class Editor extends User {
     })
     @IsNotEmpty()
     public position: Positions;
-
-    @Column({
-        type: 'enum',
-        enum: Levels,
-        default: Levels.JUNIOR,
-    })
-    @IsNotEmpty()
-    public level: Levels;
 
     @Column()
     public subjects: string;

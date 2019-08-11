@@ -1,6 +1,6 @@
 import { GaxiosResponse } from 'gaxios';
 import { drive_v3, google } from 'googleapis';
-import { OAuth2Client } from 'googleapis-common';
+import { MethodOptions, OAuth2Client } from 'googleapis-common';
 import stream from 'stream';
 import { Service } from 'typedi';
 
@@ -38,6 +38,12 @@ export interface ShareFileOptions {
     email: string;
 }
 
+export interface DownloadFileOptions {
+    id: string;
+
+    mimeType: string;
+}
+
 const sleep = (ms = 0) => new Promise(r => setTimeout(r, ms));
 
 @Service()
@@ -58,12 +64,14 @@ export class Drive {
             refresh_token: env.google.refresh_token,
         });
 
-        this.drive = google.drive('v3');
+        this.drive = google.drive({
+            version: 'v3',
+            auth: this.oAuth,
+        });
     }
 
     public shareFile(options: ShareFileOptions): Promise<string> {
         return this.executeDriveRequest(this.drive.permissions.create({
-            auth: this.oAuth,
             fileId: options.id,
             requestBody: {
                 role: options.role,
@@ -91,7 +99,6 @@ export class Drive {
         bufferStream.end(options.file.buffer);
 
         return this.executeDriveRequest(this.drive.files.create({
-            auth: this.oAuth,
             requestBody: {
                 name: options.name,
                 mimeType: options.mimeType,
@@ -107,7 +114,6 @@ export class Drive {
 
     public copy(options: CopyFileOptions): Promise<string> {
         return this.executeDriveRequest(this.drive.files.copy({
-            auth: this.oAuth,
             fileId: options.source,
             requestBody: {
                 name: options.name,
@@ -117,7 +123,24 @@ export class Drive {
         }));
     }
 
-    private async executeDriveRequest(request: Promise<GaxiosResponse<any>>): Promise<string> {
+    public downloadFile(options: DownloadFileOptions): Promise<ArrayBuffer> {
+        const resource = {
+            fileId: options.id,
+            mimeType: options.mimeType,
+        };
+
+        const request: MethodOptions = {
+            responseType: 'arraybuffer',
+        };
+
+        return new Promise((resolve, reject) => {
+            this.drive.files.export(resource, request, (err, res) => {
+                resolve((res.data as unknown) as ArrayBuffer);
+            });
+        });
+    }
+
+    private async executeDriveRequest(request: Promise<GaxiosResponse<any>>): Promise<any> {
         await sleep(500);
         return request.then(d => d.data.id);
     }

@@ -1,12 +1,13 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class Database1565395022673 implements MigrationInterface {
+export class Database1565562110025 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
-        await queryRunner.query(`CREATE TABLE "author" ("id" uuid NOT NULL, "name" character varying NOT NULL, "email" character varying NOT NULL, "lastPinIssued" TIMESTAMP, "secret" character varying, "token" character varying, "school" character varying NOT NULL, "biography" character varying NOT NULL, "country" character varying NOT NULL, "teacher" character varying, "profile" character varying, CONSTRAINT "PK_5a0e79799d372fe56f2f3fa6871" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "author_level_enum" AS ENUM('0', '1', '2', '3')`);
+        await queryRunner.query(`CREATE TABLE "author" ("id" uuid NOT NULL, "name" character varying NOT NULL, "email" character varying NOT NULL, "lastPinIssued" TIMESTAMP, "secret" character varying, "token" character varying, "level" "author_level_enum" NOT NULL DEFAULT '0', "school" character varying NOT NULL, "biography" character varying NOT NULL, "country" character varying NOT NULL, "teacher" character varying, "profile" character varying, CONSTRAINT "PK_5a0e79799d372fe56f2f3fa6871" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "editor_level_enum" AS ENUM('0', '1', '2', '3')`);
         await queryRunner.query(`CREATE TYPE "editor_position_enum" AS ENUM('Editor', 'Production')`);
-        await queryRunner.query(`CREATE TYPE "editor_level_enum" AS ENUM('Junior', 'Senior', 'Admin')`);
-        await queryRunner.query(`CREATE TABLE "editor" ("id" uuid NOT NULL, "name" character varying NOT NULL, "email" character varying NOT NULL, "lastPinIssued" TIMESTAMP, "secret" character varying, "token" character varying, "position" "editor_position_enum" NOT NULL DEFAULT 'Editor', "level" "editor_level_enum" NOT NULL DEFAULT 'Junior', "subjects" character varying NOT NULL, CONSTRAINT "PK_354bcbcb0b7526a79230987d6e4" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "editor" ("id" uuid NOT NULL, "name" character varying NOT NULL, "email" character varying NOT NULL, "lastPinIssued" TIMESTAMP, "secret" character varying, "token" character varying, "level" "editor_level_enum" NOT NULL DEFAULT '0', "position" "editor_position_enum" NOT NULL DEFAULT 'Editor', "subjects" character varying NOT NULL, CONSTRAINT "PK_354bcbcb0b7526a79230987d6e4" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "article_type_enum" AS ENUM('Review Article', 'Blog', 'Original Research', 'Magazine Article')`);
         await queryRunner.query(`CREATE TYPE "article_status_enum" AS ENUM('In Review', 'Failed Data Check', 'Passed Data Check', 'Technical Review', 'Revisions Requested', 'Ready to Publish', 'Published', 'Submitted', 'Rejected', 'Final Review')`);
         await queryRunner.query(`CREATE TYPE "article_subject_enum" AS ENUM('Biology', 'Chemistry', 'Computer Science', 'Engineering', 'Environmental & Earth Science', 'Materials Science', 'Mathematics', 'Medicine', 'Physics', 'Policy & Ethics')`);
@@ -21,9 +22,11 @@ export class Database1565395022673 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "article_editors_editor" ADD CONSTRAINT "FK_16c0441729ee4c78f994016237d" FOREIGN KEY ("editorId") REFERENCES "editor"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "article_authors_author" ADD CONSTRAINT "FK_d6fe54533ce83f5ca4e4c7be797" FOREIGN KEY ("articleId") REFERENCES "article"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "article_authors_author" ADD CONSTRAINT "FK_945f91d355b16e783417b6e1f0b" FOREIGN KEY ("authorId") REFERENCES "author"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
+        await queryRunner.query(`CREATE TABLE "query-result-cache" ("id" SERIAL NOT NULL, "identifier" character varying, "time" bigint NOT NULL, "duration" integer NOT NULL, "query" text NOT NULL, "result" text NOT NULL, CONSTRAINT "PK_6a98f758d8bfd010e7e10ffd3d3" PRIMARY KEY ("id"))`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {
+        await queryRunner.query(`DROP TABLE "query-result-cache"`);
         await queryRunner.query(`ALTER TABLE "article_authors_author" DROP CONSTRAINT "FK_945f91d355b16e783417b6e1f0b"`);
         await queryRunner.query(`ALTER TABLE "article_authors_author" DROP CONSTRAINT "FK_d6fe54533ce83f5ca4e4c7be797"`);
         await queryRunner.query(`ALTER TABLE "article_editors_editor" DROP CONSTRAINT "FK_16c0441729ee4c78f994016237d"`);
@@ -39,9 +42,10 @@ export class Database1565395022673 implements MigrationInterface {
         await queryRunner.query(`DROP TYPE "article_status_enum"`);
         await queryRunner.query(`DROP TYPE "article_type_enum"`);
         await queryRunner.query(`DROP TABLE "editor"`);
-        await queryRunner.query(`DROP TYPE "editor_level_enum"`);
         await queryRunner.query(`DROP TYPE "editor_position_enum"`);
+        await queryRunner.query(`DROP TYPE "editor_level_enum"`);
         await queryRunner.query(`DROP TABLE "author"`);
+        await queryRunner.query(`DROP TYPE "author_level_enum"`);
     }
 
 }

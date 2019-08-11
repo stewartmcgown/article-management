@@ -3,7 +3,8 @@ import {
 } from 'routing-controllers';
 
 import { EditorNotFoundError } from '../errors/EditorNotFoundError';
-import { Editor, Levels } from '../models/Editor';
+import { Editor } from '../models/Editor';
+import { Levels } from '../models/User';
 import { EditorService } from '../services/EditorService';
 
 @Authorized(Levels.JUNIOR)

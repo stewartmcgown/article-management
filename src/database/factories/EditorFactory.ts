@@ -3,7 +3,8 @@ import { define } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
 import { Subject } from '../../api/models/Article';
-import { Editor, Levels, Positions } from '../../api/models/Editor';
+import { Editor, Positions } from '../../api/models/Editor';
+import { Levels } from '../../api/models/User';
 
 define(Editor, (faker: typeof Faker) => {
     const editor = new Editor();

@@ -4,7 +4,7 @@ import {
 
 import { AuthorNotFoundError } from '../errors/AuthorNotFoundError';
 import { Author } from '../models/Author';
-import { Levels } from '../models/Editor';
+import { Levels } from '../models/User';
 import { AuthorService } from '../services/AuthorService';
 
 @Authorized(Levels.JUNIOR)

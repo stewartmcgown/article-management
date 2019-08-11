@@ -86,4 +86,7 @@ export const env = {
         parent: getOsEnv('GOOGLE_PARENT_ID'),
         marking_grid: getOsEnv('GOOGLE_MARKING_GRID'),
     },
+    wordpress: {
+        url: getOsEnv('WORDPRESS_URL'),
+    },
 };
