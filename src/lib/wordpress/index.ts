@@ -1,4 +1,5 @@
 import mammoth from 'mammoth';
+import { extension } from 'mime-types';
 import { Service } from 'typedi';
 import WPAPI from 'wpapi';
 
@@ -7,6 +8,7 @@ import { env } from '../../env';
 import { Drive } from '../../google/Drive';
 
 export interface WordpressPost {
+    id?: number;
     date?: any; // The date the object was published, in the site's timezone.
     date_gmt?: any; // The date the object was published, as GMT.
     slug?: any; // An alphanumeric identifier for the object unique to its type.
@@ -57,7 +59,7 @@ export class WordpressService {
         });
     }
 
-    public async publishArticle(article: Article): Promise<any> {
+    public async publishArticle(article: Article): Promise<WordpressPost> {
         const post = await this.articleToPost(article);
 
         const result = await this.client.posts().create(post);
@@ -67,13 +69,54 @@ export class WordpressService {
         return result;
     }
 
-    private async uploadImage(article: Article, imageBuffer: any): Promise<any> {
+    public async getArticle(article: Article): Promise<WordpressPost> {
+        if (!article.wordpressId) {
+            return undefined;
+        }
+
+        const post = await this.client.posts().id(article.wordpressId).get();
+
+        return post;
+    }
+
+    private async uploadImage(title: string, contentType: string, binary: string): Promise<any> {
         const mediaRequest: WordpressMedia = {
-            title: `Image for ${article.title}`,
+            title,
         };
 
-        const result = await this.client.media().create({
+        const result = await this.client
+            .media()
+            .file(Buffer.from(binary, 'binary'), mediaRequest.title)
+            .create(mediaRequest);
 
+        return result;
+    }
+
+    private getConvertImage(article: Article): any {
+        const boundImageUpload = this.uploadImage.bind(this);
+
+        return mammoth.images.inline(element => {
+            return element.read('binary')
+                .then(binary => {
+                    return boundImageUpload(
+                        `Image for ${article.title}.${extension(element.contentType)}`,
+                        element.contentType,
+                        binary
+                    );
+                })
+                .then(uploadResult => {
+                    if (uploadResult.error !== undefined) {
+                        throw new Error(uploadResult.message);
+                    }
+
+                    return {
+                        src: uploadResult.source_url,
+                        class: 'wp-image-' + uploadResult.id,
+                    };
+                })
+                .catch(err => {
+                    throw err;
+                });
         });
     }
 
@@ -84,13 +127,7 @@ export class WordpressService {
         });
 
         const mammothOptions = {
-            /*convertImage: mammoth.images.imgElement((image) => {
-                return image.read('base64').then((imageBuffer) => {
-                    return {
-                        src: "data:" + image.contentType + ";base64," + imageBuffer
-                    };
-                });
-            }),*/
+            convertImage: this.getConvertImage(article),
         };
 
         const { value } = await mammoth.convertToHtml({

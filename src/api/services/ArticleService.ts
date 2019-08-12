@@ -99,6 +99,25 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
     public async publish(id: string): Promise<ArticlePublishResponse> {
         const article = await this.articleRepository.findOne(id);
         const wordpress = await this.wordpressService.publishArticle(article);
+
+        article.wordpressId = wordpress.id;
+        this.articleRepository.save(article);
+
+        return {
+            article,
+            wordpress,
+        };
+    }
+
+    public async getPublished(id: string): Promise<ArticlePublishResponse> {
+        const article = await this.articleRepository.findOne(id);
+
+        if (!article) {
+            return undefined;
+        }
+
+        const wordpress = await this.wordpressService.getArticle(article);
+
         return {
             article,
             wordpress,

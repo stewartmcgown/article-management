@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class Database1565562110025 implements MigrationInterface {
+export class Database1565652710932 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`CREATE TYPE "author_level_enum" AS ENUM('0', '1', '2', '3')`);
@@ -11,7 +11,7 @@ export class Database1565562110025 implements MigrationInterface {
         await queryRunner.query(`CREATE TYPE "article_type_enum" AS ENUM('Review Article', 'Blog', 'Original Research', 'Magazine Article')`);
         await queryRunner.query(`CREATE TYPE "article_status_enum" AS ENUM('In Review', 'Failed Data Check', 'Passed Data Check', 'Technical Review', 'Revisions Requested', 'Ready to Publish', 'Published', 'Submitted', 'Rejected', 'Final Review')`);
         await queryRunner.query(`CREATE TYPE "article_subject_enum" AS ENUM('Biology', 'Chemistry', 'Computer Science', 'Engineering', 'Environmental & Earth Science', 'Materials Science', 'Mathematics', 'Medicine', 'Physics', 'Policy & Ethics')`);
-        await queryRunner.query(`CREATE TABLE "article" ("id" uuid NOT NULL, "date" TIMESTAMP NOT NULL DEFAULT now(), "title" character varying NOT NULL, "type" "article_type_enum" NOT NULL DEFAULT 'Review Article', "status" "article_status_enum" NOT NULL DEFAULT 'Submitted', "subject" "article_subject_enum" NOT NULL, "docId" character varying NOT NULL, "deadline" TIMESTAMP, "notes" character varying, "folderId" character varying NOT NULL, "markingGridId" character varying NOT NULL, "copyright" character varying, "trashed" boolean NOT NULL DEFAULT false, "summary" character varying, "reason" character varying, "modified" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_40808690eb7b915046558c0f81b" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "article" ("id" uuid NOT NULL, "date" TIMESTAMP NOT NULL DEFAULT now(), "title" character varying NOT NULL, "type" "article_type_enum" NOT NULL DEFAULT 'Review Article', "status" "article_status_enum" NOT NULL DEFAULT 'Submitted', "subject" "article_subject_enum" NOT NULL, "docId" character varying NOT NULL, "deadline" TIMESTAMP, "notes" character varying, "folderId" character varying NOT NULL, "markingGridId" character varying NOT NULL, "copyright" character varying, "trashed" boolean NOT NULL DEFAULT false, "summary" character varying, "reason" character varying, "modified" TIMESTAMP NOT NULL DEFAULT now(), "wordpress_id" integer, CONSTRAINT "PK_40808690eb7b915046558c0f81b" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "article_editors_editor" ("articleId" uuid NOT NULL, "editorId" uuid NOT NULL, CONSTRAINT "PK_eae91e4b65ee823255b9921ade7" PRIMARY KEY ("articleId", "editorId"))`);
         await queryRunner.query(`CREATE INDEX "IDX_54de9a5a39adcaea10985516d7" ON "article_editors_editor" ("articleId") `);
         await queryRunner.query(`CREATE INDEX "IDX_16c0441729ee4c78f994016237" ON "article_editors_editor" ("editorId") `);

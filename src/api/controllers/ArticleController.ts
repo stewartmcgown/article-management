@@ -48,7 +48,7 @@ export class ArticleController {
         }));
     }
 
-    @Authorized([Levels.JUNIOR, Levels.SENIOR, Levels.ADMIN])
+    @Authorized(Levels.JUNIOR)
     @Put('/:id')
     public update(@Param('id') id: string, @Body() article: Article): Promise<Article> {
         return this.articleService.update(id, article);
@@ -64,6 +64,13 @@ export class ArticleController {
     @Post('/publish/:id')
     public publish(@Param('id') id: string): Promise<ArticlePublishResponse> {
         return this.articleService.publish(id);
+    }
+
+    @Authorized(Levels.JUNIOR)
+    @Get('/publish/:id')
+    @OnUndefined(ArticleNotFoundError)
+    public getPublished(@Param('id') id: string): Promise<ArticlePublishResponse> {
+        return this.articleService.getPublished(id);
     }
 
 }

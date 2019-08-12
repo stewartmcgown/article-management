@@ -125,6 +125,12 @@ export class Article {
     @UpdateDateColumn()
     public modified: Date;
 
+    @Column({
+        nullable: true,
+        name: 'wordpress_id',
+    })
+    public wordpressId: number;
+
     @ManyToMany(type => Editor)
     @JoinTable()
     public editors: Editor[];
