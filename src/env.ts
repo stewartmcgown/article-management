@@ -88,5 +88,7 @@ export const env = {
     },
     wordpress: {
         url: getOsEnv('WORDPRESS_URL'),
+        user: getOsEnv('WORDPRESS_USER'),
+        password: getOsEnv('WORDPRESS_PASSWORD'),
     },
 };

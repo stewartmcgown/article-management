@@ -30,6 +30,7 @@
   "author": "Stewart McGown <stewart@twistedcore.co.uk",
   "dependencies": {
     "@types/jsonwebtoken": "^8.3.3",
+    "axios": "^0.19.0",
     "bcrypt": "https://github.com/kelektiv/node.bcrypt.js.git#master",
     "chalk": "^2.4.2",
     "class-transformer": "^0.2.3",
