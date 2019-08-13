@@ -1,59 +1,30 @@
 import { IsNotEmpty } from 'class-validator';
+import { Field, ObjectType } from 'type-graphql';
 import {
-    AfterLoad, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn,
-    UpdateDateColumn
+    AfterLoad, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, UpdateDateColumn
 } from 'typeorm';
 
+import { AbstractModel } from './AbstractModel';
 import { Author } from './Author';
 import { Editor } from './Editor';
-
-export enum Status {
-    'In Review' = 'In Review',
-    'Failed Data Check' = 'Failed Data Check',
-    'Passed Data Check' = 'Passed Data Check',
-    'Technical Review' = 'Technical Review',
-    'Revisions Requested' = 'Revisions Requested',
-    'Ready to Publish' = 'Ready to Publish',
-    'Published' = 'Published',
-    'Submitted' = 'Submitted',
-    'Rejected' = 'Rejected',
-    'Final Review' = 'Final Review',
-}
-
-export enum Type {
-    'Review Article' = 'Review Article',
-    'Blog' = 'Blog',
-    'Original Research' = 'Original Research',
-    'Magazine Article' = 'Magazine Article',
-}
-
-export enum Subject {
-    'Biology' = 'Biology',
-    'Chemistry' = 'Chemistry',
-    'Computer Science' = 'Computer Science',
-    'Engineering' = 'Engineering',
-    'Environmental & Earth Science' = 'Environmental & Earth Science',
-    'Materials Science' = 'Materials Science',
-    'Mathematics' = 'Mathematics',
-    'Medicine' = 'Medicine',
-    'Physics' = 'Physics',
-    'Policy & Ethics' = 'Policy & Ethics',
-}
+import { Status } from './enums/Status';
+import { Subject } from './enums/Subject';
+import { Type } from './enums/Type';
 
 /**
  * Represents an Article
  */
 @Entity()
-export class Article {
-
-    @PrimaryColumn('uuid')
-    public id: string;
+@ObjectType()
+export class Article extends AbstractModel {
 
     @CreateDateColumn()
+    @Field(type => Date)
     public date: Date;
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public title: string;
 
     @IsNotEmpty()
@@ -131,11 +102,15 @@ export class Article {
     })
     public wordpressId: number;
 
-    @ManyToMany(type => Editor)
+    @ManyToMany(type => Editor, editor => editor.articles, {
+        cascade: true,
+    })
     @JoinTable()
     public editors: Editor[];
 
-    @ManyToMany(type => Author)
+    @ManyToMany(type => Author, author => author.articles, {
+        cascade: true,
+    })
     @JoinTable()
     public authors: Author[];
 
