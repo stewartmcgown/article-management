@@ -1,18 +1,28 @@
+<p align="center">
+<img src="https://assets.ysjournal.com/img/logo-production.png" width=150 />
+</p>
+<h1 align="center">Article Management System</h1>
+<p align="center">
+<img src="https://david-dm.org/youngscientists/article-management.svg" />
+<img src="https://travis-ci.org/youngscientists/article-management.svg?branch=typescript" />
+</p>
 
-![AMS Logo](https://assets.ysjournal.com/img/article-management.png)
+A turnkey solution for article submission, peer review and publishing.
 
-A system for managing articles submitted by the many contributing authors of the Young Scientist Journal.
+# Features
+- A [REST API](#api) using routing-controllers
+- Database-agnosticism using [TypeORM](https://github.com/typeorm/typeorm)
+- Collaborative document editing with [Google Docs](https://docs.google.com)
+- [Publishing](#publishing) of completed articles to a CMS
+- Plagiarism checking
+- Copyright detection
 
 ## API
-AMS is a RESTful API that gives powerful tools to editors who want to manage a collection of scientific articles, using a token-based authorisation system.
+AMS provides a RESTful API that gives powerful tools to editors who want to manage a collection of scientific articles, using a token-based authorisation system. The system also exposes an endpoint for the submission of articles.
 
-## Technical
-
- - API built to run on NodeJS
- - TypeScript based
- - Uses a Postgres database
- - Data comes from the [article-submissions](https://github.com/youngscientists/article-submissions) form.
+## Publishing
+Articles can be published to a CMS using one of the supported publishing plugins. Currently only **Wordpress** is supported.
 
 > Built with :heart: for the [Young Scientists Journal](https://ysjournal.com).
 
-> Platform design by [Stewart McGown](https://twistedcore.co.uk) and [Peter He]()
+> Original design by [Stewart McGown](https://twistedcore.co.uk) and [Peter He](https://github.com/peterthehe)
