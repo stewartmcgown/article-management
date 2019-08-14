@@ -1,8 +1,13 @@
+import { HttpError } from 'routing-controllers';
+
 import { Editor } from '../../../src/api/models/Editor';
+import { Positions } from '../../../src/api/models/enums/Positions';
 import { AuthService } from '../../../src/auth/AuthService';
 import { EventDispatcherMock } from '../lib/EventDispatcherMock';
 import { LogMock } from '../lib/LogMock';
 import { RepositoryMock } from '../lib/RepositoryMock';
+
+import uuid = require('uuid');
 
 describe('AuthService', () => {
 
@@ -22,14 +27,26 @@ describe('AuthService', () => {
     });
 
     describe('Pin flow', () => {
-        it('request a new pin', async () => {
-            expect(await authService.issuePin('test@test.org')).toBeTruthy();
+        it('request a new pin for non-existent user', async () => {
+            expect(authService.issuePin('test@test.org')).rejects.toThrow(HttpError);
         });
 
-        it('issue and decode authToken', async () => {
-            const pin = await authService.issuePin('test@test.org');
-            const token = await authService.issueToken('wow', 'test@test.org');
+        it('request a new pin for existing user', async () => {
+            const editor = new Editor();
+
+            editor.id = uuid.v4();
+            editor.email = 'test@test.org';
+            editor.name = 'Test';
+            editor.position = Positions.EDITOR;
+            editor.subjects = 'test';
+
+            await editorRepository.save(editor);
+
+            expect(await authService.issuePin('test@test.org')).toEqual({
+                success: true,
+            });
         });
+
     });
 
 });

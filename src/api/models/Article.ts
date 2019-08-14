@@ -33,6 +33,7 @@ export class Article extends AbstractModel {
         enum: Type,
         default: Type['Review Article'],
     })
+    @Field(type => Type)
     public type: Type;
 
     @IsNotEmpty()

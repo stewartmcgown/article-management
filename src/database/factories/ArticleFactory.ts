@@ -2,14 +2,17 @@ import * as Faker from 'faker';
 import { define } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
-import { Article, Status, Subject, Type } from '../../api/models/Article';
+import { Article } from '../../api/models/Article';
+import { Status } from '../../api/models/enums/Status';
+import { Subject } from '../../api/models/enums/Subject';
+import { Type } from '../../api/models/enums/Type';
 
 define(Article, (faker: typeof Faker) => {
     const article = new Article();
 
     const randomEnum = (e: any) => e[
-            faker.random.arrayElement(Object.getOwnPropertyNames(e))
-        ];
+        faker.random.arrayElement(Object.getOwnPropertyNames(e))
+    ];
 
     article.id = uuid.v4();
     article.date = new Date();

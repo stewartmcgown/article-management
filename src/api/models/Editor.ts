@@ -1,12 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToMany } from 'typeorm';
 
+import { Article } from './Article';
+import { Positions } from './enums/Positions';
 import { User } from './User';
-
-export enum Positions {
-    EDITOR = 'Editor',
-    PRODUCTION = 'Production',
-}
 
 @Entity()
 export class Editor extends User {
@@ -21,4 +18,7 @@ export class Editor extends User {
 
     @Column()
     public subjects: string;
+
+    @ManyToMany(type => Article, article => article.editors)
+    public articles: Article[];
 }

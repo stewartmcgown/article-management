@@ -2,9 +2,10 @@ import * as Faker from 'faker';
 import { define } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
-import { Subject } from '../../api/models/Article';
-import { Editor, Positions } from '../../api/models/Editor';
-import { Levels } from '../../api/models/User';
+import { Editor } from '../../api/models/Editor';
+import { Levels } from '../../api/models/enums/Levels';
+import { Positions } from '../../api/models/enums/Positions';
+import { Subject } from '../../api/models/enums/Subject';
 
 define(Editor, (faker: typeof Faker) => {
     const editor = new Editor();

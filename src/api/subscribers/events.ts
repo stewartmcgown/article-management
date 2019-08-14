@@ -15,6 +15,7 @@ export const events = {
     article: {
         created: 'onArticleCreate',
         updated: 'onArticleUpdate',
+        copyrightUpdated: 'onArticleCopyrightUpdate',
     },
     pin: {
         issued: 'onPinIssued',

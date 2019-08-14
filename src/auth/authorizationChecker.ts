@@ -2,12 +2,14 @@ import { Action } from 'routing-controllers';
 import { Container } from 'typedi';
 import { Connection } from 'typeorm';
 
+import { Levels } from '../api/models/enums/Levels';
+import { User } from '../api/models/User';
 import { AuthService } from './AuthService';
 
 export function authorizationChecker(connection: Connection): (action: Action, roles: any[]) => Promise<boolean> | boolean {
     const authService = Container.get<AuthService>(AuthService);
 
-    return async function innerAuthorizationChecker(action: Action, roles: string[]): Promise<boolean> {
+    return async function innerAuthorizationChecker(action: Action, roles: Levels[]): Promise<boolean> {
         // here you can use request/response objects from action
         // also if decorator defines roles it needs to access the action
         // you can use them to provide granular access check
@@ -25,8 +27,12 @@ export function authorizationChecker(connection: Connection): (action: Action, r
             return false;
         }
 
-        console.log(roles);
+        const user = action.request.user as User;
 
-        return true;
+        if (roles.some(r => user.level > r)) {
+            return true;
+        }
+
+        return false;
     };
 }

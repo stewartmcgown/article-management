@@ -2,15 +2,19 @@ import * as express from 'express';
 import GraphQLHTTP from 'express-graphql';
 import { MicroframeworkLoader, MicroframeworkSettings } from 'microframework-w3tec';
 import * as path from 'path';
-import { buildSchema } from 'type-graphql';
+import { buildSchema, registerEnumType } from 'type-graphql';
 import Container from 'typedi';
 
+import * as enums from '../api/models/enums';
 import { env } from '../env';
 import { getErrorCode, getErrorMessage, handlingErrors } from '../lib/graphql';
 
 export const graphqlLoader: MicroframeworkLoader = async (settings: MicroframeworkSettings | undefined) => {
     if (settings && env.graphql.enabled) {
         const expressApp = settings.getData('express_app');
+
+        // Register enums
+        Object.keys(enums).forEach(e => registerEnumType(enums[e], { name: e }));
 
         const schema = await buildSchema({
             resolvers: env.app.dirs.resolvers,

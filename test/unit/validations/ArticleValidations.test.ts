@@ -1,6 +1,7 @@
 import { validate } from 'class-validator';
 
-import { Article, Status } from '../../../src/api/models/Article';
+import { Article } from '../../../src/api/models/Article';
+import { Status } from '../../../src/api/models/enums/Status';
 
 describe('ArticleValidations', () => {
 

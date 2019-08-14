@@ -1,7 +1,9 @@
 import { Container } from 'typedi';
 import { Connection } from 'typeorm';
 
-import { Editor, Levels, Positions } from '../../src/api/models/Editor';
+import { Editor } from '../../src/api/models/Editor';
+import { Levels } from '../../src/api/models/enums/Levels';
+import { Positions } from '../../src/api/models/enums/Positions';
 import { EditorService } from '../../src/api/services/EditorService';
 import { closeDatabase, createDatabaseConnection, migrateDatabase } from '../utils/database';
 import { configureLogger } from '../utils/logger';

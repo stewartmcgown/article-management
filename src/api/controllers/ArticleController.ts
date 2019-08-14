@@ -7,7 +7,7 @@ import { ObjectLiteral } from 'typeorm';
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
 import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
-import { Levels } from '../models/User';
+import { Levels } from '../models/enums/Levels';
 import { ArticleService } from '../services/ArticleService';
 import { ArticleCreateResponse } from './responses/ArticleCreateResponse';
 import { ArticlePublishResponse } from './responses/ArticlePublishResponse';

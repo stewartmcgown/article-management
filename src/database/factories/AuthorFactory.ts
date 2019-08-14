@@ -3,7 +3,7 @@ import { define } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
 import { Author } from '../../api/models/Author';
-import { Levels } from '../../api/models/User';
+import { Levels } from '../../api/models/enums/Levels';
 
 define(Author, (faker: typeof Faker) => {
     const author = new Author();

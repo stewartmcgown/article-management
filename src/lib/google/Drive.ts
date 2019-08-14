@@ -4,7 +4,7 @@ import { MethodOptions, OAuth2Client } from 'googleapis-common';
 import stream from 'stream';
 import { Service } from 'typedi';
 
-import { env } from '../env';
+import { env } from '../../env';
 
 export interface CreateFileOptions {
     name: string;

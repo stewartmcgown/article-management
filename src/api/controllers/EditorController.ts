@@ -4,7 +4,7 @@ import {
 
 import { EditorNotFoundError } from '../errors/EditorNotFoundError';
 import { Editor } from '../models/Editor';
-import { Levels } from '../models/User';
+import { Levels } from '../models/enums/Levels';
 import { EditorService } from '../services/EditorService';
 
 @Authorized(Levels.JUNIOR)

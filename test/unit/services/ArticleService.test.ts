@@ -1,4 +1,5 @@
-import { Article, Status } from '../../../src/api/models/Article';
+import { Article } from '../../../src/api/models/Article';
+import { Status } from '../../../src/api/models/enums/Status';
 import { ArticleService } from '../../../src/api/services/ArticleService';
 import { events } from '../../../src/api/subscribers/events';
 import { EventDispatcherMock } from '../lib/EventDispatcherMock';

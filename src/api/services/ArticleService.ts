@@ -6,7 +6,8 @@ import { EventDispatcher, EventDispatcherInterface } from '../../decorators/Even
 import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { validate, validated } from '../../decorators/Validate';
 import { env } from '../../env';
-import { Drive } from '../../google/Drive';
+import { AnalysisResult } from '../../lib/copyright/Analyser';
+import { Drive } from '../../lib/google/Drive';
 import { WordpressService } from '../../lib/wordpress';
 import { ArticlePublishResponse } from '../controllers/responses/ArticlePublishResponse';
 import { Article } from '../models/Article';
@@ -109,6 +110,11 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         };
     }
 
+    /**
+     * Get the details of a published article
+     *
+     * @param id id of an article
+     */
     public async getPublished(id: string): Promise<ArticlePublishResponse> {
         const article = await this.articleRepository.findOne(id);
 
@@ -122,6 +128,18 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
             article,
             wordpress,
         };
+    }
+
+    /**
+     * Receive a copyright event and update the article related to it.
+     *
+     * @param result a result of a copyright analysis
+     * @internal
+     */
+    public async updateCopyright(result: AnalysisResult): Promise<void> {
+        const article = await this.articleRepository.findOne(result.articleId);
+
+        console.log(article.title);
     }
 
 }

@@ -1,15 +1,11 @@
+import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { Column } from 'typeorm';
+import { Column, Unique } from 'typeorm';
 
 import { AbstractModel } from './AbstractModel';
+import { Levels } from './enums/Levels';
 
-export enum Levels {
-    AUTHOR,
-    JUNIOR,
-    SENIOR,
-    ADMIN,
-}
-
+@Unique(['email'])
 export abstract class User extends AbstractModel {
 
     @IsNotEmpty()
@@ -24,11 +20,9 @@ export abstract class User extends AbstractModel {
     @Column({ nullable: true })
     public lastPinIssued: Date;
 
+    @Exclude()
     @Column({ nullable: true, select: false })
     public secret: string;
-
-    @Column({ nullable: true, select: false })
-    public token: string;
 
     @Column({
         type: 'enum',

@@ -1,8 +1,9 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 
-import { Subject, Type } from '../Article';
 import { Author } from '../Author';
+import { Subject } from '../enums/Subject';
+import { Type } from '../enums/Type';
 import { AbstractDTO } from './AbstractDTO';
 
 @Exclude()

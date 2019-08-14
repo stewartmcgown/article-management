@@ -1,6 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToMany } from 'typeorm';
 
+import { Article } from './Article';
 import { User } from './User';
 
 @Entity()
@@ -27,4 +28,7 @@ export class Author extends User {
         nullable: true,
     })
     public profile: string;
+
+    @ManyToMany(type => Article, article => article.authors)
+    public articles: Article[];
 }

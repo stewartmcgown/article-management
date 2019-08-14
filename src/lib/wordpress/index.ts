@@ -3,9 +3,10 @@ import { extension } from 'mime-types';
 import { Service } from 'typedi';
 import WPAPI from 'wpapi';
 
+import { ArticleNotPublishedError } from '../../api/errors/ArticleNotPublishedError';
 import { Article } from '../../api/models/Article';
 import { env } from '../../env';
-import { Drive } from '../../google/Drive';
+import { Drive } from '../google/Drive';
 
 export interface WordpressPost {
     id?: number;
@@ -46,6 +47,12 @@ export interface WordpressMedia {
     post?: any; //  The ID for the associated post of the attachment.
 }
 
+export interface MammothImage {
+    src: string;
+
+    class: string;
+}
+
 @Service()
 export class WordpressService {
 
@@ -59,6 +66,11 @@ export class WordpressService {
         });
     }
 
+    /**
+     * Publishes an article to the remote Wordpress instance.
+     *
+     * @param article the article to publish
+     */
     public async publishArticle(article: Article): Promise<WordpressPost> {
         const post = await this.articleToPost(article);
 
@@ -69,12 +81,27 @@ export class WordpressService {
         return result;
     }
 
+    /**
+     * Get an article from the remote Wordpress instance.
+     *
+     * Article must have a wordpressId, or it is not published.
+     *
+     * @param article to fetch
+     * @return the remote post
+     * @throws {ArticleNotPublishedError} if the article is not published
+     */
     public async getArticle(article: Article): Promise<WordpressPost> {
         if (!article.wordpressId) {
-            return undefined;
+            throw new ArticleNotPublishedError();
         }
 
-        const post = await this.client.posts().id(article.wordpressId).get();
+        let post: WordpressPost;
+
+        try {
+            post = await this.client.posts().id(article.wordpressId).get();
+        } catch {
+            throw new ArticleNotPublishedError();
+        }
 
         return post;
     }
@@ -92,7 +119,13 @@ export class WordpressService {
         return result;
     }
 
-    private getConvertImage(article: Article): any {
+    /**
+     * @param article the article containing the image
+     * @return a function resulting in a promise that is used by Mammoth to
+     *          convert images into HTML, by first inserting them in
+     *          to the wordpress Media library.
+     */
+    private getConvertImage(article: Article): () => Promise<MammothImage> {
         const boundImageUpload = this.uploadImage.bind(this);
 
         return mammoth.images.inline(element => {

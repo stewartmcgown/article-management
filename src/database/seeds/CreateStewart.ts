@@ -2,8 +2,9 @@ import { Connection } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import * as uuid from 'uuid';
 
-import { Editor, Positions } from '../../api/models/Editor';
-import { Levels } from '../../api/models/User';
+import { Editor } from '../../api/models/Editor';
+import { Levels } from '../../api/models/enums/Levels';
+import { Positions } from '../../api/models/enums/Positions';
 
 export class CreateStewart implements Seeder {
 
