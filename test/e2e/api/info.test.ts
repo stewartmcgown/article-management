@@ -18,7 +18,7 @@ describe('/api', () => {
 
     test('GET: / should return the api-version', async (done) => {
         const response = await request(settings.app)
-            .get('/api')
+            .get('/')
             .expect('Content-Type', /json/)
             .expect(200);
 
