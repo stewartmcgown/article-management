@@ -5,8 +5,15 @@ import { CopyrightService } from '../../lib/copyright';
 import { AnalysisResult } from '../../lib/copyright/Analyser';
 import { ArticleSender } from '../../mail/ArticleSender';
 import { Article } from '../models/Article';
+import { Editor } from '../models/Editor';
 import { ArticleService } from '../services/ArticleService';
 import { events } from './events';
+
+export interface ArticleAssignedEvent {
+    article: Article;
+
+    editor: Editor;
+}
 
 @EventSubscriber()
 export class ArticleEventSubscriber {
@@ -37,6 +44,11 @@ export class ArticleEventSubscriber {
     @On(events.article.copyrightUpdated)
     public onCopyrightUpdated(result: AnalysisResult): void {
         this.articleService.updateCopyright(result);
+    }
+
+    @On(events.article.assigned)
+    public onArticleAssigned(event: ArticleAssignedEvent): void {
+        console.log(event);
     }
 
 }

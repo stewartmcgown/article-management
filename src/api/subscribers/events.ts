@@ -16,9 +16,13 @@ export const events = {
         created: 'onArticleCreate',
         updated: 'onArticleUpdate',
         copyrightUpdated: 'onArticleCopyrightUpdate',
+        assigned: 'onArticleAssigned',
     },
     pin: {
         issued: 'onPinIssued',
+    },
+    subject: {
+        created: 'onSubjectCreate',
     },
 };
 

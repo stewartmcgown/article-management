@@ -37,8 +37,7 @@ export interface ShareFileOptions {
 
     email: string;
 }
-
-export interface DownloadFileOptions {
+export interface ExportFileOptions {
     id: string;
 
     mimeType: string;
@@ -123,7 +122,7 @@ export class Drive {
         }));
     }
 
-    public downloadFile(options: DownloadFileOptions): Promise<ArrayBuffer> {
+    public exportFile(options: ExportFileOptions): Promise<ArrayBuffer> {
         const resource = {
             fileId: options.id,
             mimeType: options.mimeType,

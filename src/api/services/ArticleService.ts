@@ -12,6 +12,7 @@ import { WordpressService } from '../../lib/wordpress';
 import { ArticlePublishResponse } from '../controllers/responses/ArticlePublishResponse';
 import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
+import { Editor } from '../models/Editor';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
 import { AbstractService } from './AbstractService';
@@ -34,7 +35,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
 
     public findOne(id: string): Promise<Article | undefined> {
         this.log.info('Find one article');
-        return this.articleRepository.findOne({ id });
+        return this.articleRepository.findOne(id, { relations: ['editors', 'authors'] });
     }
 
     @validated()
@@ -140,6 +141,43 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         const article = await this.articleRepository.findOne(result.articleId);
 
         console.log(article.title);
+    }
+
+    /**
+     *
+     * @param id of an article
+     * @param editors to assign
+     */
+    public async assign(id: string, editors: Editor[]): Promise<Article> {
+        const article = await this.findOne(id);
+
+        if (!article) {
+            return article;
+        }
+
+        const existingEditors = article.editors.reduce((map, obj) => {
+            map[obj.id] = obj;
+            return map;
+        }, {});
+
+        editors.forEach(editor => {
+            if (!existingEditors[editor.id]) {
+                article.editors.push(editor);
+            }
+        });
+
+        await this.articleRepository.save(article);
+
+        article.editors.forEach(editor => {
+            if (!existingEditors[editor.id]) {
+                this.eventDispatcher.dispatch(events.article.assigned, {
+                    article,
+                    editor,
+                });
+            }
+        });
+
+        return article;
     }
 
 }

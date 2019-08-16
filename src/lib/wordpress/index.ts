@@ -154,7 +154,7 @@ export class WordpressService {
     }
 
     private async articleToPost(article: Article): Promise<WordpressPost> {
-        const buffer = await this.driveService.downloadFile({
+        const buffer = await this.driveService.exportFile({
             id: article.docId,
             mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });

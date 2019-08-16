@@ -7,6 +7,7 @@ import { ObjectLiteral } from 'typeorm';
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
 import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
+import { Editor } from '../models/Editor';
 import { Levels } from '../models/enums/Levels';
 import { ArticleService } from '../services/ArticleService';
 import { ArticleCreateResponse } from './responses/ArticleCreateResponse';
@@ -71,6 +72,13 @@ export class ArticleController {
     @OnUndefined(ArticleNotFoundError)
     public getPublished(@Param('id') id: string): Promise<ArticlePublishResponse> {
         return this.articleService.getPublished(id);
+    }
+
+    @Authorized(Levels.SENIOR)
+    @Post('/assign/:id')
+    @OnUndefined(ArticleNotFoundError)
+    public assign(@Param('id') id: string, @Body() editors: Editor[]): Promise<Article> {
+        return this.articleService.assign(id, editors);
     }
 
 }
