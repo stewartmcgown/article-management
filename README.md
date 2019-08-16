@@ -3,8 +3,9 @@
 </p>
 <h1 align="center">Article Management System</h1>
 <p align="center">
-<img src="https://david-dm.org/youngscientists/article-management.svg" />
-<img src="https://travis-ci.org/youngscientists/article-management.svg?branch=typescript" />
+    <img src="https://badges.frapsoft.com/typescript/version/typescript-next.svg?v=101" />
+    <img src="https://david-dm.org/youngscientists/article-management.svg" />
+    <img src="https://travis-ci.org/youngscientists/article-management.svg?branch=typescript" />
 </p>
 
 A turnkey solution for article submission, peer review and publishing.
