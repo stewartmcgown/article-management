@@ -147,8 +147,11 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
      *
      * @param id of an article
      * @param editors to assign
+     * @param remove if this is for a removal operation
+     *
+     * TODO: Implement removal
      */
-    public async assign(id: string, editors: Editor[]): Promise<Article> {
+    public async assign(id: string, editors: Editor[], remove: boolean = false): Promise<Article> {
         const article = await this.findOne(id);
 
         if (!article) {
