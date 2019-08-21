@@ -1,21 +1,12 @@
 {
-    "extends": [
-        "tslint:recommended"
-    ],
+    "extends": ["tslint:recommended"],
     "rules": {
-        "max-line-length": [
-            true,
-            160
-        ],
+        "max-line-length": [true, 160],
         "no-unnecessary-initializer": false,
         "no-var-requires": true,
         "no-null-keyword": true,
         "no-consecutive-blank-lines": true,
-        "quotemark": [
-            true,
-            "single",
-            "avoid-escape"
-        ],
+        "quotemark": [true, "single", "avoid-escape"],
         "interface-name": false,
         "no-empty-interface": false,
         "no-namespace": false,
@@ -46,24 +37,10 @@
                 ]
             }
         ],
-        "no-console": [
-            true,
-            "debug",
-            "info",
-            "time",
-            "timeEnd",
-            "trace"
-        ],
-        "no-inferrable-types": [
-            true,
-            "ignore-params"
-        ],
+        "no-console": [true, "debug", "info", "time", "timeEnd", "trace"],
+        "no-inferrable-types": [true, "ignore-params"],
         "no-switch-case-fall-through": true,
-        "typedef": [
-            true,
-            "call-signature",
-            "parameter"
-        ],
+        "typedef": [true, "call-signature", "parameter"],
         "trailing-comma": [
             true,
             {
@@ -76,10 +53,7 @@
                 "singleline": "never"
             }
         ],
-        "align": [
-            true,
-            "parameters"
-        ],
+        "align": [true, "parameters"],
         "class-name": true,
         "curly": true,
         "eofline": true,
@@ -105,10 +79,7 @@
         ],
         "semicolon": true,
         "switch-default": true,
-        "triple-equals": [
-            true,
-            "allow-null-check"
-        ],
+        "triple-equals": [true, "allow-null-check"],
         "typedef-whitespace": [
             true,
             {
@@ -130,9 +101,7 @@
         ]
     },
     "linterOptions": {
-        "exclude": [
-            "src/database/migrations/**"
-        ]
+        "exclude": ["src/database/migrations/**"]
     },
     "defaultSeverity": "error"
 }
