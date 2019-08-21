@@ -1,0 +1,3 @@
+[submodule "src/lib/grammarly"]
+	path = src/lib/grammarly
+	url = https://github.com/stewartmcgown/grammarly-api
