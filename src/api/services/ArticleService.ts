@@ -19,28 +19,35 @@ import { AbstractService } from './AbstractService';
 
 @Service()
 export class ArticleService extends AbstractService<ArticleDTO, Article> {
-
     constructor(
         @OrmRepository() private articleRepository: ArticleRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
         @Logger(__filename) private log: LoggerInterface,
         private driveService: Drive,
         private wordpressService: WordpressService
-    ) { super(Article); }
+    ) {
+        super(Article);
+    }
 
     public find(): Promise<Article[]> {
         this.log.info('Find all articles');
-        return this.articleRepository.find({ relations: ['editors', 'authors'] });
+        return this.articleRepository.find({
+            relations: ['editors', 'authors'],
+        });
     }
 
     public findOne(id: string): Promise<Article | undefined> {
         this.log.info('Find one article');
-        return this.articleRepository.findOne(id, { relations: ['editors', 'authors'] });
+        return this.articleRepository.findOne(id, {
+            relations: ['editors', 'authors'],
+        });
     }
 
     @validated()
-    public async create(@validate() articleDto: ArticleDTO, file: Express.Multer.File): Promise<Article> {
-
+    public async create(
+        @validate() articleDto: ArticleDTO,
+        file: Express.Multer.File
+    ): Promise<Article> {
         // DTO -> Class
         const article = new Article();
         Object.assign(article, articleDto);
@@ -151,7 +158,11 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
      *
      * TODO: Implement removal
      */
-    public async assign(id: string, editors: Editor[], remove: boolean = false): Promise<Article> {
+    public async assign(
+        id: string,
+        editors: Editor[],
+        remove: boolean = false
+    ): Promise<Article> {
         const article = await this.findOne(id);
 
         if (!article) {
@@ -183,4 +194,19 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         return article;
     }
 
+    /**
+     * Get the plain text of an article
+     *
+     * @param article to get text from
+     */
+    public async getText(article: Article): Promise<string> {
+        const { id } = article;
+
+        const file = await this.driveService.exportFile({
+            id,
+            mimeType: 'text/plain',
+        });
+
+        return Buffer.from(file).toString('utf-8');
+    }
 }

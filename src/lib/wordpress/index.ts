@@ -23,16 +23,16 @@ export interface WordpressPost {
     comment_status?: 'open' | 'closed'; // Whether or not comments are open on the object.
     ping_status?: 'open' | 'closed'; // Whether or not the object can be pinged.
     format?:
-        | 'standard'
-        | 'aside'
-        | 'chat'
-        | 'gallery'
-        | 'link'
-        | 'image'
-        | 'quote'
-        | 'status'
-        | 'video'
-        | 'audio'; // The format for the object.
+    | 'standard'
+    | 'aside'
+    | 'chat'
+    | 'gallery'
+    | 'link'
+    | 'image'
+    | 'quote'
+    | 'status'
+    | 'video'
+    | 'audio'; // The format for the object.
     meta?: any; // Meta fields.
     sticky?: any; // Whether or not the object should be treated as sticky.
     template?: any; // The theme file to use to display the object.
@@ -71,7 +71,7 @@ export class WordpressService {
         this.client = new WPAPI({
             endpoint: env.wordpress.url,
             username: env.wordpress.user,
-            password: env.wordpress.password
+            password: env.wordpress.password,
         });
     }
 
@@ -124,7 +124,7 @@ export class WordpressService {
         binary: string
     ): Promise<any> {
         const mediaRequest: WordpressMedia = {
-            title
+            title,
         };
 
         const result = await this.client
@@ -163,7 +163,7 @@ export class WordpressService {
 
                     return {
                         src: uploadResult.source_url,
-                        class: 'wp-image-' + uploadResult.id
+                        class: 'wp-image-' + uploadResult.id,
                     };
                 })
                 .catch(err => {
@@ -176,23 +176,23 @@ export class WordpressService {
         const buffer = await this.driveService.exportFile({
             id: article.docId,
             mimeType:
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
 
         const mammothOptions = {
-            convertImage: this.getConvertImage(article)
+            convertImage: this.getConvertImage(article),
         };
 
         const { value } = await mammoth.convertToHtml(
             {
-                buffer
+                buffer,
             },
             mammothOptions
         );
 
         return {
             title: article.title,
-            content: value
+            content: value,
         };
     }
 }

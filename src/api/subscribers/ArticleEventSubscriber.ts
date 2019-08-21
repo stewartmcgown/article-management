@@ -1,8 +1,10 @@
 import { EventSubscriber, On } from 'event-dispatch';
+import { Grammarly } from 'grammarly-api';
 import Container from 'typedi';
 
 import { CopyrightService } from '../../lib/copyright';
 import { AnalysisResult } from '../../lib/copyright/Analyser';
+import { PlagiarismService } from '../../lib/plagiarism';
 import { ArticleSender } from '../../mail/ArticleSender';
 import { Article } from '../models/Article';
 import { Editor } from '../models/Editor';
@@ -20,11 +22,13 @@ export class ArticleEventSubscriber {
     private articleSender: ArticleSender;
     private copyrightService: CopyrightService;
     private articleService: ArticleService;
+    private plagiarismService: PlagiarismService;
 
     constructor() {
         this.articleSender = Container.get(ArticleSender);
         this.copyrightService = Container.get(CopyrightService);
         this.articleService = Container.get(ArticleService);
+        this.plagiarismService = Container.get(PlagiarismService);
     }
 
     @On(events.article.created)
@@ -34,6 +38,7 @@ export class ArticleEventSubscriber {
         });
 
         this.copyrightService.add(article);
+        this.plagiarismService.add(article);
     }
 
     @On(events.article.updated)
@@ -50,5 +55,4 @@ export class ArticleEventSubscriber {
     public onArticleAssigned(event: ArticleAssignedEvent): void {
         console.log(event);
     }
-
 }
