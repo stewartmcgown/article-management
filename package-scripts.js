@@ -2,7 +2,10 @@
  * Windows: Please do not use trailing comma as windows will fail with token error
  */
 
-const { series, rimraf, } = require('nps-utils');
+const {
+    series,
+    rimraf,
+} = require('nps-utils');
 
 module.exports = {
     scripts: {
@@ -153,6 +156,14 @@ module.exports = {
                 ),
                 description: 'Migrates the database to newest version available'
             },
+            transfer: {
+                script: series(
+                    'nps banner.transfer',
+                    'nps config',
+                    runFast('./commands/transfer.ts')
+                ),
+                description: 'Transfers old JSON into the new format'
+            },
             revert: {
                 script: series(
                     'nps banner.revert',
@@ -281,7 +292,8 @@ module.exports = {
             migrate: banner('migrate'),
             seed: banner('seed'),
             revert: banner('revert'),
-            clean: banner('clean')
+            clean: banner('clean'),
+            transfer: banner('transfer'),
         }
     }
 };
