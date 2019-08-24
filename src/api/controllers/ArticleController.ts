@@ -1,7 +1,7 @@
-import { plainToClass } from 'class-transformer';
 import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, Req, UploadedFile
 } from 'routing-controllers';
+import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { ObjectLiteral } from 'typeorm';
 
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
@@ -41,7 +41,12 @@ export class ArticleController {
 
     @Post()
     public create(@UploadedFile('file') file: Express.Multer.File, @Body() body: any): Promise<ArticleCreateResponse> {
+
         const article = plainToClass<ArticleDTO, ObjectLiteral>(ArticleDTO, JSON.parse(body.article) as ObjectLiteral);
+
+        if (!file) {
+            throw new Error('No file included.');
+        }
 
         return this.articleService.create(article, file).then(result => ({
             id: result.id,

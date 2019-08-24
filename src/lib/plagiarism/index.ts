@@ -1,10 +1,10 @@
-import { plagiarism } from 'grammarly-api';
 import { Service } from 'typedi';
 
 import { Article } from '../../api/models/Article';
 import { ArticleService } from '../../api/services/ArticleService';
 import { Logger } from '../../decorators/Logger';
 import { sleep } from '../../utils';
+import { plagiarism } from '../grammarly';
 import { LoggerInterface } from '../logger';
 
 @Service()
@@ -34,14 +34,17 @@ export class PlagiarismService {
     private async run(): Promise<void> {
         while (this.running) {
             const current = this.queue.pop();
-            const text = await this.articleService.getText(current);
-            const { hasPlagiarism } = await plagiarism(text);
 
-            if (hasPlagiarism) {
-                this.log.info(`[${current.id}] Plagiarism detected`);
+            if (current !== undefined) {
+                const text = await this.articleService.getText(current);
+                const { hasPlagiarism } = await plagiarism(text);
+
+                if (hasPlagiarism) {
+                    this.log.info(`[${current.id}] Plagiarism detected`);
+                }
             }
 
-            await sleep(1000);
+            await sleep(10000);
         }
     }
 }

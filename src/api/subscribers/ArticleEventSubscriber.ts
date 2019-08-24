@@ -1,5 +1,4 @@
 import { EventSubscriber, On } from 'event-dispatch';
-import { Grammarly } from 'grammarly-api';
 import Container from 'typedi';
 
 import { CopyrightService } from '../../lib/copyright';

@@ -1,5 +1,5 @@
-import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { Exclude } from 'routing-controllers/node_modules/class-transformer';
 import { Column, Unique } from 'typeorm';
 
 import { AbstractModel } from './AbstractModel';

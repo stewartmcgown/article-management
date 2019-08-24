@@ -1,11 +1,11 @@
-// tslint:disable-next-line: no-submodule-imports
-import { defaultMetadataStorage } from 'class-transformer/storage';
 import { getFromContainer, MetadataStorage } from 'class-validator';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import basicAuth from 'express-basic-auth';
 import { MicroframeworkLoader, MicroframeworkSettings } from 'microframework-w3tec';
 import { getMetadataArgsStorage, MetadataArgsStorage } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
+// tslint:disable-next-line: no-submodule-imports
+import { defaultMetadataStorage } from 'routing-controllers/node_modules/class-transformer/storage';
 import * as swaggerUi from 'swagger-ui-express';
 
 import { env } from '../env';

@@ -1,3 +1,4 @@
+import { validateSync } from 'class-validator';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 import uuid from 'uuid';
@@ -48,6 +49,10 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         @validate() articleDto: ArticleDTO,
         file: Express.Multer.File
     ): Promise<Article> {
+        if (articleDto.authors.length < 1 || articleDto.authors.some(a => validateSync(a).length > 0)) {
+            throw new Error();
+        }
+
         // DTO -> Class
         const article = new Article();
         Object.assign(article, articleDto);

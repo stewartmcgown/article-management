@@ -1,4 +1,6 @@
-import { validateSync } from 'class-validator';
+import {
+    registerDecorator, validateSync, ValidationArguments, ValidationOptions
+} from 'class-validator';
 
 /**
  * Calls the {@link class-validator} synchronous validate method on it.
@@ -27,6 +29,28 @@ export function validated(): any {
             const result = originalMethod.apply(this, args);
             return result;
         };
+    };
+}
+
+/**
+ * Specifies that a property is an array of Class instances.
+ *
+ * @param validationOptions for validation
+ */
+export function IsNonPrimitiveArray(validationOptions?: ValidationOptions): any {
+    return (object: any, propertyName: string) => {
+        registerDecorator({
+            name: 'IsNonPrimitiveArray',
+            target: object.constructor,
+            propertyName,
+            constraints: [],
+            options: validationOptions,
+            validator: {
+                validate(value: any, args: ValidationArguments): any {
+                    return Array.isArray(value) && value.reduce((a, b) => a && typeof b === 'object' && !Array.isArray(b), true);
+                },
+            },
+        });
     };
 }
 
@@ -64,6 +88,7 @@ export class Validator {
             if (paramIndexes.indexOf(index) !== -1) {
                 // Actual validation logic
                 const validationErrors = validateSync(paramValue);
+
                 if (validationErrors.length) {
                     throw {
                         errors: validationErrors,

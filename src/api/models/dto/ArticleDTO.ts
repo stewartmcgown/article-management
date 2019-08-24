@@ -1,10 +1,11 @@
-import { Exclude, Expose } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { Exclude, Expose, Type } from 'routing-controllers/node_modules/class-transformer';
 
-import { Author } from '../Author';
+import { IsNonPrimitiveArray } from '../../../decorators/Validate';
+import * as Enums from '../enums';
 import { Subject } from '../enums/Subject';
-import { Type } from '../enums/Type';
 import { AbstractDTO } from './AbstractDTO';
+import { AuthorDTO } from './AuthorDTO';
 
 @Exclude()
 export class ArticleDTO extends AbstractDTO {
@@ -14,7 +15,7 @@ export class ArticleDTO extends AbstractDTO {
 
     @Expose()
     @IsNotEmpty()
-    public type: Type;
+    public type: Enums.Type;
 
     @Expose()
     @IsNotEmpty()
@@ -34,6 +35,10 @@ export class ArticleDTO extends AbstractDTO {
     public reason: string;
 
     @Expose()
-    @IsNotEmpty()
-    public authors: Author[];
+    @ValidateNested({
+        each: true,
+    })
+    @IsNonPrimitiveArray()
+    @Type(() => AuthorDTO)
+    public authors: AuthorDTO[];
 }

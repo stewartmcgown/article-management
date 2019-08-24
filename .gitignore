@@ -33,6 +33,7 @@ tsconfig.build.json
 src/**/*.js
 src/**/*.js.map
 !src/public/**/*
+!src/lib/grammarly/**/*.js
 test/**/*.js
 test/**/*.js.map
 coverage/
