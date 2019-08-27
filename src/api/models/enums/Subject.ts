@@ -1,12 +1,12 @@
 export enum Subject {
     'Biology' = 'Biology',
     'Chemistry' = 'Chemistry',
-    'Computer Science' = 'Computer Science',
+    'ComputerScience' = 'Computer Science',
     'Engineering' = 'Engineering',
-    'Environmental & Earth Science' = 'Environmental & Earth Science',
-    'Materials Science' = 'Materials Science',
+    'EnvironmentalEarthScience' = 'Environmental & Earth Science',
+    'MaterialsScience' = 'Materials Science',
     'Mathematics' = 'Mathematics',
     'Medicine' = 'Medicine',
     'Physics' = 'Physics',
-    'Policy & Ethics' = 'Policy & Ethics',
+    'PolicyEthics' = 'Policy & Ethics',
 }

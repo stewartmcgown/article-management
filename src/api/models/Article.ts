@@ -112,7 +112,7 @@ export class Article extends AbstractModel {
     @Column({
         nullable: true,
         name: 'wordpress_id',
-    }) p
+    })
     @Field()
     public wordpressId: number;
 

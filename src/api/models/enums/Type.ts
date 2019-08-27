@@ -1,6 +1,6 @@
 export enum Type {
-    'Review Article' = 'Review Article',
+    'ReviewArticle' = 'Review Article',
     'Blog' = 'Blog',
-    'Original Research' = 'Original Research',
-    'Magazine Article' = 'Magazine Article',
+    'OriginalResearch' = 'Original Research',
+    'MagazineArticle' = 'Magazine Article',
 }

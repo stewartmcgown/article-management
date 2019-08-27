@@ -21,10 +21,10 @@ module.exports = {
          * Serves the current app and watches for changes to restart it
          */
         serve: {
-            inspector: {
+            inspect: {
                 script: series(
                     'nps banner.serve',
-                    'nodemon --watch src --watch .env --inspect'
+                    'nodemon --watch src --watch .env --inspect 9229'
                 ),
                 description: 'Serves the current app and watches for changes to restart it, you may attach inspector to it.'
             },

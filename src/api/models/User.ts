@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { Exclude } from 'routing-controllers/node_modules/class-transformer';
+import { Field } from 'type-graphql';
 import { Column, Unique } from 'typeorm';
 
 import { AbstractModel } from './AbstractModel';
@@ -10,18 +11,22 @@ export abstract class User extends AbstractModel {
 
     @IsNotEmpty()
     @Column()
+    @Field()
     public name: string;
 
     @IsNotEmpty()
     @IsEmail()
     @Column()
+    @Field()
     public email: string;
 
     @Column({ nullable: true })
+    @Field(type => Date)
     public lastPinIssued: Date;
 
     @Exclude()
     @Column({ nullable: true, select: false })
+    @Field()
     public secret: string;
 
     @Column({
@@ -30,5 +35,6 @@ export abstract class User extends AbstractModel {
         default: Levels.AUTHOR,
     })
     @IsNotEmpty()
+    @Field(type => Levels)
     public level: Levels;
 }
