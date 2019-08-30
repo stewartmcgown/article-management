@@ -4,8 +4,8 @@ import * as uuid from 'uuid';
 
 import { Article } from '../../api/models/Article';
 import { Status } from '../../api/models/enums/Status';
-import { Subject } from '../../api/models/enums/Subject';
 import { Type } from '../../api/models/enums/Type';
+import { Subject } from '../../api/models/Subject';
 
 define(Article, (faker: typeof Faker) => {
     const article = new Article();
@@ -19,7 +19,8 @@ define(Article, (faker: typeof Faker) => {
     article.title = faker.lorem.sentence();
     article.type = randomEnum(Type);
     article.status = randomEnum(Status);
-    article.subject = randomEnum(Subject);
+    article.subject = new Subject();
+    article.subject.name
     article.docId = faker.phone.phoneNumber();
     article.folderId = faker.phone.phoneNumber();
     article.markingGridId = faker.phone.phoneNumber();

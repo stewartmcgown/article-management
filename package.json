@@ -11,7 +11,9 @@
     "presetup": "npm install",
     "setup": "npm start config && npm start setup.script",
     "serve": "nps serve",
-    "dev": "nps serve.inspect"
+    "dev": "nps serve.inspect",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -132,6 +134,7 @@
     "@types/uuid": "^3.4.5",
     "@types/winston": "^2.4.4",
     "@types/wpapi": "^1.1.0",
+    "@vuepress/theme-vue": "^1.0.3",
     "cross-env": "^5.2.0",
     "csvtojson": "^2.0.10",
     "jest": "24.8.0",
@@ -139,7 +142,10 @@
     "mock-express-response": "^0.2.2",
     "ncp": "^2.0.0",
     "nock": "10.0.6",
+    "prettier": "^1.18.2",
     "sqlite3": "^4.0.9",
-    "ts-jest": "24.0.2"
+    "ts-jest": "24.0.2",
+    "tslint-plugin-prettier": "^2.0.1",
+    "vuepress": "^1.0.3"
   }
 }

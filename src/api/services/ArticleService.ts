@@ -1,4 +1,5 @@
-import { validateSync } from 'class-validator';
+import { validateSync, ValidationError } from 'class-validator';
+import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 import uuid from 'uuid';
@@ -12,11 +13,14 @@ import { Drive } from '../../lib/google/Drive';
 import { WordpressService } from '../../lib/wordpress';
 import { ArticlePublishResponse } from '../controllers/responses/ArticlePublishResponse';
 import { Article } from '../models/Article';
-import { ArticleDTO } from '../models/dto/ArticleDTO';
+import { Author } from '../models/Author';
+import { ALLOWED_FORMATS, ArticleDTO } from '../models/dto/ArticleDTO';
+import { AuthorDTO } from '../models/dto/AuthorDTO';
 import { Editor } from '../models/Editor';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
 import { AbstractService } from './AbstractService';
+import { AuthorService } from './AuthorService';
 
 @Service()
 export class ArticleService extends AbstractService<ArticleDTO, Article> {
@@ -25,7 +29,8 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
         @Logger(__filename) private log: LoggerInterface,
         private driveService: Drive,
-        private wordpressService: WordpressService
+        private wordpressService: WordpressService,
+        private authorService: AuthorService
     ) {
         super(Article);
     }
@@ -53,9 +58,13 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
             throw new Error();
         }
 
+        this.validateFile(file);
+
         // DTO -> Class
-        const article = new Article();
-        Object.assign(article, articleDto);
+        articleDto.authors = plainToClass<Author, AuthorDTO[]>(Author, articleDto.authors);
+        const findAuthorOrAuthor = async (author) => ((await this.authorService.findByEmail(author.email)) || author)
+        articleDto.authors = await Promise.all(articleDto.authors.map(author => findAuthorOrAuthor(author)));
+        const article = plainToClass<Article, ArticleDTO>(Article, articleDto);
 
         this.log.info('Create a new article => ', article.toString());
 
@@ -205,13 +214,29 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
      * @param article to get text from
      */
     public async getText(article: Article): Promise<string> {
-        const { id } = article;
+        const { docId } = article;
 
         const file = await this.driveService.exportFile({
-            id,
+            id: docId,
             mimeType: 'text/plain',
         });
 
         return Buffer.from(file).toString('utf-8');
+    }
+
+    private validateFile(file: Express.Multer.File): void {
+        const errors: ValidationError[] = [];
+
+        if (!ALLOWED_FORMATS.includes(file.mimetype)) {
+            errors.push({
+                property: 'file',
+                constraints: {
+                    mimeType: `MimeType must be one of [${ALLOWED_FORMATS.join(', ')}]`,
+                },
+                children: [],
+            });
+        }
+
+        if (errors.length) { throw errors; }
     }
 }

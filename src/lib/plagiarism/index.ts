@@ -41,6 +41,9 @@ export class PlagiarismService {
 
                 if (hasPlagiarism) {
                     this.log.info(`[${current.id}] Plagiarism detected`);
+                    const article = await this.articleService.findOne(current.id);
+                    article.hasPlagiarism = hasPlagiarism;
+                    await this.articleService.update(article.id, article);
                 }
             }
 

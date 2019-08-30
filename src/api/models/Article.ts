@@ -1,15 +1,15 @@
 import { IsNotEmpty } from 'class-validator';
 import { Field, ObjectType } from 'type-graphql';
 import {
-    AfterLoad, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, UpdateDateColumn
+    AfterLoad, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, UpdateDateColumn
 } from 'typeorm';
 
 import { AbstractModel } from './AbstractModel';
 import { Author } from './Author';
 import { Editor } from './Editor';
 import { Status } from './enums/Status';
-import { Subject } from './enums/Subject';
 import { Type } from './enums/Type';
+import { Subject } from './Subject';
 
 /**
  * Represents an Article
@@ -46,10 +46,7 @@ export class Article extends AbstractModel {
     public status: Status;
 
     @IsNotEmpty()
-    @Column({
-        type: 'enum',
-        enum: Subject,
-    })
+    @ManyToOne(type => Subject)
     @Field(() => Subject)
     public subject: Subject;
 
@@ -82,6 +79,7 @@ export class Article extends AbstractModel {
 
     @Column({
         nullable: true,
+        type: 'json'
     })
     @Field()
     public copyright: string;
@@ -115,6 +113,11 @@ export class Article extends AbstractModel {
     })
     @Field()
     public wordpressId: number;
+
+    @Column({
+        default: false
+    })
+    public hasPlagiarism: boolean;
 
     @ManyToMany(type => Editor, editor => editor.articles, {
         cascade: true,
