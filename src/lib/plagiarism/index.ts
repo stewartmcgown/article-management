@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 
 import { Article } from '../../api/models/Article';
 import { ArticleService } from '../../api/services/ArticleService';
+import { AuthService } from '../../auth/AuthService';
 import { Logger } from '../../decorators/Logger';
 import { sleep } from '../../utils';
 import { plagiarism } from '../grammarly';
@@ -14,7 +15,8 @@ export class PlagiarismService {
 
     constructor(
         @Logger(__filename) private log: LoggerInterface,
-        private articleService: ArticleService
+        private articleService: ArticleService,
+        private authService: AuthService
     ) {
         this.running = true;
         this.run();
@@ -43,7 +45,7 @@ export class PlagiarismService {
                     this.log.info(`[${current.id}] Plagiarism detected`);
                     const article = await this.articleService.findOne(current.id);
                     article.hasPlagiarism = hasPlagiarism;
-                    await this.articleService.update(article.id, article);
+                    await this.articleService.update(article.id, article, await this.authService.getServiceUser());
                 }
             }
 

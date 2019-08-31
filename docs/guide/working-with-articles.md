@@ -57,6 +57,6 @@ Fetches all the currently available articles.
 
 _Response_
 
-```js
-;[Article]
+```json
+[Article]
 ```

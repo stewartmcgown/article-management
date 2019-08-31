@@ -6,6 +6,8 @@ import { OrmRepository } from 'typeorm-typedi-extensions';
 import { PinResponse } from '../api/controllers/responses/PinResponse';
 import { TokenResponse } from '../api/controllers/responses/TokenResponse';
 import { UserNotFoundError } from '../api/errors/UserNotFoundError';
+import { Editor } from '../api/models/Editor';
+import { Levels, Positions } from '../api/models/enums';
 import { User } from '../api/models/User';
 import { EditorRepository } from '../api/repositories/EditorRepository';
 import { events } from '../api/subscribers/events';
@@ -25,6 +27,8 @@ export class AuthService {
      */
     private static PIN_REQUEST_TIMEOUT = 6000;
 
+    private serviceUser: User;
+
     constructor(
         @Logger(__filename) private log: LoggerInterface,
         @OrmRepository() private editorRepository: EditorRepository,
@@ -35,6 +39,28 @@ export class AuthService {
             step: 60,
             window: 1,
         };
+    }
+
+    /**
+     * Return a default service user with admin permissions.
+     *
+     * The user is persisted in the database, and is guaranteed to be able to execute
+     * all actions.
+     */
+    public async getServiceUser(): Promise<User> {
+        if (this.serviceUser) { return this.serviceUser; }
+
+        this.serviceUser = new Editor();
+        Object.assign(this.serviceUser, {
+            name: 'Service Account',
+            email: 'service-account@ysj-internal',
+            level: Levels.ADMIN,
+            position: Positions.PRODUCTION,
+        });
+
+        await this.editorRepository.save(this.serviceUser);
+
+        return this.serviceUser;
     }
 
     public parseTokenFromRequest(request: any): string {
@@ -53,15 +79,15 @@ export class AuthService {
      * @param email email to issue for
      */
     public async issuePin(email: string): Promise<PinResponse> {
-       const user = await this.editorRepository.findOne({
-           where: {
-               email,
-           },
-           select: ['id', 'secret', 'email', 'name', 'lastPinIssued'],
-       });
+        const user = await this.editorRepository.findOne({
+            where: {
+                email,
+            },
+            select: ['id', 'secret', 'email', 'name', 'lastPinIssued'],
+        });
 
-       if (!user) {
-           throw new UserNotFoundError();
+        if (!user) {
+            throw new UserNotFoundError();
         }
 
         if (!user.secret) {
@@ -124,9 +150,9 @@ export class AuthService {
         const token = jwt.sign({
             id: user.id,
             email: user.email,
-         }, this.secret(), {
-             expiresIn: AuthService.EXPIRES_IN,
-         });
+        }, this.secret(), {
+            expiresIn: AuthService.EXPIRES_IN,
+        });
 
         return {
             token,

@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { Immutable, Protected } from 'protected-ts';
 import { Field, ObjectType } from 'type-graphql';
 import {
     AfterLoad, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, UpdateDateColumn
@@ -7,6 +8,7 @@ import {
 import { AbstractModel } from './AbstractModel';
 import { Author } from './Author';
 import { Editor } from './Editor';
+import { Levels } from './enums';
 import { Status } from './enums/Status';
 import { Type } from './enums/Type';
 import { Subject } from './Subject';
@@ -19,6 +21,7 @@ import { Subject } from './Subject';
 export class Article extends AbstractModel {
 
     @CreateDateColumn()
+    @Immutable()
     @Field(type => Date)
     public date: Date;
 
@@ -79,7 +82,7 @@ export class Article extends AbstractModel {
 
     @Column({
         nullable: true,
-        type: 'json'
+        type: 'json',
     })
     @Field()
     public copyright: string;
@@ -115,7 +118,7 @@ export class Article extends AbstractModel {
     public wordpressId: number;
 
     @Column({
-        default: false
+        default: false,
     })
     public hasPlagiarism: boolean;
 
@@ -124,6 +127,9 @@ export class Article extends AbstractModel {
     })
     @JoinTable()
     @Field(type => [Editor])
+    @Protected({
+        roles: [Levels.SENIOR],
+    })
     public editors: Editor[];
 
     @ManyToMany(type => Author, author => author.articles, {

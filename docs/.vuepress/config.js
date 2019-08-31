@@ -60,7 +60,7 @@ module.exports = {
                         children: [
                             '/guide/getting-started',
                             '/guide/authenticating',
-                            '/guide/creating-articles'
+                            '/guide/working-with-articles'
                         ]
                     },
 

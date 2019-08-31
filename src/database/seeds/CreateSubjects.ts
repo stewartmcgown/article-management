@@ -23,14 +23,14 @@ export class CreateSubjects implements Seeder {
             'Medicine',
             'Physics',
             'Policy & Ethics',
-        ]
+        ];
 
         subjects.forEach(sub => {
             const subject = new Subject();
             subject.id = uuid.v1();
             subject.name = sub;
             em.save(subject).then(r => r);
-        })
+        });
     }
 
 }

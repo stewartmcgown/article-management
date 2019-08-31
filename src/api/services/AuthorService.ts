@@ -26,8 +26,8 @@ export class AuthorService {
         return this.authorRepository.findOne({
             where: {
                 email,
-            }
-        })
+            },
+        });
     }
 
     public findOne(id: string): Promise<Author | undefined> {

@@ -20,7 +20,7 @@ define(Article, (faker: typeof Faker) => {
     article.type = randomEnum(Type);
     article.status = randomEnum(Status);
     article.subject = new Subject();
-    article.subject.name
+    article.subject.name = 'Subject';
     article.docId = faker.phone.phoneNumber();
     article.folderId = faker.phone.phoneNumber();
     article.markingGridId = faker.phone.phoneNumber();

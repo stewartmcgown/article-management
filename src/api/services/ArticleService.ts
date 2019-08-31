@@ -1,4 +1,5 @@
 import { validateSync, ValidationError } from 'class-validator';
+import { attemptUpdate } from 'protected-ts';
 import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
@@ -17,6 +18,7 @@ import { Author } from '../models/Author';
 import { ALLOWED_FORMATS, ArticleDTO } from '../models/dto/ArticleDTO';
 import { AuthorDTO } from '../models/dto/AuthorDTO';
 import { Editor } from '../models/Editor';
+import { User } from '../models/User';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
 import { AbstractService } from './AbstractService';
@@ -35,10 +37,14 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         super(Article);
     }
 
-    public find(): Promise<Article[]> {
+    public find(searchKeys: object): Promise<Article[]> {
         this.log.info('Find all articles');
+
         return this.articleRepository.find({
             relations: ['editors', 'authors'],
+            where: {
+                ...searchKeys,
+            },
         });
     }
 
@@ -62,7 +68,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
 
         // DTO -> Class
         articleDto.authors = plainToClass<Author, AuthorDTO[]>(Author, articleDto.authors);
-        const findAuthorOrAuthor = async (author) => ((await this.authorService.findByEmail(author.email)) || author)
+        const findAuthorOrAuthor = async (author) => ((await this.authorService.findByEmail(author.email)) || author);
         articleDto.authors = await Promise.all(articleDto.authors.map(author => findAuthorOrAuthor(author)));
         const article = plainToClass<Article, ArticleDTO>(Article, articleDto);
 
@@ -107,9 +113,16 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         return newArticle;
     }
 
-    public update(id: string, article: Article): Promise<Article> {
+    public async update(id: string, updates: Article, user: User): Promise<Article> {
         this.log.info('Update a article');
-        article.id = id;
+        const article = await this.articleRepository.findOne(id);
+        attemptUpdate(article, updates, {
+            fail: true,
+            ruleArgs: {
+                roles: [user.level],
+            },
+        });
+
         return this.articleRepository.save(article);
     }
 
@@ -165,7 +178,6 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
     }
 
     /**
-     *
      * @param id of an article
      * @param editors to assign
      * @param remove if this is for a removal operation

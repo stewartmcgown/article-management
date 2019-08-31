@@ -3,7 +3,7 @@ import { Exclude, Expose, Type } from 'routing-controllers/node_modules/class-tr
 
 import { IsNonPrimitiveArray } from '../../../decorators/Validate';
 import * as Enums from '../enums';
-import { Subject } from '../enums/Subject';
+import { Subject } from '../Subject';
 import { AbstractDTO } from './AbstractDTO';
 import { AuthorDTO } from './AuthorDTO';
 
@@ -24,7 +24,7 @@ export const ALLOWED_FORMATS = [
     'application/rtf',
     'text/html',
     'application/vnd.oasis.opendocument.text',
-    'text/richtext'
+    'text/richtext',
 ];
 
 /**
