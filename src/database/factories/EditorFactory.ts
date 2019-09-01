@@ -5,7 +5,6 @@ import * as uuid from 'uuid';
 import { Editor } from '../../api/models/Editor';
 import { Levels } from '../../api/models/enums/Levels';
 import { Positions } from '../../api/models/enums/Positions';
-import { Subject } from '../../api/models/enums/Subject';
 
 define(Editor, (faker: typeof Faker) => {
     const editor = new Editor();
@@ -19,7 +18,7 @@ define(Editor, (faker: typeof Faker) => {
     editor.name = faker.name.firstName() + ' ' + faker.name.lastName();
     editor.position = randomEnum(Positions);
     editor.level = Levels.JUNIOR;
-    editor.subjects = randomEnum(Subject).toString();
+    editor.subjects = 'Physics';
 
     return editor;
 });
