@@ -129,7 +129,7 @@ export class WordpressService {
 
         const result = await this.client
             .media()
-            .file(Buffer.from(binary, 'binary'), mediaRequest.title)
+            .file(Buffer.from(binary, 'binary').toString('binary'), mediaRequest.title)
             .create(mediaRequest);
 
         return result;

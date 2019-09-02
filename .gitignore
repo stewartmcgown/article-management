@@ -40,3 +40,6 @@ coverage/
 !test/preprocessor.js
 mydb.sql
 src/database/sheets/raw/**
+
+
+data/
