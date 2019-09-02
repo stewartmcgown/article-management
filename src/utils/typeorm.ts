@@ -1,4 +1,5 @@
-import { getConnection } from 'typeorm';
+import { SearchParserResult } from 'search-query-parser';
+import { getConnection, Like, ObjectLiteral } from 'typeorm';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 
 /**
@@ -15,6 +16,28 @@ export function getEntityKeys(type: Function): string[] {
 // tslint:disable-next-line: ban-types
 export function getColumnMetadata(type: Function): ColumnMetadata[] {
     return getConnection().getMetadata(type).columns;
+}
+
+export function searchParserToWhere<T>(query: SearchParserResult, type: new () => T): ObjectLiteral {
+    const columns = getColumnMetadata(type);
+    const searchKeys = {};
+
+    if (query && query.offsets) {
+        query.offsets.forEach(o => {
+            if (o.keyword) {
+                const column = columns.find(c => c.propertyName === o.keyword);
+                let value = o.value;
+
+                if (typeof column.type === 'function') {
+                    value = !(typeof typeMap[column.type.name] === 'function') || typeMap[column.type.name](value);
+                }
+
+                searchKeys[o.keyword] = (typeof value === 'string' ? Like(`%${value}%`) : value);
+            }
+        });
+    }
+
+    return searchKeys;
 }
 
 export const typeMap = {
