@@ -4,9 +4,9 @@ import {
 } from 'routing-controllers';
 import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { parse, SearchParserResult } from 'search-query-parser';
-import { Like, ObjectLiteral } from 'typeorm';
+import { ObjectLiteral } from 'typeorm';
 
-import { getColumnMetadata, getEntityKeys, typeMap } from '../../utils/typeorm';
+import { getEntityKeys, searchParserToWhere } from '../../utils/typeorm';
 import { ArticleNotFoundError } from '../errors/ArticleNotFoundError';
 import { Article } from '../models/Article';
 import { ArticleDTO } from '../models/dto/ArticleDTO';
@@ -29,26 +29,7 @@ export class ArticleController {
             keywords: getEntityKeys(Article),
         }) as SearchParserResult;
 
-        const searchKeys = {};
-
-        const columns = getColumnMetadata(Article);
-
-        if (query && query.offsets) {
-            query.offsets.forEach(o => {
-                if (o.keyword) {
-                    const column = columns.find(c => c.propertyName === o.keyword);
-                    let value = o.value;
-
-                    if (typeof column.type === 'function') {
-                        value = !(typeof typeMap[column.type.name] === 'function') || typeMap[column.type.name](value);
-                    }
-
-                    searchKeys[o.keyword] = (typeof value === 'string' ? Like(`%${value}%`) : value);
-                }
-            });
-        }
-
-        return this.articleService.find(query as SearchParserResult);
+        return this.articleService.find(searchParserToWhere<Article>(query, Article));
     }
 
     @Authorized(Levels.JUNIOR)
