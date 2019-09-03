@@ -62,7 +62,6 @@ module.exports = {
         "no-invalid-this": "off",
         "no-multiple-empty-lines": "error",
         "no-new-wrappers": "error",
-        "no-throw-literal": "error",
         "no-undef-init": "off",
         "no-unsafe-finally": "error",
         "no-unused-labels": "error",
