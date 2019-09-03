@@ -1,3 +1,4 @@
+import consola from 'consola';
 import { EventSubscriber, On } from 'event-dispatch';
 import Container from 'typedi';
 
@@ -52,6 +53,6 @@ export class ArticleEventSubscriber {
 
     @On(events.article.assigned)
     public onArticleAssigned(event: ArticleAssignedEvent): void {
-        console.log(event);
+        consola.info(event);
     }
 }

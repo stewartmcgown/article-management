@@ -11,7 +11,7 @@ export class CreateStewart implements Seeder {
     public async run(factory: Factory, connection: Connection): Promise<any> {
         const em = connection.createEntityManager();
 
-        const user = new Editor();
+         const user = new Editor();
         user.id = uuid.v1();
         user.email = 'stewart@twistedcore.co.uk';
         user.name = 'Stewart McGown';

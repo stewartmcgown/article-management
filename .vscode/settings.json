@@ -10,4 +10,5 @@
     "html.format.enable": true,
     "html.format.indentHandlebars": true,
     "html.format.maxPreserveNewLines": 0,
+    "eslint.enable": true,
 }

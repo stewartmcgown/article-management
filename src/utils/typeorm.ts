@@ -20,7 +20,7 @@ export function getColumnMetadata(type: Function): ColumnMetadata[] {
 
 export function searchParserToWhere<T>(query: SearchParserResult, type: new () => T): ObjectLiteral {
     const columns = getColumnMetadata(type);
-    const searchKeys = {};
+     const searchKeys = {};
 
     if (query && query.offsets) {
         query.offsets.forEach(o => {

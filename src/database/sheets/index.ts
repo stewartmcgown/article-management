@@ -89,7 +89,7 @@ export const oldArticleToNew = (old: OldArticle): Article => {
 };
 
 export const run = async () => {
-    const articles: OldArticle[] = require(join(__dirname, '/raw/db.json'));
+    const articles: OldArticle[] = await import(join(__dirname, '/raw/db.json'));
 
     const articleRepo = Container.get(ArticleRepository);
 

@@ -1,4 +1,5 @@
 import { validateSync, ValidationError } from 'class-validator';
+import consola from 'consola';
 import { attemptUpdate } from 'protected-ts';
 import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { Service } from 'typedi';
@@ -68,8 +69,10 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
 
         // DTO -> Class
         articleDto.authors = plainToClass<Author, AuthorDTO[]>(Author, articleDto.authors);
+
         const findAuthorOrAuthor = async (author) => ((await this.authorService.findByEmail(author.email)) || author);
         articleDto.authors = await Promise.all(articleDto.authors.map(author => findAuthorOrAuthor(author)));
+
         const article = plainToClass<Article, ArticleDTO>(Article, articleDto);
 
         this.log.info('Create a new article => ', article.toString());
@@ -134,7 +137,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
 
     public async publish(id: string): Promise<ArticlePublishResponse> {
         const article = await this.articleRepository.findOne(id);
-        const wordpress = await this.wordpressService.publishArticle(article);
+            const wordpress = await this.wordpressService.publishArticle(article);
 
         article.wordpressId = wordpress.id;
         this.articleRepository.save(article);
@@ -174,7 +177,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
     public async updateCopyright(result: AnalysisResult): Promise<void> {
         const article = await this.articleRepository.findOne(result.articleId);
 
-        console.log(article.title);
+        consola.log(article.title);
     }
 
     /**
@@ -187,7 +190,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
     public async assign(
         id: string,
         editors: Editor[],
-        remove: boolean = false
+        remove = false
     ): Promise<Article> {
         const article = await this.findOne(id);
 
@@ -228,10 +231,10 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
     public async getText(article: Article): Promise<string> {
         const { docId } = article;
 
-        const file = await this.driveService.exportFile({
-            id: docId,
-            mimeType: 'text/plain',
-        });
+            const file = await this.driveService.exportFile({
+                id: docId,
+                mimeType: 'text/plain',
+            });
 
         return Buffer.from(file).toString('utf-8');
     }

@@ -144,32 +144,28 @@ export class WordpressService {
     private getConvertImage(article: Article): () => Promise<MammothImage> {
         const boundImageUpload = this.uploadImage.bind(this);
 
-        return mammoth.images.inline(element => {
-            return element
-                .read('binary')
-                .then(binary => {
-                    return boundImageUpload(
-                        `Image for ${article.title}.${extension(
-                            element.contentType
-                        )}`,
-                        element.contentType,
-                        binary
-                    );
-                })
-                .then(uploadResult => {
-                    if (uploadResult.error !== undefined) {
-                        throw new Error(uploadResult.message);
-                    }
+        return mammoth.images.inline(element => element
+            .read('binary')
+            .then(binary => boundImageUpload(
+                `Image for ${article.title}.${extension(
+                    element.contentType
+                )}`,
+                element.contentType,
+                binary
+            ))
+            .then(uploadResult => {
+                if (uploadResult.error !== undefined) {
+                    throw new Error(uploadResult.message);
+                }
 
-                    return {
-                        src: uploadResult.source_url,
-                        class: 'wp-image-' + uploadResult.id,
-                    };
-                })
-                .catch(err => {
-                    throw err;
-                });
-        });
+                return {
+                    src: uploadResult.source_url,
+                    class: 'wp-image-' + uploadResult.id,
+                };
+            })
+            .catch(err => {
+                throw err;
+            }));
     }
 
     private async articleToPost(article: Article): Promise<WordpressPost> {

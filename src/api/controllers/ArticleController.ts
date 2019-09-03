@@ -1,6 +1,6 @@
 import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req,
-    UploadedFile
+    UploadedFile, UploadedFiles
 } from 'routing-controllers';
 import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { parse, SearchParserResult } from 'search-query-parser';
@@ -40,7 +40,9 @@ export class ArticleController {
     }
 
     @Post()
-    public create(@UploadedFile('file') file: Express.Multer.File, @Body() body: any): Promise<ArticleCreateResponse> {
+    public create(@UploadedFile('file') file: Express.Multer.File,
+        @UploadedFiles('photos') photos: Express.Multer.File[],
+        @Body() body: any): Promise<ArticleCreateResponse> {
 
         const article = plainToClass<ArticleDTO, ObjectLiteral>(ArticleDTO, JSON.parse(body.article) as ObjectLiteral);
 

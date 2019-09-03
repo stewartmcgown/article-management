@@ -1,3 +1,4 @@
+import consola from 'consola';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import * as uuid from 'uuid';
 
@@ -32,7 +33,7 @@ export let defaultHandler = (err?) => {
     const errId = uuid.v4();
     err.message = `${err.message}: ${errId}`;
     if (!env.isTest) {
-        console.error(err && err.stack || err);
+        consola.error(err && err.stack || err);
     }
     if (env.isProduction) {
         logger.error(err);

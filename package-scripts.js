@@ -7,6 +7,35 @@ const {
     rimraf,
 } = require('nps-utils');
 
+function banner(name) {
+    return {
+        hiddenFromHelp: true,
+        silent: true,
+        description: `Shows ${name} banners to the console`,
+        script: runFast(`./commands/banner.ts ${name}`),
+    };
+}
+
+function copy(source, target) {
+    return `copyfiles --up 1 ${source} ${target}`;
+}
+
+function copyDir(source, target) {
+    return `ncp ${source} ${target}`;
+}
+
+function run(path) {
+    return `ts-node ${path}`;
+}
+
+function runFast(path) {
+    return `ts-node --transpile-only ${path}`;
+}
+
+function eslint(path) {
+    return `eslint -c ./.eslintrc.js ${path}`;
+}
+
 module.exports = {
     scripts: {
         default: 'nps start',
@@ -73,7 +102,7 @@ module.exports = {
          * Runs TSLint over your project
          */
         lint: {
-            script: tslint(`./src/**/*.ts`),
+            script: eslint(`./src/**/*.ts`),
             hiddenFromHelp: true
         },
         /**
@@ -209,7 +238,7 @@ module.exports = {
                     description: 'Runs the unit tests'
                 },
                 pretest: {
-                    script: tslint(`./test/unit/**.ts`),
+                    script: eslint(`./test/unit/**.ts`),
                     hiddenFromHelp: true
                 },
                 run: {
@@ -235,7 +264,7 @@ module.exports = {
                     description: 'Runs the integration tests'
                 },
                 pretest: {
-                    script: tslint(`./test/integration/**.ts`),
+                    script: eslint(`./test/integration/**.ts`),
                     hiddenFromHelp: true
                 },
                 run: {
@@ -262,7 +291,7 @@ module.exports = {
                     description: 'Runs the e2e tests'
                 },
                 pretest: {
-                    script: tslint(`./test/e2e/**.ts`),
+                    script: eslint(`./test/e2e/**.ts`),
                     hiddenFromHelp: true
                 },
                 run: {
@@ -297,32 +326,3 @@ module.exports = {
         }
     }
 };
-
-function banner(name) {
-    return {
-        hiddenFromHelp: true,
-        silent: true,
-        description: `Shows ${name} banners to the console`,
-        script: runFast(`./commands/banner.ts ${name}`),
-    };
-}
-
-function copy(source, target) {
-    return `copyfiles --up 1 ${source} ${target}`;
-}
-
-function copyDir(source, target) {
-    return `ncp ${source} ${target}`;
-}
-
-function run(path) {
-    return `ts-node ${path}`;
-}
-
-function runFast(path) {
-    return `ts-node --transpile-only ${path}`;
-}
-
-function tslint(path) {
-    return `tslint -c ./tslint.json ${path} --format stylish`;
-}

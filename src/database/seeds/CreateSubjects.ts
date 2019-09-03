@@ -12,7 +12,7 @@ export class CreateSubjects implements Seeder {
     public async run(factory: Factory, connection: Connection): Promise<any> {
         const em = connection.createEntityManager();
 
-        const subjects = [
+         const subjects = [
             'Biology',
             'Chemistry',
             'Computer Science',

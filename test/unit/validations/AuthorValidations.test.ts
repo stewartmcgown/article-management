@@ -1,9 +1,6 @@
-import { validate, validateSync } from 'class-validator';
+import { validateSync } from 'class-validator';
 
-import { Article } from '../../../src/api/models/Article';
 import { Author } from '../../../src/api/models/Author';
-import { Levels } from '../../../src/api/models/enums';
-import { Status } from '../../../src/api/models/enums/Status';
 
 describe('AuthorValidations', () => {
 

@@ -124,7 +124,7 @@ export class AuthService {
     public async verifyToken(token: string): Promise<User> {
         const { id } = jwt.verify(token, this.secret()) as any;
 
-        const user = await this.editorRepository.findOne(id);
+         const user = await this.editorRepository.findOne(id);
 
         return user;
 
@@ -138,7 +138,7 @@ export class AuthService {
             select: ['id', 'email', 'secret'],
         });
 
-        const pinValid = otplib.authenticator.verify({
+         const pinValid = otplib.authenticator.verify({
             token: pin,
             secret: user.secret,
         });

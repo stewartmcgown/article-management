@@ -139,7 +139,7 @@ export class Drive {
         });
     }
 
-    private async executeDriveRequest(request: Promise<GaxiosResponse<any>>, n: number = 5): Promise<any> {
+    private async executeDriveRequest(request: Promise<GaxiosResponse<any>>, n = 5): Promise<any> {
         await sleep(500);
         return request.then(d => d.data.id).catch((err: GaxiosError) => err.message.includes('rate limit') ? this.executeDriveRequest(request, --n) : err);
     }

@@ -8,10 +8,6 @@ import { Levels } from '../../api/models/enums/Levels';
 define(Author, (faker: typeof Faker) => {
     const author = new Author();
 
-    const randomEnum = (e: any) => e[
-        faker.random.arrayElement(Object.getOwnPropertyNames(e))
-    ];
-
     author.id = uuid.v4();
     author.email = faker.internet.email();
     author.name = faker.name.firstName() + ' ' + faker.name.lastName();
