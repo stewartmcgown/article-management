@@ -5,5 +5,5 @@ services:
     ports:
         - "5432:5432"
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres is great
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: test

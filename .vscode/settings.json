@@ -11,4 +11,9 @@
     "html.format.indentHandlebars": true,
     "html.format.maxPreserveNewLines": 0,
     "eslint.enable": true,
+    "cSpell.words": [
+      "Postgres",
+      "STRUCTRUE",
+      "TYPEORM"
+    ],
 }

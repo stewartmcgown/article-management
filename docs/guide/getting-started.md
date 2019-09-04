@@ -1,12 +1,12 @@
 # Getting Started
 
 ## Development Environment
-Before you can start hacking away at the project, you'll need to a have a few things installed.
 
-```bash
-git clone https://github.com/stewartmcgown/article-management
-docker-compose up -d # Creates a Postgres database
-npm install
-npm run setup
-npm run serve
-```
+* Fist Check
+  *  Make sure that you are on the `typescript` branch.
+  *  Make sure to rename the `.env.example` to `.env`.
+  *  Make sure that you don't have postgres running, it might interfere with docker and give you an error.
+* Then Run
+  * run `docker-compose up -d` # Creates a Postgres database
+  * run `npm run setup`
+  * run `npm run serve`
