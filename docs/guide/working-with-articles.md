@@ -55,8 +55,28 @@ You can simplify this using a generator for multipart requests.
 
 Fetches all the currently available articles.
 
+_Request_
+
+```json5
+GET / articles
+```
+
 _Response_
 
 ```json
 [Article]
+```
+
+## Searching for Articles
+
+You can search for articles by using the custom query parameter. Concatenate whichever properties you want to search for from the Article resource in the following format:
+
+```json5
+GET / articles ? (q = { prop }) : { value }
+```
+
+Values with spaces are absolutely okay. The following example will return only untrashed articles with a title containing Lorem Ipsum.
+
+```json5
+GET /articles?q=trashed:false title:Lorem Ipsum
 ```

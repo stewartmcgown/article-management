@@ -2,6 +2,7 @@ import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put
 } from 'routing-controllers';
 
+import { UserNotFoundError } from '../errors/UserNotFoundError';
 import { Levels } from '../models/enums/Levels';
 import { Subject } from '../models/Subject';
 import { SubjectService } from '../services/SubjectService';
@@ -20,7 +21,7 @@ export class SubjectController {
     }
 
     @Get('/:id')
-    @OnUndefined(Error)
+    @OnUndefined(UserNotFoundError)
     public one(@Param('id') id: string): Promise<Subject | undefined> {
         return this.subjectService.findOne(id);
     }

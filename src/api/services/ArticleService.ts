@@ -22,11 +22,10 @@ import { Editor } from '../models/Editor';
 import { User } from '../models/User';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
-import { AbstractService } from './AbstractService';
 import { AuthorService } from './AuthorService';
 
 @Service()
-export class ArticleService extends AbstractService<ArticleDTO, Article> {
+export class ArticleService {
     constructor(
         @OrmRepository() private articleRepository: ArticleRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
@@ -35,7 +34,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
         private wordpressService: WordpressService,
         private authorService: AuthorService
     ) {
-        super(Article);
+
     }
 
     public find(searchKeys: object): Promise<Article[]> {
@@ -137,7 +136,7 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
 
     public async publish(id: string): Promise<ArticlePublishResponse> {
         const article = await this.articleRepository.findOne(id);
-            const wordpress = await this.wordpressService.publishArticle(article);
+        const wordpress = await this.wordpressService.publishArticle(article);
 
         article.wordpressId = wordpress.id;
         this.articleRepository.save(article);
@@ -231,10 +230,10 @@ export class ArticleService extends AbstractService<ArticleDTO, Article> {
     public async getText(article: Article): Promise<string> {
         const { docId } = article;
 
-            const file = await this.driveService.exportFile({
-                id: docId,
-                mimeType: 'text/plain',
-            });
+        const file = await this.driveService.exportFile({
+            id: docId,
+            mimeType: 'text/plain',
+        });
 
         return Buffer.from(file).toString('utf-8');
     }

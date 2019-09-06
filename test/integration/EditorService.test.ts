@@ -3,7 +3,6 @@ import { Connection } from 'typeorm';
 
 import { Editor } from '../../src/api/models/Editor';
 import { Levels } from '../../src/api/models/enums/Levels';
-import { Positions } from '../../src/api/models/enums/Positions';
 import { EditorService } from '../../src/api/services/EditorService';
 import { closeDatabase, createDatabaseConnection, migrateDatabase } from '../utils/database';
 import { configureLogger } from '../utils/logger';
@@ -37,7 +36,6 @@ describe('EditorService', () => {
         editor.id = uuid.v4();
         editor.name = 'test';
         editor.level = Levels.JUNIOR;
-        editor.position = Positions.EDITOR;
         const service = Container.get<EditorService>(EditorService);
         const resultCreate = await service.create(editor);
 

@@ -1,23 +1,18 @@
-import { IsNotEmpty } from 'class-validator';
 import { Field, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 
 import { Article } from './Article';
-import { Positions } from './enums/Positions';
+import { Team } from './Team';
 import { User } from './User';
 
 @Entity()
 @ObjectType()
 export class Editor extends User {
 
-    @Column({
-        type: 'enum',
-        enum: Positions,
-        default: Positions.EDITOR,
-    })
-    @IsNotEmpty()
-    @Field(() => Positions)
-    public position: Positions;
+    @ManyToMany(type => Team, team => team.editors)
+    @JoinTable()
+    @Field(() => [Team])
+    public teams: Team[];
 
     @Column()
     @Field()

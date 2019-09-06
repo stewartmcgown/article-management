@@ -1,22 +1,39 @@
 import { validate } from 'class-validator';
+import { DeepPartial, Repository } from 'typeorm';
 
 import { AbstractModel } from '../models/AbstractModel';
-import { AbstractDTO } from '../models/dto/AbstractDTO';
 
-export abstract class AbstractService<D extends AbstractDTO, E extends AbstractModel> {
+import uuid = require('uuid');
 
-    constructor(private modelFactory: (new () => E)) { }
+/**
+ * A simple abstraction for a service. Doesn't handle emitted events due to limitations
+ * of the untyped EventDispatcher.
+ */
+export abstract class AbstractService<M extends AbstractModel> {
 
-    protected async dtoToClass(dto: D): Promise<E> {
-        const validationErrors = await validate(dto);
-        if (validationErrors.length) {
-            throw validationErrors;
-        }
+    constructor(protected repository: Repository<M>) { }
 
-        // DTO -> Class
-        const entity = new this.modelFactory();
-        Object.assign(entity, dto);
+    public find(): Promise<M[]> {
+        return this.repository.find();
+    }
 
-        return entity;
+    public findOne(id: string): Promise<M | undefined> {
+        return this.repository.findOne(id);
+    }
+
+    public async create(model: M): Promise<M> {
+        model.id = uuid.v1();
+        await this.repository.save(model as unknown as DeepPartial<M>); // Dirty typeorm tricks
+        return model;
+    }
+
+    public update(id: string, model: M): Promise<M> {
+        model.id = id;
+        return this.repository.save(model as unknown as DeepPartial<M>);
+    }
+
+    public async delete(id: string): Promise<void> {
+        await this.repository.delete(id);
+        return;
     }
 }

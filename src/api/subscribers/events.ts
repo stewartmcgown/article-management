@@ -24,6 +24,9 @@ export const events = {
     subject: {
         created: 'onSubjectCreate',
     },
+    team: {
+        created: 'onTeamCreate',
+    }
 };
 
 export interface PinIssuedEvent {

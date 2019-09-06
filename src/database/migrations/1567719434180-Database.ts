@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class Database1567600432202 implements MigrationInterface {
+export class Database1567719434180 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`CREATE TYPE "author_level_enum" AS ENUM('0', '1', '2', '3')`);

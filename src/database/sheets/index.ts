@@ -4,7 +4,7 @@ import Container from 'typedi';
 import { Article } from '../../api/models/Article';
 import { Author } from '../../api/models/Author';
 import { Editor } from '../../api/models/Editor';
-import { Levels, Positions } from '../../api/models/enums';
+import { Levels } from '../../api/models/enums';
 import { ArticleRepository } from '../../api/repositories/ArticleRepository';
 
 import uuid = require('uuid');
@@ -54,7 +54,6 @@ export const oldEditorToNew = (old: OldEditor): Editor => {
     a.email = old.email;
     a.level = Levels[old.level.toUpperCase()];
     a.name = old.name;
-    a.position = Positions[old.position.toUpperCase()];
     a.subjects = old.subjects;
 
     return a;

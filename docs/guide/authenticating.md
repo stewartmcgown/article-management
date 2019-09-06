@@ -33,6 +33,8 @@ Using the token emailed to you, log in.
 }
 ```
 
+The response also contains a `Set-Cookie` header that places the value of the above token into the `ams-token` cookie.
+
 ## User levels
 
 Users can be one of the following levels:

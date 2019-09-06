@@ -7,7 +7,7 @@ import { PinResponse } from '../api/controllers/responses/PinResponse';
 import { TokenResponse } from '../api/controllers/responses/TokenResponse';
 import { UserNotFoundError } from '../api/errors/UserNotFoundError';
 import { Editor } from '../api/models/Editor';
-import { Levels, Positions } from '../api/models/enums';
+import { Levels } from '../api/models/enums';
 import { User } from '../api/models/User';
 import { EditorRepository } from '../api/repositories/EditorRepository';
 import { events } from '../api/subscribers/events';
@@ -55,7 +55,6 @@ export class AuthService {
             name: 'Service Account',
             email: 'service-account@ysj-internal',
             level: Levels.ADMIN,
-            position: Positions.PRODUCTION,
         });
 
         await this.editorRepository.save(this.serviceUser);
@@ -124,7 +123,7 @@ export class AuthService {
     public async verifyToken(token: string): Promise<User> {
         const { id } = jwt.verify(token, this.secret()) as any;
 
-         const user = await this.editorRepository.findOne(id);
+        const user = await this.editorRepository.findOne(id);
 
         return user;
 
@@ -138,7 +137,7 @@ export class AuthService {
             select: ['id', 'email', 'secret'],
         });
 
-         const pinValid = otplib.authenticator.verify({
+        const pinValid = otplib.authenticator.verify({
             token: pin,
             secret: user.secret,
         });

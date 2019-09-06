@@ -1,4 +1,5 @@
-import { Body, JsonController, Post } from 'routing-controllers';
+import { Response } from 'express';
+import { Body, JsonController, Post, Res } from 'routing-controllers';
 
 import { AuthService } from '../../auth/AuthService';
 import { PinRequest } from './requests/PinRequest';
@@ -19,8 +20,15 @@ export class AuthController {
     }
 
     @Post('/token')
-    public token(@Body() request: TokenRequest): Promise<TokenResponse> {
-        return this.authService.issueToken(request.pin, request.email);
+    public async token(@Body() request: TokenRequest, @Res() response: Response): Promise<TokenResponse> {
+        const tokenResponse = await this.authService.issueToken(request.pin, request.email);
+
+        response.cookie('ams-token', tokenResponse.token, {
+            expires: new Date(Date.now() + 10 * 60 * 1000),
+            httpOnly: true,
+        });
+
+        return tokenResponse;
     }
 
 }
