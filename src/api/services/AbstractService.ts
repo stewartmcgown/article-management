@@ -1,4 +1,3 @@
-import { validate } from 'class-validator';
 import { DeepPartial, Repository } from 'typeorm';
 
 import { AbstractModel } from '../models/AbstractModel';
