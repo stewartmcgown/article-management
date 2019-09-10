@@ -4,6 +4,6 @@
         "ts": "node -r ts-node/register"
     },
     "events": {
-        "start": "eslint -c ./.eslintrc.js 'src/**/*.ts' --quiet"
+        "start": "eslint -c ./.eslintrc.js src/**/*.ts --quiet"
     }
 }

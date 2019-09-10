@@ -1,4 +1,4 @@
-import { validateSync, ValidationError } from 'class-validator';
+import { validateSync } from 'class-validator';
 import consola from 'consola';
 import { attemptUpdate } from 'protected-ts';
 import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
@@ -13,15 +13,17 @@ import { env } from '../../env';
 import { AnalysisResult } from '../../lib/copyright/Analyser';
 import { Drive } from '../../lib/google/Drive';
 import { WordpressService } from '../../lib/wordpress';
+import { getAllRelations } from '../../utils/typeorm';
 import { ArticlePublishResponse } from '../controllers/responses/ArticlePublishResponse';
 import { Article } from '../models/Article';
 import { Author } from '../models/Author';
-import { ALLOWED_FORMATS, ArticleDTO } from '../models/dto/ArticleDTO';
+import { ArticleDTO } from '../models/dto/ArticleDTO';
 import { AuthorDTO } from '../models/dto/AuthorDTO';
 import { Editor } from '../models/Editor';
 import { User } from '../models/User';
 import { ArticleRepository } from '../repositories/ArticleRepository';
 import { events } from '../subscribers/events';
+import { validateArticleFiles } from '../validators/ArticleValidator';
 import { AuthorService } from './AuthorService';
 
 @Service()
@@ -41,7 +43,7 @@ export class ArticleService {
         this.log.info('Find all articles');
 
         return this.articleRepository.find({
-            relations: ['editors', 'authors'],
+            relations: getAllRelations(Article),
             where: {
                 ...searchKeys,
             },
@@ -51,20 +53,21 @@ export class ArticleService {
     public findOne(id: string): Promise<Article | undefined> {
         this.log.info('Find one article');
         return this.articleRepository.findOne(id, {
-            relations: ['editors', 'authors'],
+            relations: getAllRelations(Article),
         });
     }
 
     @validated()
     public async create(
         @validate() articleDto: ArticleDTO,
-        file: Express.Multer.File
+        file: Express.Multer.File,
+        photos: Express.Multer.File[]
     ): Promise<Article> {
         if (articleDto.authors.length < 1 || articleDto.authors.some(a => validateSync(a).length > 0)) {
             throw new Error();
         }
 
-        this.validateFile(file);
+        validateArticleFiles(file, photos);
 
         // DTO -> Class
         articleDto.authors = plainToClass<Author, AuthorDTO[]>(Author, articleDto.authors);
@@ -236,21 +239,5 @@ export class ArticleService {
         });
 
         return Buffer.from(file).toString('utf-8');
-    }
-
-    private validateFile(file: Express.Multer.File): void {
-        const errors: ValidationError[] = [];
-
-        if (!ALLOWED_FORMATS.includes(file.mimetype)) {
-            errors.push({
-                property: 'file',
-                constraints: {
-                    mimeType: `MimeType must be one of [${ALLOWED_FORMATS.join(', ')}]`,
-                },
-                children: [],
-            });
-        }
-
-        if (errors.length) { throw errors; }
     }
 }

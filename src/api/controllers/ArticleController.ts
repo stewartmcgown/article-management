@@ -1,6 +1,6 @@
 import {
     Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Req,
-    UploadedFile, UploadedFiles
+    UploadedFiles
 } from 'routing-controllers';
 import { plainToClass } from 'routing-controllers/node_modules/class-transformer';
 import { parse, SearchParserResult } from 'search-query-parser';
@@ -40,9 +40,11 @@ export class ArticleController {
     }
 
     @Post()
-    public create(@UploadedFile('file') file: Express.Multer.File,
-        @UploadedFiles('photos') photos: Express.Multer.File[],
+    public create(
+        @UploadedFiles('files') files: Express.Multer.File[],
         @Body() body: any): Promise<ArticleCreateResponse> {
+
+        const [file, ...photos] = files;
 
         const article = plainToClass<ArticleDTO, ObjectLiteral>(ArticleDTO, JSON.parse(body.article) as ObjectLiteral);
 
@@ -50,7 +52,7 @@ export class ArticleController {
             throw new Error('No file included.');
         }
 
-        return this.articleService.create(article, file).then(result => ({
+        return this.articleService.create(article, file, photos).then(result => ({
             id: result.id,
             title: result.title,
         }));

@@ -9,18 +9,22 @@ import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
  * @returns array of keys
  */
 // tslint:disable-next-line: ban-types
-export function getEntityKeys(type: Function): string[] {
+export function getEntityKeys<T>(type: new () => T): string[] {
     return getConnection().getMetadata(type).columns.map(meta => meta.propertyName);
 }
 
 // tslint:disable-next-line: ban-types
-export function getColumnMetadata(type: Function): ColumnMetadata[] {
+export function getColumnMetadata<T>(type: new () => T): ColumnMetadata[] {
     return getConnection().getMetadata(type).columns;
+}
+
+export function getAllRelations<T>(type: new () => T): string[] {
+    return getConnection().getMetadata(type).relations.map(rel => rel.propertyName);
 }
 
 export function searchParserToWhere<T>(query: SearchParserResult, type: new () => T): ObjectLiteral {
     const columns = getColumnMetadata(type);
-     const searchKeys = {};
+    const searchKeys = {};
 
     if (query && query.offsets) {
         query.offsets.forEach(o => {

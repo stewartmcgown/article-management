@@ -27,17 +27,34 @@ Articles are created using a `multipart/form-data` approach. You can supply the 
 
 #### Multipart/form-data
 
-```
+You must include an array of files that correspond to the upload of the article. The ordering is important, as the _first file_ must be the article, with all subsequent files being author pictures.
+
+If you had, for example, an article with two authors, this would be the `multipart/form-data` body.
+
+```json5
 Content-Type: multipart/form-data; boundary=------------------9051914041544843365972754266
-Content-Length: 554
+Content-Length: 3340
 -------------------9051914041544843365972754266
-Content-Disposition: form-data; name="file"; filename="MyArticle.docx"
+Content-Disposition: form-data; name="files[]"; filename="MyArticle.docx"
 Content-Type: text/plain
 
 Binary data of MyArticle.docx
 
 -------------------9051914041544843365972754266
-Content-Disposition: form-data; name="articles"
+Content-Disposition: form-data; name="files[]"; filename="Author1.jpeg"
+Content-Type: image/jpeg
+
+Binary data of Author1.jpeg
+
+-------------------9051914041544843365972754266
+Content-Disposition: form-data; name="files[]"; filename="Author2.jpeg"
+Content-Type: image/jpeg
+
+Binary data of Author2.jpeg
+
+-------------------9051914041544843365972754266
+Content-Disposition: form-data; name="article"
+Content-Type: application/json
 
 {
     "title": ...,
@@ -46,8 +63,6 @@ Content-Disposition: form-data; name="articles"
 
 -------------------9051914041544843365972754266--
 ```
-
-You can simplify this using a generator for multipart requests.
 
 ## Managing Articles
 

@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as otplib from 'otplib';
 import { Service } from 'typedi';
@@ -21,6 +22,7 @@ export class AuthService {
 
     private static EXPIRES_IN = '24h';
     private static AUTHORIZATION_HEADER_KEY = 'authorization';
+    private static COOKIE_TOKEN_KEY = 'ams-token';
 
     /**
      * How long between PIN requests?
@@ -62,14 +64,30 @@ export class AuthService {
         return this.serviceUser;
     }
 
-    public parseTokenFromRequest(request: any): string {
-        const authHeader: string = request.headers[AuthService.AUTHORIZATION_HEADER_KEY];
+    public parseTokenFromRequest(request: Request): string {
 
-        if (!authHeader.startsWith('Bearer ')) {
-            return undefined;
+        const parseAuthHeader = () => {
+            const authHeader: string = request.headers[AuthService.AUTHORIZATION_HEADER_KEY] as string;
+
+            if (!authHeader.startsWith('Bearer ')) {
+                return undefined;
+            }
+
+            return authHeader.substr(7);
         }
 
-        return authHeader.substr(7);
+        const parseCookie = () => request.cookies[AuthService.COOKIE_TOKEN_KEY] as string;
+
+        const options = [parseAuthHeader, parseCookie];
+
+        for (const option of options) {
+            const token = option();
+            if (token) {
+                return token;
+            }
+        }
+
+        return '';
     }
 
     /**
