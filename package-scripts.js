@@ -238,7 +238,7 @@ module.exports = {
                     description: 'Runs the unit tests'
                 },
                 pretest: {
-                    script: eslint(`./test/unit/**.ts`),
+                    script: eslint(`./test/unit/**/*.ts`),
                     hiddenFromHelp: true
                 },
                 run: {
@@ -264,7 +264,7 @@ module.exports = {
                     description: 'Runs the integration tests'
                 },
                 pretest: {
-                    script: eslint(`./test/integration/**.ts`),
+                    script: eslint(`./test/integration/**/*.ts`),
                     hiddenFromHelp: true
                 },
                 run: {
@@ -291,7 +291,7 @@ module.exports = {
                     description: 'Runs the e2e tests'
                 },
                 pretest: {
-                    script: eslint(`./test/e2e/**.ts`),
+                    script: eslint(`./test/e2e/**/*.ts`),
                     hiddenFromHelp: true
                 },
                 run: {
