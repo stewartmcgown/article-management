@@ -39,6 +39,7 @@
     "commander": "^3.0.1",
     "compression": "^1.7.4",
     "consola": "^2.10.1",
+    "cookie-parser": "^1.4.4",
     "copyfiles": "^2.1.1",
     "cors": "^2.8.5",
     "dataloader": "^1.4.0",
