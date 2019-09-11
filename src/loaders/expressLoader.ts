@@ -1,3 +1,4 @@
+import cors from 'cors';
 import { Application } from 'express';
 import { MicroframeworkLoader, MicroframeworkSettings } from 'microframework-w3tec';
 import { createExpressServer } from 'routing-controllers';
@@ -17,7 +18,6 @@ export const expressLoader: MicroframeworkLoader = (settings: MicroframeworkSett
          * We could have also use useExpressServer here to attach controllers to an existing express instance.
          */
         const expressApp: Application = createExpressServer({
-            cors: true,
             classTransformer: true,
             routePrefix: env.app.routePrefix,
             defaultErrorHandler: false,
@@ -35,6 +35,11 @@ export const expressLoader: MicroframeworkLoader = (settings: MicroframeworkSett
             authorizationChecker: authorizationChecker(connection),
             currentUserChecker: currentUserChecker(connection),
         });
+
+        expressApp.use(cors({
+            origin: (origin, callback) => env.app.cors.split(',').includes(origin) ? callback(null, true) : callback(new Error('Domain not authorised.')),
+            credentials: true,
+        }));
 
         expressApp.use(bodyParser({ limit: '10mb' }));
 

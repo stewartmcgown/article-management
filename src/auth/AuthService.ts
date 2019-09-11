@@ -69,7 +69,7 @@ export class AuthService {
         const parseAuthHeader = () => {
             const authHeader: string = request.headers[AuthService.AUTHORIZATION_HEADER_KEY] as string;
 
-            if (!authHeader.startsWith('Bearer ')) {
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
                 return undefined;
             }
 

@@ -12,7 +12,6 @@ describe('AuthorValidations', () => {
         author.biography = 'Whatever';
 
         const errors = validateSync(author);
-        console.log(errors);
         expect(errors.length).toBeGreaterThan(0);
     });
 
