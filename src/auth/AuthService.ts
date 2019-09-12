@@ -20,9 +20,13 @@ import { InvalidPinError } from './errors/InvalidPinError';
 @Service()
 export class AuthService {
 
-    private static EXPIRES_IN = '24h';
+    public static readonly EXPIRES_IN = {
+        formatted: '24h',
+        ms: 8.64e7
+    };
+
     private static AUTHORIZATION_HEADER_KEY = 'authorization';
-    private static COOKIE_TOKEN_KEY = 'ams-token';
+    public static readonly COOKIE_TOKEN_KEY = 'ams-token';
 
     /**
      * How long between PIN requests?
@@ -168,7 +172,7 @@ export class AuthService {
             id: user.id,
             email: user.email,
         }, this.secret(), {
-            expiresIn: AuthService.EXPIRES_IN,
+            expiresIn: AuthService.EXPIRES_IN.formatted,
         });
 
         return {

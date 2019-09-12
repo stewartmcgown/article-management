@@ -23,8 +23,8 @@ export class AuthController {
     public async token(@Body() request: TokenRequest, @Res() response: Response): Promise<TokenResponse> {
         const tokenResponse = await this.authService.issueToken(request.pin, request.email);
 
-        response.cookie('ams-token', tokenResponse.token, {
-            expires: new Date(Date.now() + 10 * 60 * 1000),
+        response.cookie(AuthService.COOKIE_TOKEN_KEY, tokenResponse.token, {
+            expires: new Date(Date.now() + AuthService.EXPIRES_IN.ms),
             httpOnly: true,
         });
 
