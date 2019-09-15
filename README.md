@@ -11,6 +11,7 @@ AMS is a RESTful API that gives powerful tools to editors who want to manage a c
  - API built to run on NodeJS
  - Interfaces with a Spreadsheet DB (will switch to MongoDB)
  - Data comes from the [article-submissions](https://github.com/youngscientists/article-submissions) form.
+ - Check Typescript branch for current development!
 
 > Built with :heart: for the [Young Scientists Journal](https://ysjournal.com).
 
