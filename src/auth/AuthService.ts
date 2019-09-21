@@ -10,6 +10,7 @@ import { UserNotFoundError } from '../api/errors/UserNotFoundError';
 import { Editor } from '../api/models/Editor';
 import { Levels } from '../api/models/enums';
 import { User } from '../api/models/User';
+import { AuthorRepository } from '../api/repositories/AuthorRepository';
 import { EditorRepository } from '../api/repositories/EditorRepository';
 import { events } from '../api/subscribers/events';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/EventDispatcher';
@@ -38,6 +39,7 @@ export class AuthService {
     constructor(
         @Logger(__filename) private log: LoggerInterface,
         @OrmRepository() private editorRepository: EditorRepository,
+        @OrmRepository() private authorRepository: AuthorRepository,
         // @OrmRepository() private authorRepository: AuthorRepository,
         @EventDispatcher() private eventDispatcher: EventDispatcherInterface
     ) {
@@ -145,10 +147,7 @@ export class AuthService {
     public async verifyToken(token: string): Promise<User> {
         const { id } = jwt.verify(token, this.secret()) as any;
 
-        const user = await this.editorRepository.findOne(id);
-
-        return user;
-
+        return await this.editorRepository.findOne(id) || await this.authorRepository.findOne(id);
     }
 
     public async issueToken(pin: string, email: string): Promise<TokenResponse> {

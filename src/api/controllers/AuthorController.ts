@@ -22,7 +22,7 @@ export class AuthorController {
 
     @Get('/me')
     public findMe(@Req() req: any): Promise<Author[]> {
-        return req.author;
+        return req.user;
     }
 
     @Get('/:id')

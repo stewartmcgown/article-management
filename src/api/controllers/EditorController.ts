@@ -22,7 +22,7 @@ export class EditorController {
 
     @Get('/me')
     public findMe(@Req() req: any): Promise<Editor[]> {
-        return req.editor;
+        return req.user;
     }
 
     @Get('/:id')
