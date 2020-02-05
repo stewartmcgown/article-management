@@ -82,7 +82,7 @@
     "tslint": "^5.19.0",
     "type-graphql": "^0.17.5",
     "typedi": "0.8.0",
-    "typeorm": "^0.2.18",
+    "typeorm": "^0.2.21",
     "typeorm-seeding": "^1.0.0-rc.3",
     "typeorm-typedi-extensions": "^0.2.3",
     "typescript": "^3.6.2",
