@@ -31,6 +31,7 @@
   "homepage": "https://github.com/youngscientists/article-management#readme",
   "author": "Stewart McGown <stewart@twistedcore.co.uk",
   "dependencies": {
+    "@stewartmcgown/grammarly-api": "^1.1.2",
     "@types/jsonwebtoken": "^8.3.3",
     "axios": "^0.19.0",
     "bcrypt": "https://github.com/kelektiv/node.bcrypt.js.git#master",
