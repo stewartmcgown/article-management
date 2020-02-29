@@ -15,8 +15,10 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
   },
-    { "engines" : { "npm" : "~1.0.20" } }
-    { "engines" : { "node" : "^8.0.0" }}
+  
+    { "engines" : { "npm" : "~1.0.20" }},
+    { "engines" : { "node" : "^8.0.0" }},
+
   
   "repository": "git+ssh://git@github.com/youngscientists/article-management.git",
   "keywords": [
