@@ -16,7 +16,7 @@
     "docs:build": "vuepress build docs"
   }
   
-    { "engines" : { "npm" : "~1.0.20" }},
+    { "engines" : { "npm" : "~1.0.20" }}
     { "engines" : { "node" : "^8.0.0" }},
 
   
