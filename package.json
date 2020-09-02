@@ -18,7 +18,7 @@
     "eslint-loader": "^2.1.1",
     "eslint-plugin-prettier": "^2.7.0",
     "express-session": "^1.15.6",
-    "googleapis": "^36.0.0",
+    "googleapis": "^39.1.0",
     "html-loader": "^0.5.5",
     "jspolyfill-array.prototype.findIndex": "^0.1.0",
     "memcache": "^0.3.0",
